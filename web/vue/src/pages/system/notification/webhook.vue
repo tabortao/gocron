@@ -29,8 +29,8 @@
 </template>
 
 <script>
-import systemSidebar from '../sidebar'
-import notificationTab from './tab'
+import systemSidebar from '../sidebar.vue'
+import notificationTab from './tab.vue'
 import notificationService from '../../../api/notification'
 export default {
   name: 'notification-webhook',

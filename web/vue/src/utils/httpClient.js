@@ -1,8 +1,7 @@
 import axios from 'axios'
-import {Message} from 'element-ui'
+import { ElMessage } from 'element-plus'
 import router from '../router/index'
-import store from '../store/index'
-import Qs from 'qs'
+import { useUserStore } from '../stores/user'
 
 const errorMessage = '加载失败, 请稍后再试'
 // 成功状态码
@@ -12,14 +11,15 @@ const AUTH_ERROR_CODE = 401
 // 应用未安装
 const APP_NOT_INSTALL_CODE = 801
 
-axios.defaults.baseURL = 'api'
+axios.defaults.baseURL = '/api'
 axios.defaults.timeout = 10000
 axios.defaults.responseType = 'json'
 axios.interceptors.request.use(config => {
-  config.headers['Auth-Token'] = store.getters.user.token
+  const userStore = useUserStore()
+  config.headers['Auth-Token'] = userStore.token
   return config
 }, error => {
-  Message.error({
+  ElMessage.error({
     message: errorMessage
   })
 
@@ -29,7 +29,7 @@ axios.interceptors.request.use(config => {
 axios.interceptors.response.use(data => {
   return data
 }, error => {
-  Message.error({
+  ElMessage.error({
     message: errorMessage
   })
 
@@ -53,7 +53,7 @@ function checkResponseCode (code, msg) {
       return false
   }
   if (code !== SUCCESS_CODE) {
-    Message.error({
+    ElMessage.error({
       message: msg
     })
     return false
@@ -73,7 +73,7 @@ function successCallback (res, next) {
 }
 
 function failureCallback (error) {
-  Message.error({
+  ElMessage.error({
     message: '请求失败 - ' + error
   })
 }
@@ -94,7 +94,7 @@ export default {
       requests.push(axios.get(item.uri, {params}))
     }
 
-    axios.all(requests).then(axios.spread(function (...res) {
+    Promise.all(requests).then(function (res) {
       const result = []
       for (let item of res) {
         if (!checkResponseCode(item.data.code, item.data.message)) {
@@ -103,17 +103,11 @@ export default {
         result.push(item.data.data)
       }
       next(...result)
-    })).catch((error) => failureCallback(error))
+    }).catch((error) => failureCallback(error))
   },
 
   post (uri, data, next) {
-    const promise = axios.post(uri, Qs.stringify(data), {
-      headers: {
-        post: {
-          'Content-Type': 'application/x-www-form-urlencoded'
-        }
-      }
-    })
+    const promise = axios.post(uri, data)
     handle(promise, next)
   }
 }

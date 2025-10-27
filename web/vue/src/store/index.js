@@ -1,9 +1,7 @@
-import vue from 'vue'
-import vuex from 'vuex'
+import { createStore } from 'vuex'
 import userStorage from '../storage/user'
 
-vue.use(vuex)
-export default new vuex.Store({
+export default createStore({
   state: {
     hiddenNavMenu: false,
     user: userStorage.get()

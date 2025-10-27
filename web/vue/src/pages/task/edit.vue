@@ -254,7 +254,7 @@
 </template>
 
 <script>
-import taskSidebar from './sidebar'
+import taskSidebar from './sidebar.vue'
 import taskService from '../../api/task'
 import notificationService from '../../api/notification'
 

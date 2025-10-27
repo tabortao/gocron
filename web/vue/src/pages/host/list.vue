@@ -16,7 +16,7 @@
       </el-form>
       <el-row type="flex" justify="end">
         <el-col :span="2">
-          <el-button type="primary" v-if="this.$store.getters.user.isAdmin"  @click="toEdit(null)">新增</el-button>
+          <el-button type="primary" v-if="$store.getters.user.isAdmin"  @click="toEdit(null)">新增</el-button>
         </el-col>
         <el-col :span="2">
           <el-button type="info" @click="refresh">刷新</el-button>

@@ -55,7 +55,7 @@
     </el-form>
     <el-row type="flex" justify="end">
       <el-col :span="2">
-        <el-button type="primary" @click="toEdit(null)" v-if="this.$store.getters.user.isAdmin">新增</el-button>
+        <el-button type="primary" @click="toEdit(null)" v-if="$store.getters.user.isAdmin">新增</el-button>
       </el-col>
       <el-col :span="2">
         <el-button type="info" @click="refresh">刷新</el-button>
@@ -77,25 +77,25 @@
       border
       style="width: 100%">
       <el-table-column type="expand">
-        <template slot-scope="scope">
+        <template #default="scope">
           <el-form label-position="left" inline class="demo-table-expand">
             <el-form-item label="任务创建时间:">
-              {{scope.row.created | formatTime}} <br>
+              {{ $filters.formatTime(scope.row.created) }} <br>
             </el-form-item>
             <el-form-item label="任务类型:">
-              {{scope.row.level | formatLevel}} <br>
+              {{ formatLevel(scope.row.level) }} <br>
             </el-form-item>
             <el-form-item label="单实例运行:">
-               {{scope.row.multi | formatMulti}} <br>
+               {{ formatMulti(scope.row.multi) }} <br>
             </el-form-item>
             <el-form-item label="超时时间:">
-              {{scope.row.timeout | formatTimeout}} <br>
+              {{ formatTimeout(scope.row.timeout) }} <br>
             </el-form-item>
             <el-form-item label="重试次数:">
               {{scope.row.retry_times}} <br>
             </el-form-item>
             <el-form-item label="重试间隔:">
-              {{scope.row.retry_interval | formatRetryTimesInterval}}
+              {{ formatRetryTimesInterval(scope.row.retry_interval) }}
             </el-form-item> <br>
             <el-form-item label="任务节点">
               <div v-for="item in scope.row.hosts" :key="item.host_id">
@@ -130,8 +130,8 @@
       width="120">
       </el-table-column>
       <el-table-column label="下次执行时间" width="160">
-        <template slot-scope="scope">
-          {{scope.row.next_run_time | formatTime}}
+        <template #default="scope">
+          {{ $filters.formatTime(scope.row.next_run_time) }}
         </template>
       </el-table-column>
       <el-table-column
@@ -140,8 +140,8 @@
         label="执行方式">
       </el-table-column>
       <el-table-column
-        label="状态" v-if="this.isAdmin">
-          <template slot-scope="scope">
+        label="状态" v-if="isAdmin">
+          <template #default="scope">
             <el-switch
               v-if="scope.row.level === 1"
               v-model="scope.row.status"
@@ -154,7 +154,7 @@
           </template>
       </el-table-column>
       <el-table-column label="状态" v-else>
-        <template slot-scope="scope">
+        <template #default="scope">
           <el-switch
             v-if="scope.row.level === 1"
             v-model="scope.row.status"
@@ -166,8 +166,8 @@
           </el-switch>
         </template>
       </el-table-column>
-      <el-table-column label="操作" width="220" v-if="this.isAdmin">
-        <template slot-scope="scope">
+      <el-table-column label="操作" width="220" v-if="isAdmin">
+        <template #default="scope">
           <el-row>
             <el-button type="primary" @click="toEdit(scope.row)">编辑</el-button>
             <el-button type="success" @click="runTask(scope.row)">手动执行</el-button>
@@ -185,7 +185,7 @@
 </template>
 
 <script>
-import taskSidebar from './sidebar'
+import taskSidebar from './sidebar.vue'
 import taskService from '../../api/task'
 
 export default {
@@ -237,33 +237,19 @@ export default {
 
     this.search()
   },
-  filters: {
+  methods: {
     formatLevel (value) {
-      if (value === 1) {
-        return '主任务'
-      }
-      return '子任务'
+      return value === 1 ? '主任务' : '子任务'
     },
     formatTimeout (value) {
-      if (value > 0) {
-        return value + '秒'
-      }
-      return '不限制'
+      return value > 0 ? value + '秒' : '不限制'
     },
     formatRetryTimesInterval (value) {
-      if (value > 0) {
-        return value + '秒'
-      }
-      return '系统默认'
+      return value > 0 ? value + '秒' : '系统默认'
     },
     formatMulti (value) {
-      if (value > 0) {
-        return '否'
-      }
-      return '是'
-    }
-  },
-  methods: {
+      return value > 0 ? '否' : '是'
+    },
     changeStatus (item) {
       if (item.status) {
         taskService.enable(item.id)

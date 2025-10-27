@@ -47,7 +47,7 @@ package-all: build-vue statik
 
 .PHONY: build-vue
 build-vue:
-	cd web/vue && NODE_OPTIONS=--no-warnings yarn run build
+	cd web/vue && yarn run build
 	cp -r web/vue/dist/* web/public/
 
 .PHONY: install-vue

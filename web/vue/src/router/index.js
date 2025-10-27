@@ -1,167 +1,127 @@
-import Vue from 'vue'
-import Router from 'vue-router'
-import store from '../store/index'
-import NotFound from '../components/common/notFound'
+import { createRouter, createWebHashHistory } from 'vue-router'
+import { useUserStore } from '../stores/user'
 
-import TaskList from '../pages/task/list'
-import TaskEdit from '../pages/task/edit'
-import TaskLog from '../pages/taskLog/list'
+const routes = [
+  {
+    path: '/:pathMatch(.*)*',
+    component: () => import('../components/common/notFound.vue'),
+    meta: { noLogin: true, noNeedAdmin: true }
+  },
+  {
+    path: '/',
+    redirect: '/task'
+  },
+  {
+    path: '/install',
+    name: 'install',
+    component: () => import('../pages/install/index.vue'),
+    meta: { noLogin: true, noNeedAdmin: true }
+  },
+  {
+    path: '/task',
+    name: 'task-list',
+    component: () => import('../pages/task/list.vue'),
+    meta: { noNeedAdmin: true }
+  },
+  {
+    path: '/task/create',
+    name: 'task-create',
+    component: () => import('../pages/task/edit.vue')
+  },
+  {
+    path: '/task/edit/:id',
+    name: 'task-edit',
+    component: () => import('../pages/task/edit.vue')
+  },
+  {
+    path: '/task/log',
+    name: 'task-log',
+    component: () => import('../pages/taskLog/list.vue'),
+    meta: { noNeedAdmin: true }
+  },
+  {
+    path: '/host',
+    name: 'host-list',
+    component: () => import('../pages/host/list.vue'),
+    meta: { noNeedAdmin: true }
+  },
+  {
+    path: '/host/create',
+    name: 'host-create',
+    component: () => import('../pages/host/edit.vue')
+  },
+  {
+    path: '/host/edit/:id',
+    name: 'host-edit',
+    component: () => import('../pages/host/edit.vue')
+  },
+  {
+    path: '/user',
+    name: 'user-list',
+    component: () => import('../pages/user/list.vue')
+  },
+  {
+    path: '/user/create',
+    name: 'user-create',
+    component: () => import('../pages/user/edit.vue')
+  },
+  {
+    path: '/user/edit/:id',
+    name: 'user-edit',
+    component: () => import('../pages/user/edit.vue')
+  },
+  {
+    path: '/user/login',
+    name: 'user-login',
+    component: () => import('../pages/user/login.vue'),
+    meta: { noLogin: true }
+  },
+  {
+    path: '/user/edit-password/:id',
+    name: 'user-edit-password',
+    component: () => import('../pages/user/editPassword.vue')
+  },
+  {
+    path: '/user/edit-my-password',
+    name: 'user-edit-my-password',
+    component: () => import('../pages/user/editMyPassword.vue'),
+    meta: { noNeedAdmin: true }
+  },
+  {
+    path: '/user/two-factor',
+    name: 'user-two-factor',
+    component: () => import('../pages/user/twoFactor.vue'),
+    meta: { noNeedAdmin: true }
+  },
+  {
+    path: '/system',
+    redirect: '/system/notification/email'
+  },
+  {
+    path: '/system/notification/email',
+    name: 'system-notification-email',
+    component: () => import('../pages/system/notification/email.vue')
+  },
+  {
+    path: '/system/notification/slack',
+    name: 'system-notification-slack',
+    component: () => import('../pages/system/notification/slack.vue')
+  },
+  {
+    path: '/system/notification/webhook',
+    name: 'system-notification-webhook',
+    component: () => import('../pages/system/notification/webhook.vue')
+  },
+  {
+    path: '/system/login-log',
+    name: 'login-log',
+    component: () => import('../pages/system/loginLog.vue')
+  }
+]
 
-import HostList from '../pages/host/list'
-import HostEdit from '../pages/host/edit'
-
-import UserList from '../pages/user/list'
-import UserEdit from '../pages/user/edit'
-import UserLogin from '../pages/user/login'
-import UserEditPassword from '../pages/user/editPassword'
-import UserEditMyPassword from '../pages/user/editMyPassword'
-import UserTwoFactor from '../pages/user/twoFactor'
-
-import NotificationEmail from '../pages/system/notification/email'
-import NotificationSlack from '../pages/system/notification/slack'
-import NotificationWebhook from '../pages/system/notification/webhook'
-
-import Install from '../pages/install/index'
-import LoginLog from '../pages/system/loginLog'
-
-Vue.use(Router)
-
-const router = new Router({
-  routes: [
-    {
-      path: '*',
-      component: NotFound,
-      meta: {
-        noLogin: true,
-        noNeedAdmin: true
-      }
-    },
-    {
-      path: '/',
-      redirect: '/task'
-    },
-    {
-      path: '/install',
-      name: 'install',
-      component: Install,
-      meta: {
-        noLogin: true,
-        noNeedAdmin: true
-      }
-    },
-    {
-      path: '/task',
-      name: 'task-list',
-      component: TaskList,
-      meta: {
-        noNeedAdmin: true
-      }
-    },
-    {
-      path: '/task/create',
-      name: 'task-create',
-      component: TaskEdit
-    },
-    {
-      path: '/task/edit/:id',
-      name: 'task-edit',
-      component: TaskEdit
-    },
-    {
-      path: '/task/log',
-      name: 'task-log',
-      component: TaskLog,
-      meta: {
-        noNeedAdmin: true
-      }
-    },
-    {
-      path: '/host',
-      name: 'host-list',
-      component: HostList,
-      meta: {
-        noNeedAdmin: true
-      }
-    },
-    {
-      path: '/host/create',
-      name: 'host-create',
-      component: HostEdit
-    },
-    {
-      path: '/host/edit/:id',
-      name: 'host-edit',
-      component: HostEdit
-    },
-    {
-      path: '/user',
-      name: 'user-list',
-      component: UserList
-    },
-    {
-      path: '/user/create',
-      name: 'user-create',
-      component: UserEdit
-    },
-    {
-      path: '/user/edit/:id',
-      name: 'user-edit',
-      component: UserEdit
-    },
-    {
-      path: '/user/login',
-      name: 'user-login',
-      component: UserLogin,
-      meta: {
-        noLogin: true
-      }
-    },
-    {
-      path: '/user/edit-password/:id',
-      name: 'user-edit-password',
-      component: UserEditPassword
-    },
-    {
-      path: '/user/edit-my-password',
-      name: 'user-edit-my-password',
-      component: UserEditMyPassword,
-      meta: {
-        noNeedAdmin: true
-      }
-    },
-    {
-      path: '/user/two-factor',
-      name: 'user-two-factor',
-      component: UserTwoFactor,
-      meta: {
-        noNeedAdmin: true
-      }
-    },
-    {
-      path: '/system',
-      redirect: '/system/notification/email'
-    },
-    {
-      path: '/system/notification/email',
-      name: 'system-notification-email',
-      component: NotificationEmail
-    },
-    {
-      path: '/system/notification/slack',
-      name: 'system-notification-slack',
-      component: NotificationSlack
-    },
-    {
-      path: '/system/notification/webhook',
-      name: 'system-notification-webhook',
-      component: NotificationWebhook
-    },
-    {
-      path: '/system/login-log',
-      name: 'login-log',
-      component: LoginLog
-    }
-  ]
+const router = createRouter({
+  history: createWebHashHistory(),
+  routes
 })
 
 router.beforeEach((to, from, next) => {
@@ -169,24 +129,21 @@ router.beforeEach((to, from, next) => {
     next()
     return
   }
-  if (store.getters.user.token) {
-    if ((store.getters.user.isAdmin || to.meta.noNeedAdmin)) {
+  
+  const userStore = useUserStore()
+  
+  if (userStore.token) {
+    if (userStore.isAdmin || to.meta.noNeedAdmin) {
       next()
       return
     }
-    if (!store.getters.user.isAdmin) {
-      next(
-        {
-          path: '/404.html'
-        }
-      )
-      return
-    }
+    next({ path: '/404.html' })
+    return
   }
 
   next({
     path: '/user/login',
-    query: {redirect: to.fullPath}
+    query: { redirect: to.fullPath }
   })
 })
 
