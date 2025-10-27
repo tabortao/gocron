@@ -38,7 +38,7 @@ enable-race:
 	$(eval RACE = -race)
 
 .PHONY: package
-package: build-vue statik
+package: build-web
 	bash ./package.sh
 
 .PHONY: package-all
@@ -47,7 +47,7 @@ package-all: build-vue statik
 
 .PHONY: build-vue
 build-vue:
-	cd web/vue && yarn run build
+	cd web/vue && NODE_OPTIONS=--no-warnings yarn run build
 	cp -r web/vue/dist/* web/public/
 
 .PHONY: install-vue
@@ -62,6 +62,10 @@ run-vue:
 statik:
 	go get github.com/rakyll/statik
 	go generate ./...
+
+.PHONY: build-web
+build-web: build-vue statik
+	@echo "Web build complete!"
 
 .PHONY: lint
 	golangci-lint run

@@ -225,7 +225,7 @@ func changeStatus(c *gin.Context, status models.Status) {
 func UpdatePassword(c *gin.Context) {
 	id, _ := strconv.Atoi(c.Param("id"))
 	var form UpdatePasswordForm
-	if err := c.ShouldBindJSON(&form); err != nil {
+	if err := c.ShouldBind(&form); err != nil {
 		json := utils.JsonResponse{}
 		result := json.CommonFailure("表单验证失败, 请检测输入")
 		c.String(http.StatusOK, result)
@@ -252,7 +252,7 @@ func UpdatePassword(c *gin.Context) {
 // UpdateMyPassword 更新我的密码
 func UpdateMyPassword(c *gin.Context) {
 	var form UpdateMyPasswordForm
-	if err := c.ShouldBindJSON(&form); err != nil {
+	if err := c.ShouldBind(&form); err != nil {
 		json := utils.JsonResponse{}
 		result := json.CommonFailure("表单验证失败, 请检测输入")
 		c.String(http.StatusOK, result)
