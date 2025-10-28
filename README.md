@@ -88,7 +88,7 @@ gocron-node -enable-tls # 启用TLS
 ## 技术栈
 
 * 后端：Gin + GORM + gRPC
-* 前端：Vue 3 + Element Plus
+* 前端：Vue3 + Element Plus + Vite
 * 定时任务：Cron
 * 数据库：MySQL / PostgreSQL
 

@@ -88,7 +88,7 @@ gocron-node -enable-tls # Enable TLS
 ## Tech Stack
 
 * Backend: Gin + GORM + gRPC
-* Frontend: Vue 3 + Element Plus
+* Frontend: Vue3 + Element Plus + Vite
 * Scheduler: Cron
 * Database: MySQL / PostgreSQL
 
