@@ -297,29 +297,27 @@ export default {
         `确定要手动执行任务 "${item.name}" 吗？`,
         '手动执行任务',
         {
-          confirmButtonText: '立即执行',
+          confirmButtonText: '确定执行',
           cancelButtonText: '取消',
           type: 'warning',
-          center: true,
-          customClass: 'custom-message-box',
-          modal: true,
-          lockScroll: true
+          center: true
         }
       ).then(() => {
-        taskService.run(item.id, (...args) => {
-          const message = args[2]
-          this.$message.success(message || '任务已开始执行')
-          this.search()
+        taskService.run(item.id, () => {
+          this.$message.success('任务已开始执行')
         })
       }).catch(() => {})
     },
     remove (item) {
-      ElMessageBox.confirm(`确定要删除任务 "${item.name}" 吗？`, '提示', {
-        confirmButtonText: '确定',
-        cancelButtonText: '取消',
-        type: 'warning',
-        center: true
-      }).then(() => {
+      ElMessageBox.confirm(
+        `确定要删除任务 "${item.name}" 吗？`,
+        '提示',
+        {
+          confirmButtonText: '确定',
+          cancelButtonText: '取消',
+          type: 'warning'
+        }
+      ).then(() => {
         taskService.remove(item.id, () => {
           this.refresh()
         })
