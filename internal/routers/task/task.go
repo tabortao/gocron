@@ -12,7 +12,6 @@ import (
 	"github.com/gocronx-team/gocron/internal/routers/base"
 	"github.com/gocronx-team/gocron/internal/service"
 	"github.com/jakecoffman/cron"
-	"github.com/ouqiang/goutil"
 )
 
 type TaskForm struct {
@@ -168,7 +167,7 @@ func Store(c *gin.Context) {
 	}
 
 	if taskModel.Level == models.TaskLevelParent {
-		err = goutil.PanicToError(func() {
+		err = utils.PanicToError(func() {
 			cron.Parse(form.Spec)
 		})
 		if err != nil {

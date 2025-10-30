@@ -9,8 +9,6 @@ import (
 	"sync"
 	"time"
 
-	"github.com/ouqiang/goutil"
-
 	"github.com/gocronx-team/gocron/internal/models"
 	"github.com/gocronx-team/gocron/internal/modules/app"
 	"github.com/gocronx-team/gocron/internal/modules/httpclient"
@@ -18,6 +16,7 @@ import (
 	"github.com/gocronx-team/gocron/internal/modules/notify"
 	rpcClient "github.com/gocronx-team/gocron/internal/modules/rpc/client"
 	pb "github.com/gocronx-team/gocron/internal/modules/rpc/proto"
+	"github.com/gocronx-team/gocron/internal/modules/utils"
 	"github.com/jakecoffman/cron"
 )
 
@@ -134,7 +133,7 @@ func (task Task) Initialize() {
 		page++
 	}
 	logger.Infof("定时任务初始化完成, 共%d个定时任务添加到调度器", taskNum)
-	
+
 	// 添加日志自动清理任务
 	task.initLogCleanupTask()
 }
@@ -148,7 +147,7 @@ func (task Task) initLogCleanupTask() {
 	fmt.Sscanf(cleanupTime, "%d:%d", &hour, &minute)
 	// 生成cron表达式: 秒 分 时 日 月 周
 	cronSpec := fmt.Sprintf("0 %d %d * * *", minute, hour)
-	
+
 	serviceCron.AddFunc(cronSpec, func() {
 		settingModel := new(models.Setting)
 		days := settingModel.GetLogRetentionDays()
@@ -203,7 +202,7 @@ func (task Task) Add(taskModel models.Task) {
 	}
 
 	cronName := strconv.Itoa(taskModel.Id)
-	err := goutil.PanicToError(func() {
+	err := utils.PanicToError(func() {
 		serviceCron.AddFunc(taskModel.Spec, taskFunc, cronName)
 	})
 	if err != nil {
@@ -546,15 +545,15 @@ func execJob(handler Handler, taskModel models.Task, taskUniqueId int64) TaskRes
 func cleanupLogFiles() {
 	settingModel := new(models.Setting)
 	fileSizeLimit := settingModel.GetLogFileSizeLimit()
-	
+
 	// 如果设置为0，不清理日志文件
 	if fileSizeLimit <= 0 {
 		return
 	}
-	
+
 	logDir := "log"
 	logFile := "cron.log"
-	
+
 	// 检查日志文件是否存在
 	logPath := fmt.Sprintf("%s/%s", logDir, logFile)
 	fileInfo, err := os.Stat(logPath)
@@ -564,7 +563,7 @@ func cleanupLogFiles() {
 		}
 		return
 	}
-	
+
 	// 如果文件大小超过限制，则清空
 	maxSize := int64(fileSizeLimit) * 1024 * 1024 // 转换为MB
 	if fileInfo.Size() > maxSize {

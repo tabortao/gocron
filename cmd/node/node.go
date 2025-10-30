@@ -10,7 +10,6 @@ import (
 	"github.com/gocronx-team/gocron/internal/modules/rpc/auth"
 	"github.com/gocronx-team/gocron/internal/modules/rpc/server"
 	"github.com/gocronx-team/gocron/internal/modules/utils"
-	"github.com/ouqiang/goutil"
 	log "github.com/sirupsen/logrus"
 )
 
@@ -43,7 +42,7 @@ func main() {
 	log.SetLevel(level)
 
 	if version {
-		goutil.PrintAppVersion(AppVersion, GitCommit, BuildDate)
+		utils.PrintAppVersion(AppVersion, GitCommit, BuildDate)
 		return
 	}
 
