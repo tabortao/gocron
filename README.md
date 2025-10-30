@@ -21,6 +21,20 @@
 * 日志自动清理（数据库日志和文件日志定时清理）
 * 任务执行结果通知（邮件、Slack、Webhook）
 
+## 界面截图
+
+以下是系统的部分界面截图：
+
+### 任务调度
+![任务调度](assets/screenshot/scheduler.png)
+
+### 任务管理
+![任务管理](assets/screenshot/task.png)
+
+### 系统通知
+![系统通知](assets/screenshot/notification.png)
+
+
 ## 环境要求
 
 * Go 1.23+
