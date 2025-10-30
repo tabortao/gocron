@@ -1,0 +1,78 @@
+name: CI
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main, develop ]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v4
+
+    - name: Set up Go
+      uses: actions/setup-go@v4
+      with:
+        go-version: '1.23'
+
+    - name: Cache Go modules
+      uses: actions/cache@v3
+      with:
+        path: ~/go/pkg/mod
+        key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
+        restore-keys: |
+          ${{ runner.os }}-go-
+
+    - name: Download dependencies
+      run: go mod download
+
+    - name: Run tests
+      run: make test
+
+    - name: Run linter
+      uses: golangci/golangci-lint-action@v3
+      with:
+        version: latest
+
+  build:
+    runs-on: ubuntu-latest
+    needs: test
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v4
+
+    - name: Set up Go
+      uses: actions/setup-go@v4
+      with:
+        go-version: '1.23'
+
+    - name: Set up Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '18'
+        cache: 'yarn'
+        cache-dependency-path: web/vue/yarn.lock
+
+    - name: Install frontend dependencies
+      run: |
+        cd web/vue
+        yarn install --frozen-lockfile
+
+    - name: Build frontend
+      run: make build-vue
+
+    - name: Generate static assets
+      run: |
+        go install github.com/rakyll/statik@latest
+        go generate ./...
+
+    - name: Build binaries
+      run: make build
+
+    - name: Test package script
+      run: |
+        chmod +x package.sh
+        bash ./package.sh -p "linux" -a "amd64"

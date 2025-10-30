@@ -219,6 +219,41 @@ refactor(api): refactor task scheduling logic
 
 We look forward to your participation in making gocron even better! 🚀
 
+## Release Process
+
+### Automated Release (Recommended)
+
+1. **Create a tag release**:
+   ```bash
+   git tag -a v1.2.3 -m "Release v1.2.3"
+   git push origin v1.2.3
+   ```
+   
+2. **GitHub Actions automatically builds**:
+   - Automatically builds binaries for all platforms
+   - Automatically generates release notes
+   - Automatically uploads to GitHub Releases
+
+### Manual Release
+
+1. **Through GitHub interface**:
+   - Visit the project's Actions page
+   - Select "Manual Release" workflow
+   - Click "Run workflow"
+   - Enter version number and release notes
+   - Execute release
+
+### Release Content
+
+Each release includes binaries for the following platforms:
+- **Linux**: amd64, arm64
+- **macOS**: amd64, arm64  
+- **Windows**: amd64, arm64
+
+Includes two components:
+- `gocron`: Web server
+- `gocron-node`: Task execution node
+
 ## Project Origin & Acknowledgments
 
 This project is developed and refactored based on [gocron](https://github.com/ouqiang/gocron). I really appreciate the design philosophy of the original project, but since the original author is no longer maintaining it, I have done extensive refactoring work on this foundation, including:

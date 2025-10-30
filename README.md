@@ -218,6 +218,41 @@ refactor(api): 重构任务调度逻辑
 
 我们期待您的参与，让gocron变得更加完善！🚀
 
+## 发布流程
+
+### 自动发布（推荐）
+
+1. **创建标签发布**：
+   ```bash
+   git tag -a v1.2.3 -m "Release v1.2.3"
+   git push origin v1.2.3
+   ```
+   
+2. **GitHub Actions自动构建**：
+   - 自动构建所有平台的二进制文件
+   - 自动生成发布说明
+   - 自动上传到GitHub Releases
+
+### 手动发布
+
+1. **通过GitHub界面**：
+   - 访问项目的Actions页面
+   - 选择"Manual Release"工作流
+   - 点击"Run workflow"
+   - 输入版本号和发布说明
+   - 执行发布
+
+### 发布内容
+
+每次发布包含以下平台的二进制文件：
+- **Linux**: amd64, arm64
+- **macOS**: amd64, arm64  
+- **Windows**: amd64, arm64
+
+包含两个组件：
+- `gocron`: Web服务器
+- `gocron-node`: 任务执行节点
+
 ## 项目来源与致谢
 
 这个项目是在 [gocron](https://github.com/ouqiang/gocron) 的基础上开发改造而来。我非常喜欢原项目的设计理念，但由于原作者不再维护，我在此基础上做了大量的重构工作，包括：
