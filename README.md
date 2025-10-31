@@ -234,6 +234,7 @@ refactor(api): 重构任务调度逻辑
 * 后端Web框架重构（升级到现代化的[gin](https://github.com/gin-gonic/gin)框架）
 * 数据库迁移工具重构（基于[gorm](https://github.com/go-gorm/gorm)的自动迁移系统）
 * 多数据库支持（特别增加了SQLite支持，方便轻量级部署）
+* 修复了若干关键问题（Shell任务停止功能、系统重启后孤立任务处理等）
 * 更好的用户体验和界面设计
 
 感谢原项目作者的付出，也希望大家多给项目点star、多提issue，鼓励项目的发展，让我们一起完善这个项目！
