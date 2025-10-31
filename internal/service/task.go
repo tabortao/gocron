@@ -336,7 +336,7 @@ func createTaskLog(taskModel models.Task, status models.Status) (int64, error) {
 		}
 		taskLogModel.Hostname = aggregationHost
 	}
-	taskLogModel.StartTime = time.Now()
+	taskLogModel.StartTime = models.LocalTime(time.Now())
 	taskLogModel.Status = status
 	insertId, err := taskLogModel.Create()
 

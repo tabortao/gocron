@@ -3,9 +3,15 @@ import { createPinia } from 'pinia'
 import piniaPluginPersistedstate from 'pinia-plugin-persistedstate'
 import { ElMessageBox, ElMessage } from 'element-plus'
 import 'element-plus/dist/index.css'
+import dayjs from 'dayjs'
+import utc from 'dayjs/plugin/utc'
+import timezone from 'dayjs/plugin/timezone'
 import App from './App.vue'
 import router from './router'
 import i18n from './locales'
+
+dayjs.extend(utc)
+dayjs.extend(timezone)
 
 const app = createApp(App)
 const pinia = createPinia()
@@ -42,10 +48,7 @@ app.config.globalProperties.$message = ElMessage
 app.config.globalProperties.$filters = {
   formatTime(time) {
     if (!time) return ''
-    const fillZero = (num) => (num >= 10 ? num : '0' + num)
-    const date = new Date(time)
-    const result = `${date.getFullYear()}-${fillZero(date.getMonth() + 1)}-${fillZero(date.getDate())} ${fillZero(date.getHours())}:${fillZero(date.getMinutes())}:${fillZero(date.getSeconds())}`
-    return result.indexOf('20') === 0 ? result : ''
+    return dayjs(time).format('YYYY-MM-DD HH:mm:ss')
   }
 }
 

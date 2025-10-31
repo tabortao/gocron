@@ -1,12 +1,45 @@
 package models
 
 import (
+	"database/sql/driver"
+	"fmt"
 	"time"
 
 	"gorm.io/gorm"
 )
 
+type LocalTime time.Time
 
+func (t LocalTime) MarshalJSON() ([]byte, error) {
+	formatted := fmt.Sprintf("\"%s\"", time.Time(t).Format(DefaultTimeFormat))
+	return []byte(formatted), nil
+}
+
+func (t *LocalTime) UnmarshalJSON(data []byte) error {
+	if string(data) == "null" {
+		return nil
+	}
+	parsed, err := time.ParseInLocation(`"`+DefaultTimeFormat+`"`, string(data), time.Local)
+	if err == nil {
+		*t = LocalTime(parsed)
+	}
+	return err
+}
+
+func (t LocalTime) Value() (driver.Value, error) {
+	return time.Time(t), nil
+}
+
+func (t *LocalTime) Scan(value interface{}) error {
+	if value == nil {
+		return nil
+	}
+	if v, ok := value.(time.Time); ok {
+		*t = LocalTime(v)
+		return nil
+	}
+	return fmt.Errorf("cannot scan %T into LocalTime", value)
+}
 
 type TaskType int8
 
@@ -21,8 +54,8 @@ type TaskLog struct {
 	Timeout    int          `json:"timeout" gorm:"type:mediumint;not null;default:0"`
 	RetryTimes int8         `json:"retry_times" gorm:"type:tinyint;not null;default:0"`
 	Hostname   string       `json:"hostname" gorm:"type:varchar(128);not null;default:''"`
-	StartTime  time.Time    `json:"start_time" gorm:"column:start_time;autoCreateTime"`
-	EndTime    time.Time    `json:"end_time" gorm:"column:end_time;autoUpdateTime"`
+	StartTime  LocalTime    `json:"start_time" gorm:"column:start_time;autoCreateTime"`
+	EndTime    LocalTime    `json:"end_time" gorm:"column:end_time;autoUpdateTime"`
 	Status     Status       `json:"status" gorm:"type:tinyint;not null;index;default:1"`
 	Result     string       `json:"result" gorm:"type:mediumtext;not null"`
 	TotalTime  int          `json:"total_time" gorm:"-"`
@@ -57,11 +90,11 @@ func (taskLog *TaskLog) List(params CommonMap) ([]TaskLog, error) {
 	
 	if len(list) > 0 {
 		for i, item := range list {
-			endTime := item.EndTime
+			endTime := time.Time(item.EndTime)
 			if item.Status == Running {
 				endTime = time.Now()
 			}
-			execSeconds := endTime.Sub(item.StartTime).Seconds()
+			execSeconds := endTime.Sub(time.Time(item.StartTime)).Seconds()
 			list[i].TotalTime = int(execSeconds)
 		}
 	}
