@@ -49,8 +49,18 @@ func Clear(c *gin.Context) {
 
 // 停止运行中的任务
 func Stop(c *gin.Context) {
-	id, _ := strconv.ParseInt(c.Query("id"), 10, 64)
-	taskId, _ := strconv.Atoi(c.Query("task_id"))
+	var form struct {
+		Id     int64 `form:"id" binding:"required"`
+		TaskId int   `form:"task_id" binding:"required"`
+	}
+	if err := c.ShouldBind(&form); err != nil {
+		json := utils.JsonResponse{}
+		result := json.CommonFailure("参数错误")
+		c.String(http.StatusOK, result)
+		return
+	}
+	id := form.Id
+	taskId := form.TaskId
 	taskModel := new(models.Task)
 	task, err := taskModel.Detail(taskId)
 	json := utils.JsonResponse{}
