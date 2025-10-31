@@ -29,7 +29,8 @@ func Slack(c *gin.Context) {
 
 func UpdateSlack(c *gin.Context) {
 	var form UpdateSlackForm
-	if err := c.ShouldBindJSON(&form); err != nil {
+	if err := c.ShouldBind(&form); err != nil {
+		logger.Errorf("Slack配置表单验证失败: %v", err)
 		json := utils.JsonResponse{}
 		result := json.CommonFailure("表单验证失败, 请检测输入")
 		c.String(http.StatusOK, result)
@@ -44,7 +45,8 @@ func UpdateSlack(c *gin.Context) {
 
 func CreateSlackChannel(c *gin.Context) {
 	var form CreateSlackChannelForm
-	if err := c.ShouldBindJSON(&form); err != nil {
+	if err := c.ShouldBind(&form); err != nil {
+		logger.Errorf("创建Slack频道表单验证失败: %v", err)
 		json := utils.JsonResponse{}
 		result := json.CommonFailure("表单验证失败, 请检测输入")
 		c.String(http.StatusOK, result)
@@ -93,6 +95,7 @@ type MailServerForm struct {
 	Port     int    `form:"port" json:"port" binding:"required,min=1,max=65535"`
 	User     string `form:"user" json:"user" binding:"required,email,max=64"`
 	Password string `form:"password" json:"password" binding:"required,max=64"`
+	Template string `form:"template" json:"template"`
 }
 
 // CreateMailUserForm 创建邮件用户表单
@@ -121,15 +124,31 @@ type CreateSlackChannelForm struct {
 func UpdateMail(c *gin.Context) {
 	var form MailServerForm
 	if err := c.ShouldBind(&form); err != nil {
+		logger.Errorf("邮件配置表单验证失败: %v", err)
 		json := utils.JsonResponse{}
 		result := json.CommonFailure("表单验证失败, 请检测输入")
 		c.String(http.StatusOK, result)
 		return
 	}
 	
-	jsonByte, _ := json.Marshal(form)
+	// 从表单中提取template，单独保存
+	template := strings.TrimSpace(form.Template)
+	
+	// 将服务器配置序列化为JSON（不包含template）
+	serverConfig := struct {
+		Host     string `json:"host"`
+		Port     int    `json:"port"`
+		User     string `json:"user"`
+		Password string `json:"password"`
+	}{
+		Host:     form.Host,
+		Port:     form.Port,
+		User:     form.User,
+		Password: form.Password,
+	}
+	jsonByte, _ := json.Marshal(serverConfig)
+	
 	settingModel := new(models.Setting)
-	template := strings.TrimSpace(c.Query("template"))
 	err := settingModel.UpdateMail(string(jsonByte), template)
 	result := utils.JsonResponseByErr(err)
 	c.String(http.StatusOK, result)
@@ -137,7 +156,8 @@ func UpdateMail(c *gin.Context) {
 
 func CreateMailUser(c *gin.Context) {
 	var form CreateMailUserForm
-	if err := c.ShouldBindJSON(&form); err != nil {
+	if err := c.ShouldBind(&form); err != nil {
+		logger.Errorf("创建邮件用户表单验证失败: %v", err)
 		json := utils.JsonResponse{}
 		result := json.CommonFailure("表单验证失败, 请检测输入")
 		c.String(http.StatusOK, result)
@@ -174,7 +194,8 @@ func WebHook(c *gin.Context) {
 
 func UpdateWebHook(c *gin.Context) {
 	var form UpdateWebHookForm
-	if err := c.ShouldBindJSON(&form); err != nil {
+	if err := c.ShouldBind(&form); err != nil {
+		logger.Errorf("Webhook配置表单验证失败: %v", err)
 		json := utils.JsonResponse{}
 		result := json.CommonFailure("表单验证失败, 请检测输入")
 		c.String(http.StatusOK, result)
