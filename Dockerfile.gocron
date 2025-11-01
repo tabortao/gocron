@@ -21,14 +21,14 @@ COPY . .
 # Copy frontend build files to public directory
 COPY --from=frontend /app/web/vue/dist/* ./web/public/
 
-# Install statik separately to avoid concurrent build issues
-RUN go install github.com/rakyll/statik@latest
+# Install statik without CGO to avoid ARM64 compilation issues
+RUN CGO_ENABLED=0 go install github.com/rakyll/statik@latest
 
 # Generate static files (statik will pack web/public)
 RUN go generate ./...
 
-# Build with CGO enabled for SQLite support
-RUN CGO_ENABLED=1 GOMAXPROCS=2 go build -ldflags="-s -w" -trimpath -o gocron ./cmd/gocron
+# Build with CGO enabled for SQLite support, reduced parallelism for ARM64 stability
+RUN CGO_ENABLED=1 GOMAXPROCS=1 go build -ldflags="-s -w" -trimpath -o gocron ./cmd/gocron
 
 FROM alpine:latest
 
