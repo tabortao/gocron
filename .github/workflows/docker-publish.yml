@@ -41,7 +41,7 @@ jobs:
     - name: Build and push
       run: |
         docker buildx build \
-          --platform linux/amd64,linux/arm64 \
+          --platform linux/amd64 \
           --file ./Dockerfile.gocron \
           --tag ${{ secrets.DOCKER_USERNAME }}/gocron:${{ steps.version.outputs.version }} \
           --tag ${{ secrets.DOCKER_USERNAME }}/gocron:latest \
