@@ -56,9 +56,9 @@
 
 ## 快速开始
 
-### Docker Compose 部署（推荐）
+### Docker Compose 部署
 
-最简单的部署方式，一键启动 gocron 管理端：
+使用 Docker 部署，需要本地构建镜像：
 
 ```bash
 # 1. 克隆项目
@@ -105,16 +105,24 @@ yarn run dev
 
 访问 http://localhost:8080
 
-### 生产部署
+### 二进制部署（推荐）
+
+适合生产环境，支持所有数据库（包括 SQLite）：
 
 ```bash
-# 1. 编译
+# 1. 编译打包
 make package
 
-# 2. 启动服务
+# 2. 解压对应平台的包
+tar -xzf gocron-package/gocron-*.tar.gz
+tar -xzf gocron-node-package/gocron-node-*.tar.gz
+
+# 3. 启动服务
+cd gocron-*
 ./gocron web
 
-# 3. 启动任务节点
+# 4. 启动任务节点（另一个终端）
+cd gocron-node-*
 ./gocron-node
 ```
 

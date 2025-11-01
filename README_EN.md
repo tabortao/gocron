@@ -55,9 +55,9 @@ Here are some partial screenshots of the system:
 
 ## Quick Start
 
-### Docker Compose Deployment (Recommended)
+### Docker Compose Deployment
 
-The simplest deployment method, start gocron management server with one command:
+Deploy using Docker with local image build:
 
 ```bash
 # 1. Clone the project
@@ -103,16 +103,24 @@ yarn run dev
 
 Visit http://localhost:8080
 
-### Production Deployment
+### Binary Deployment (Recommended)
+
+Suitable for production environments, supports all databases (including SQLite):
 
 ```bash
-# 1. Build
+# 1. Build and package
 make package
 
-# 2. Start service
+# 2. Extract the package for your platform
+tar -xzf gocron-package/gocron-*.tar.gz
+tar -xzf gocron-node-package/gocron-node-*.tar.gz
+
+# 3. Start service
+cd gocron-*
 ./gocron web
 
-# 3. Start task node
+# 4. Start task node (in another terminal)
+cd gocron-node-*
 ./gocron-node
 ```
 
