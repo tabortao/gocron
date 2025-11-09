@@ -10,6 +10,8 @@ import (
 	"github.com/gocronx-team/gocron/internal/modules/rpc/auth"
 	"github.com/gocronx-team/gocron/internal/modules/rpc/proto"
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/backoff"
+	"google.golang.org/grpc/credentials/insecure"
 	"google.golang.org/grpc/keepalive"
 )
 
@@ -80,11 +82,14 @@ func (p *GRPCPool) factory(addr string) (*Client, error) {
 	}
 	opts := []grpc.DialOption{
 		grpc.WithKeepaliveParams(keepAliveParams),
-		grpc.WithBackoffMaxDelay(backOffMaxDelay),
+		grpc.WithConnectParams(grpc.ConnectParams{
+			Backoff:           backoff.Config{MaxDelay: backOffMaxDelay},
+			MinConnectTimeout: dialTimeout,
+		}),
 	}
 
 	if !app.Setting.EnableTLS {
-		opts = append(opts, grpc.WithInsecure())
+		opts = append(opts, grpc.WithTransportCredentials(insecure.NewCredentials()))
 	} else {
 		server := strings.Split(addr, ":")
 		certificate := auth.Certificate{

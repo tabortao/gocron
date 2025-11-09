@@ -5,7 +5,7 @@ import (
 	"crypto/x509"
 	"errors"
 	"fmt"
-	"io/ioutil"
+	"os"
 
 	"google.golang.org/grpc/credentials"
 )
@@ -27,7 +27,7 @@ func (c Certificate) GetTLSConfigForServer() (*tls.Config, error) {
 	}
 
 	certPool := x509.NewCertPool()
-	bs, err := ioutil.ReadFile(c.CAFile)
+	bs, err := os.ReadFile(c.CAFile)
 	if err != nil {
 		return nil, fmt.Errorf("failed to read client ca cert: %s", err)
 	}
@@ -56,7 +56,7 @@ func (c Certificate) GetTransportCredsForClient() (credentials.TransportCredenti
 	}
 
 	certPool := x509.NewCertPool()
-	bs, err := ioutil.ReadFile(c.CAFile)
+	bs, err := os.ReadFile(c.CAFile)
 	if err != nil {
 		return nil, fmt.Errorf("failed to read ca cert: %s", err)
 	}

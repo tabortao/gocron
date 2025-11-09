@@ -152,7 +152,7 @@ Git Commit: {{.GitCommit}}
 func PanicToError(f func()) (err error) {
 	defer func() {
 		if e := recover(); e != nil {
-			err = fmt.Errorf(PanicTrace(e))
+			err = fmt.Errorf("%s", PanicTrace(e))
 		}
 	}()
 	f()
