@@ -13,6 +13,7 @@ A lightweight distributed scheduled task management system developed in Go, desi
 * Task dependency configuration
 * Multi-user and permission control
 * Two-Factor Authentication (2FA)
+* Agent Auto-Registration (Linux/macOS/Windows supported)
 * Internationalization support (Chinese/English interface switching)
 * Multi-database support (MySQL/PostgreSQL/SQLite)
 * Task types
@@ -27,6 +28,8 @@ A lightweight distributed scheduled task management system developed in Go, desi
 Here are some partial screenshots of the system:
 
 ![Scheduled Tasks](assets/screenshot/scheduler_en.png)
+
+![Agent Auto-Registration](assets/screenshot/agent_en.png)
 
 ![Task Management](assets/screenshot/task_en.png)
 
@@ -125,6 +128,38 @@ cd gocron-node-*
 ```
 
 Visit http://localhost:5920
+
+## Agent Auto-Registration
+
+gocron supports one-click generation of installation commands through the web interface. Simply execute the command on the target server to automatically install and register the Agent node.
+
+### Usage
+
+1. Go to the "Task Nodes" page in the web interface
+2. Click the "Auto Register" button
+3. Copy the installation command for the corresponding platform
+4. Execute the command on the target server
+
+### Supported Platforms
+
+**Linux / macOS**
+```bash
+curl -fsSL http://your-server:5920/api/agent/install.sh | bash -s -- <token>
+```
+
+**Windows (PowerShell with Administrator privileges)**
+```powershell
+iwr -useb http://your-server:5920/api/agent/install.ps1?token=<token> | iex
+```
+
+### Features
+
+* ✅ One-time token with 3-hour validity period
+* ✅ Token can be reused within validity period, suitable for batch installation
+* ✅ Automatic download, installation, registration, and startup of Agent
+* ✅ Automatic creation of systemd service on Linux
+* ✅ Automatic creation of Windows service on Windows
+* ✅ Secure one-way communication (Agent only accesses gocron during registration)
 
 ## Commands
 

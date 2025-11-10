@@ -15,6 +15,7 @@
 * 任务依赖配置
 * 多用户与权限控制
 * 双因素认证(2FA)
+* Agent自动注册（支持Linux/macOS/Windows）
 * 国际化支持（中文/英文界面切换）
 * 多数据库支持（MySQL/PostgreSQL/SQLite）
 * 任务类型
@@ -30,9 +31,13 @@
 
 ![任务调度](assets/screenshot/scheduler.png)
 
+![Agent自动注册](assets/screenshot/agent.png)
+
 ![任务管理](assets/screenshot/task.png)
 
 ![系统通知](assets/screenshot/notification.png)
+
+
 
 
 ## 环境要求
@@ -127,6 +132,38 @@ cd gocron-node-*
 ```
 
 访问 http://localhost:5920
+
+## Agent自动注册
+
+gocron支持通过Web界面一键生成安装命令，在目标服务器上执行即可自动安装并注册Agent节点。
+
+### 使用方法
+
+1. 在Web界面进入「任务节点」页面
+2. 点击「自动注册」按钮
+3. 复制对应平台的安装命令
+4. 在目标服务器上执行命令
+
+### 支持平台
+
+**Linux / macOS**
+```bash
+curl -fsSL http://your-server:5920/api/agent/install.sh | bash -s -- <token>
+```
+
+**Windows (PowerShell管理员权限)**
+```powershell
+iwr -useb http://your-server:5920/api/agent/install.ps1?token=<token> | iex
+```
+
+### 特性
+
+* ✅ 一次性Token，3小时有效期
+* ✅ Token可在有效期内重复使用，适合批量安装
+* ✅ 自动下载、安装、注册、启动Agent
+* ✅ Linux自动创建systemd服务
+* ✅ Windows自动创建Windows服务
+* ✅ 安全的单向通信（Agent仅在注册时访问gocron）
 
 ## 命令说明
 
