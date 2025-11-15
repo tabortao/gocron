@@ -4,13 +4,13 @@ import enUS from './en-US'
 
 const getDefaultLocale = () => {
   const savedLocale = localStorage.getItem('locale')
-  return savedLocale || 'en-US'
+  return savedLocale || 'zh-CN'
 }
 
 const i18n = createI18n({
   legacy: false,
   locale: getDefaultLocale(),
-  fallbackLocale: 'en-US',
+  fallbackLocale: 'zh-CN',
   messages: {
     'zh-CN': zhCN,
     'en-US': enUS

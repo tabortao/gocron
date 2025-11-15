@@ -36,12 +36,12 @@ var (
 func InitEnv(versionString string) {
 	logger.InitLogger()
 	var err error
-	// 优先使用用户主目录下的.gocron目录
-	homeDir, err := os.UserHomeDir()
+	// 使用项目根目录下的.gocron目录
+	execPath, err := os.Executable()
 	if err != nil {
 		logger.Fatal(err)
 	}
-	AppDir = filepath.Join(homeDir, ".gocron")
+	AppDir = filepath.Join(filepath.Dir(execPath), ".gocron")
 	fmt.Printf("AppDir: %s\n", AppDir)
 	ConfDir = filepath.Join(AppDir, "conf")
 	LogDir = filepath.Join(AppDir, "log")
