@@ -73,15 +73,25 @@ export default {
         this.formRules = newVal
       },
       immediate: true
+    },
+    '$route': {
+      handler() {
+        this.loadForm()
+      },
+      deep: true
     }
   },
   created () {
-    const id = this.$route.params.id
-    if (!id) {
+    this.loadForm()
+  },
+  methods: {
+    loadForm() {
       this.resetForm()
-      return
-    }
-    hostService.detail(id, (data) => {
+      const id = this.$route.params.id
+      if (!id) {
+        return
+      }
+      hostService.detail(id, (data) => {
       if (!data) {
         this.$message.error(this.t('message.dataNotFound'))
         this.cancel()
@@ -93,8 +103,7 @@ export default {
       this.form.alias = data.alias
       this.form.remark = data.remark
     })
-  },
-  methods: {
+    },
     resetForm() {
       this.form = {
         id: '',
