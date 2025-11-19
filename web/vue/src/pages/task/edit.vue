@@ -354,10 +354,7 @@ export default {
       mailUsers: [],
       slackChannels: [],
       selectedMailNotifyIds: [],
-      selectedSlackNotifyIds: [],
-      hasMailConfig: false,
-      hasSlackConfig: false,
-      hasWebhookConfig: false
+      selectedSlackNotifyIds: []
     }
   },
   computed: {
@@ -435,8 +432,11 @@ export default {
         { value: 3, label: this.t('task.notifyAlways') },
         { value: 4, label: this.t('task.notifyKeywordMatch') }
       ]
-      // 初始化为空，将在loadNotificationOptions中根据配置动态设置
-      this.notifyTypes = []
+      this.notifyTypes = [
+        { value: 2, label: this.t('task.notifyEmail') },
+        { value: 3, label: this.t('task.notifySlack') },
+        { value: 4, label: this.t('task.notifyWebhook') }
+      ]
     },
     updateNotifyKeywordRule () {
       const keywordRules = this.formRules.notify_keyword
@@ -584,50 +584,12 @@ export default {
       }
     },
     loadNotificationOptions () {
-      // 加载邮件配置
       notificationService.mail((data) => {
         this.mailUsers = data.mail_users || []
-        // 检查SMTP服务器是否配置
-        const hasMailConfig = data.host && data.user && data.password
-        this.updateNotifyTypes(hasMailConfig, null, null)
       })
-      
-      // 加载Slack配置
       notificationService.slack((data) => {
         this.slackChannels = data.channels || []
-        const hasSlackConfig = data.url && data.channels && data.channels.length > 0
-        this.updateNotifyTypes(null, hasSlackConfig, null)
       })
-      
-      // 加载Webhook配置
-      notificationService.webhook((data) => {
-        const hasWebhookConfig = data.url
-        this.updateNotifyTypes(null, null, hasWebhookConfig)
-      })
-    },
-    
-    updateNotifyTypes(hasMailConfig, hasSlackConfig, hasWebhookConfig) {
-      // 保持已有的配置状态
-      if (hasMailConfig !== null) this.hasMailConfig = hasMailConfig
-      if (hasSlackConfig !== null) this.hasSlackConfig = hasSlackConfig  
-      if (hasWebhookConfig !== null) this.hasWebhookConfig = hasWebhookConfig
-      
-      // 重新构建通知类型选项
-      this.notifyTypes = []
-      if (this.hasMailConfig) {
-        this.notifyTypes.push({ value: 2, label: this.t('task.notifyEmail') })
-      }
-      if (this.hasSlackConfig) {
-        this.notifyTypes.push({ value: 3, label: this.t('task.notifySlack') })
-      }
-      if (this.hasWebhookConfig) {
-        this.notifyTypes.push({ value: 4, label: this.t('task.notifyWebhook') })
-      }
-      
-      // 如果当前选中的通知类型不再可用，重置为默认值
-      if (this.form.notify_type && !this.notifyTypes.find(t => t.value === this.form.notify_type)) {
-        this.form.notify_type = this.notifyTypes.length > 0 ? this.notifyTypes[0].value : null
-      }
     },
     submit () {
       this.$refs.form.validate((valid) => {

@@ -32,8 +32,8 @@ type TaskForm struct {
 	HostId           string                      `form:"host_id" json:"host_id"`
 	Tag              string                      `form:"tag" json:"tag"`
 	Remark           string                      `form:"remark" json:"remark"`
-	NotifyStatus     int8                        `form:"notify_status" json:"notify_status" binding:"oneof=1 2 3 4"`
-	NotifyType       int8                        `form:"notify_type" json:"notify_type" binding:"oneof=1 2 3 4"`
+	NotifyStatus     int8                        `form:"notify_status" json:"notify_status" binding:"required,oneof=1 2 3 4"`
+	NotifyType       int8                        `form:"notify_type" json:"notify_type" binding:"required,oneof=1 2 3 4"`
 	NotifyReceiverId string                      `form:"notify_receiver_id" json:"notify_receiver_id"`
 	NotifyKeyword    string                      `form:"notify_keyword" json:"notify_keyword"`
 }

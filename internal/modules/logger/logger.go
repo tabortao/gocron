@@ -2,10 +2,12 @@ package logger
 
 import (
 	"fmt"
+	"io"
+	"log/slog"
 	"os"
+	"path/filepath"
 	"runtime"
 
-	"github.com/cihub/seelog"
 	"github.com/gin-gonic/gin"
 )
 
@@ -14,7 +16,7 @@ import (
 type Level int8
 
 var (
-	logger   seelog.LoggerInterface
+	logger   *slog.Logger
 	exitFunc = os.Exit
 )
 
@@ -27,19 +29,29 @@ const (
 )
 
 func InitLogger() {
-	config := getLogConfig()
-	l, err := seelog.LoggerFromConfigAsString(config)
+	logDir := "log"
+	if err := os.MkdirAll(logDir, 0755); err != nil {
+		panic(err)
+	}
+
+	logFile := filepath.Join(logDir, "cron.log")
+	file, err := os.OpenFile(logFile, os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0666)
 	if err != nil {
 		panic(err)
 	}
-	logger = l
+
+	writer := io.MultiWriter(os.Stdout, file)
+	handler := slog.NewTextHandler(writer, &slog.HandlerOptions{
+		Level: slog.LevelDebug,
+	})
+	logger = slog.New(handler)
 }
 
 func Debug(v ...interface{}) {
 	if gin.Mode() != gin.DebugMode {
 		return
 	}
-	write(DEBUG, v)
+	write(DEBUG, v...)
 }
 
 func Debugf(format string, v ...interface{}) {
@@ -50,7 +62,7 @@ func Debugf(format string, v ...interface{}) {
 }
 
 func Info(v ...interface{}) {
-	write(INFO, v)
+	write(INFO, v...)
 }
 
 func Infof(format string, v ...interface{}) {
@@ -58,7 +70,7 @@ func Infof(format string, v ...interface{}) {
 }
 
 func Warn(v ...interface{}) {
-	write(WARN, v)
+	write(WARN, v...)
 }
 
 func Warnf(format string, v ...interface{}) {
@@ -66,7 +78,7 @@ func Warnf(format string, v ...interface{}) {
 }
 
 func Error(v ...interface{}) {
-	write(ERROR, v)
+	write(ERROR, v...)
 }
 
 func Errorf(format string, v ...interface{}) {
@@ -74,7 +86,7 @@ func Errorf(format string, v ...interface{}) {
 }
 
 func Fatal(v ...interface{}) {
-	write(FATAL, v)
+	write(FATAL, v...)
 }
 
 func Fatalf(format string, v ...interface{}) {
@@ -82,79 +94,53 @@ func Fatalf(format string, v ...interface{}) {
 }
 
 func write(level Level, v ...interface{}) {
-	defer logger.Flush()
+	msg := fmt.Sprint(v...)
+	args := []any{}
 
-	content := ""
 	if gin.Mode() == gin.DebugMode {
 		pc, file, line, ok := runtime.Caller(2)
 		if ok {
-			content = fmt.Sprintf("#%s#%s#%d行#", file, runtime.FuncForPC(pc).Name(), line)
+			args = append(args, "file", file, "func", runtime.FuncForPC(pc).Name(), "line", line)
 		}
 	}
 
 	switch level {
 	case DEBUG:
-		logger.Debug(content, v)
+		logger.Debug(msg, args...)
 	case INFO:
-		logger.Info(content, v)
+		logger.Info(msg, args...)
 	case WARN:
-		logger.Warn(content, v)
+		logger.Warn(msg, args...)
 	case FATAL:
-		logger.Critical(content, v)
+		logger.Error(msg, args...)
 		exitFunc(1)
 	case ERROR:
-		logger.Error(content, v)
+		logger.Error(msg, args...)
 	}
 }
 
 func writef(level Level, format string, v ...interface{}) {
-	defer logger.Flush()
+	msg := fmt.Sprintf(format, v...)
+	args := []any{}
 
-	content := ""
 	if gin.Mode() == gin.DebugMode {
 		pc, file, line, ok := runtime.Caller(2)
 		if ok {
-			content = fmt.Sprintf("#%s#%s#%d行#", file, runtime.FuncForPC(pc).Name(), line)
+			args = append(args, "file", file, "func", runtime.FuncForPC(pc).Name(), "line", line)
 		}
 	}
 
-	format = content + format
-
 	switch level {
 	case DEBUG:
-		logger.Debugf(format, v...)
+		logger.Debug(msg, args...)
 	case INFO:
-		logger.Infof(format, v...)
+		logger.Info(msg, args...)
 	case WARN:
-		logger.Warnf(format, v...)
+		logger.Warn(msg, args...)
 	case FATAL:
-		logger.Criticalf(format, v...)
+		logger.Error(msg, args...)
 		exitFunc(1)
 	case ERROR:
-		logger.Errorf(format, v...)
+		logger.Error(msg, args...)
 	}
-}
-
-func getLogConfig() string {
-	config := `
-    <seelog>
-        <outputs formatid="main">
-            %s
-            <filter levels="info,critical,error,warn">
-                <file path="log/cron.log" />
-            </filter>
-        </outputs>
-        <formats>
-            <format id="main" format="%%Date/%%Time [%%LEV] %%Msg%%n"/>
-        </formats>
-    </seelog>`
-
-	consoleConfig := `
-            <filter levels="info,debug,critical,warn,error">
-                <console />
-            </filter>
-         `
-	config = fmt.Sprintf(config, consoleConfig)
-
-	return config
 }
