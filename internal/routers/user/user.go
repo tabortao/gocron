@@ -142,6 +142,12 @@ func Store(c *gin.Context) {
 			c.String(http.StatusOK, result)
 			return
 		}
+		// 验证密码复杂度
+		if valid, errKey := utils.ValidatePassword(form.Password); !valid {
+			result := json.CommonFailure(i18n.T(c, errKey))
+			c.String(http.StatusOK, result)
+			return
+		}
 		if form.Password != form.ConfirmPassword {
 			result := json.CommonFailure(i18n.T(c, "password_mismatch"))
 			c.String(http.StatusOK, result)
@@ -240,6 +246,12 @@ func UpdatePassword(c *gin.Context) {
 		c.String(http.StatusOK, result)
 		return
 	}
+	// 验证密码复杂度
+	if valid, errKey := utils.ValidatePassword(form.NewPassword); !valid {
+		result = json.CommonFailure(i18n.T(c, errKey))
+		c.String(http.StatusOK, result)
+		return
+	}
 	userModel := new(models.User)
 	_, err := userModel.UpdatePassword(id, form.NewPassword)
 	if err != nil {
@@ -269,6 +281,12 @@ func UpdateMyPassword(c *gin.Context) {
 	}
 	if form.OldPassword == form.NewPassword {
 		result = json.CommonFailure(i18n.T(c, "password_same_as_old"))
+		c.String(http.StatusOK, result)
+		return
+	}
+	// 验证密码复杂度
+	if valid, errKey := utils.ValidatePassword(form.NewPassword); !valid {
+		result = json.CommonFailure(i18n.T(c, errKey))
 		c.String(http.StatusOK, result)
 		return
 	}

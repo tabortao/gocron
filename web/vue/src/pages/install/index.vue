@@ -65,12 +65,12 @@
         <el-row>
           <el-col :span="12">
             <el-form-item label="密码" prop="admin_password">
-              <el-input v-model="form.admin_password" type="password"></el-input>
+              <el-input v-model="form.admin_password" type="password" placeholder="至少8位，包含字母和数字"></el-input>
             </el-form-item>
           </el-col>
           <el-col :span="12">
             <el-form-item label="确认密码" prop="confirm_admin_password">
-              <el-input v-model="form.confirm_admin_password" type="password"></el-input>
+              <el-input v-model="form.confirm_admin_password" type="password" placeholder="至少8位，包含字母和数字"></el-input>
             </el-form-item>
           </el-col>
         </el-row>
@@ -116,11 +116,11 @@ export default {
         ],
         admin_password: [
           {required: true, message: '请输入管理员密码', trigger: 'blur'},
-          {min: 6, message: '长度至少6个字符', trigger: 'blur'}
+          {min: 8, message: '长度至少8个字符', trigger: 'blur'}
         ],
         confirm_admin_password: [
           {required: true, message: '请再次输入管理员密码', trigger: 'blur'},
-          {min: 6, message: '长度至少6个字符', trigger: 'blur'}
+          {min: 8, message: '长度至少8个字符', trigger: 'blur'}
         ]
       },
       dbList: [

@@ -13,10 +13,10 @@
         </el-form-item>
         <template v-if="!form.id">
           <el-form-item :label="t('user.password')" prop="password">
-            <el-input v-model="form.password" type="password"></el-input>
+            <el-input v-model="form.password" type="password" :placeholder="t('user.passwordPlaceholder')"></el-input>
           </el-form-item>
           <el-form-item :label="t('user.confirmPassword')" prop="confirm_password">
-            <el-input v-model="form.confirm_password" type="password"></el-input>
+            <el-input v-model="form.confirm_password" type="password" :placeholder="t('user.passwordPlaceholder')"></el-input>
           </el-form-item>
         </template>
         <el-form-item :label="t('user.role')" prop="is_admin">
