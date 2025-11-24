@@ -211,16 +211,9 @@ fi
 
 # 生成 release notes
 cat > /tmp/release_notes.md <<EOF
-## 🔧 Bug Fixes & Performance Improvements
 
-### Bug Fixes
-- Fixed logger formatting issues that caused incorrect log output
-
-### Performance Improvements
-- Added HTTP connection pooling for better resource usage (46% less memory)
-- Optimized database queries to reduce load (99% fewer queries)
-
-**Upgrade:** Simply replace the binary, no configuration changes needed.
+fix: correct task execution time calculation
+chore: fix errcheck linter warnings
 
 EOF
 

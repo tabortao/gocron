@@ -36,6 +36,8 @@ request.interceptors.response.use(
     }
     
     if (code === AUTH_ERROR_CODE) {
+      const userStore = useUserStore()
+      userStore.logout()
       router.push('/user/login')
       return Promise.reject(new Error(message))
     }
@@ -48,7 +50,14 @@ request.interceptors.response.use(
     return data
   },
   error => {
-    ElMessage.error(error.message || '网络错误')
+    // 网络错误或超时
+    if (error.code === 'ECONNABORTED') {
+      ElMessage.error('请求超时，请稍后重试')
+    } else if (!error.response) {
+      ElMessage.error('网络连接失败，请检查网络')
+    } else {
+      ElMessage.error(error.message || '请求失败')
+    }
     return Promise.reject(error)
   }
 )
