@@ -130,6 +130,15 @@ const router = createRouter({
 })
 
 router.beforeEach((to, from, next) => {
+  // 防止登录后访问登录页
+  if (to.path === '/user/login') {
+    const userStore = useUserStore()
+    if (userStore.token) {
+      next({ path: '/' })
+      return
+    }
+  }
+  
   if (to.meta.noLogin) {
     next()
     return

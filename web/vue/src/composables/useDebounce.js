@@ -1,4 +1,4 @@
-import { ref, watch } from 'vue'
+import { ref, watch, onUnmounted } from 'vue'
 
 export function useDebounce(value, delay = 300) {
   const debouncedValue = ref(value.value)
@@ -9,6 +9,11 @@ export function useDebounce(value, delay = 300) {
     timeout = setTimeout(() => {
       debouncedValue.value = newValue
     }, delay)
+  })
+  
+  // 组件卸载时清理
+  onUnmounted(() => {
+    if (timeout) clearTimeout(timeout)
   })
 
   return debouncedValue

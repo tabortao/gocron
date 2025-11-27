@@ -54,7 +54,9 @@ app.config.globalProperties.$filters = {
 
 // 全局错误处理
 app.config.errorHandler = (err, instance, info) => {
-  console.error('[Global Error]', err, info)
+  if (import.meta.env.DEV) {
+    console.error('[Global Error]', err, info)
+  }
   ElMessage.error('系统错误，请刷新页面重试')
 }
 
@@ -67,6 +69,11 @@ app.config.warnHandler = (msg, instance, trace) => {
 // 开发环境性能监控
 if (import.meta.env.DEV) {
   app.config.performance = true
+}
+
+// 生产环境禁用 devtools
+if (import.meta.env.PROD) {
+  app.config.devtools = false
 }
 
 app.mount('#app')

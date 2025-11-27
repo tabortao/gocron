@@ -1,0 +1,21 @@
+# Auto detect text files and perform LF normalization
+* text=auto
+
+# Source code
+*.js text eol=lf
+*.vue text eol=lf
+*.json text eol=lf
+*.css text eol=lf
+*.scss text eol=lf
+*.md text eol=lf
+
+# Binary files
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.ico binary
+*.woff binary
+*.woff2 binary
+*.ttf binary
+*.eot binary

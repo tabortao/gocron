@@ -8,8 +8,10 @@
   "scripts": {
     "dev": "vite",
     "build": "vite build",
+    "build:analyze": "vite build --mode analyze",
     "preview": "vite preview",
     "lint": "eslint . --ext .vue,.js --fix",
+    "lint:check": "eslint . --ext .vue,.js",
     "test": "vitest",
     "test:ui": "vitest --ui"
   },

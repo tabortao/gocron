@@ -40,12 +40,18 @@ export default defineConfig({
     assetsDir: 'static',
     sourcemap: false,
     minify: 'esbuild',
+    cssCodeSplit: true,
+    reportCompressedSize: false,
     rollupOptions: {
       output: {
         manualChunks: {
           'vue-vendor': ['vue', 'vue-router', 'pinia'],
-          'element-plus': ['element-plus']
-        }
+          'element-plus': ['element-plus', '@element-plus/icons-vue'],
+          'utils': ['axios', 'dayjs', 'qs']
+        },
+        chunkFileNames: 'static/js/[name]-[hash].js',
+        entryFileNames: 'static/js/[name]-[hash].js',
+        assetFileNames: 'static/[ext]/[name]-[hash].[ext]'
       }
     },
     chunkSizeWarningLimit: 1000
