@@ -18,7 +18,7 @@ require (
 	github.com/urfave/cli/v2 v2.27.7
 	golang.org/x/net v0.42.0
 	golang.org/x/text v0.27.0
-	google.golang.org/grpc v1.55.0
+	google.golang.org/grpc v1.56.3
 	gopkg.in/ini.v1 v1.67.0
 	gorm.io/driver/mysql v1.5.7
 	gorm.io/driver/postgres v1.5.11
