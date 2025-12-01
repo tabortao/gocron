@@ -1,9 +1,9 @@
 package models
 
 type TaskHost struct {
-	Id     int   `json:"id" gorm:"primaryKey;autoIncrement"`
-	TaskId int   `json:"task_id" gorm:"not null;index"`
-	HostId int16 `json:"host_id" gorm:"type:smallint;not null;index"`
+	Id     int `json:"id" gorm:"primaryKey;autoIncrement"`
+	TaskId int `json:"task_id" gorm:"not null;index"`
+	HostId int `json:"host_id" gorm:"not null;index"`
 }
 
 type TaskHostDetail struct {
@@ -30,7 +30,7 @@ func (th *TaskHost) Add(taskId int, hostIds []int) error {
 	taskHosts := make([]TaskHost, len(hostIds))
 	for i, value := range hostIds {
 		taskHosts[i].TaskId = taskId
-		taskHosts[i].HostId = int16(value)
+		taskHosts[i].HostId = value
 	}
 
 	return Db.Create(&taskHosts).Error
@@ -47,7 +47,7 @@ func (th *TaskHost) GetHostIdsByTaskId(taskId int) ([]TaskHostDetail, error) {
 	return list, err
 }
 
-func (th *TaskHost) GetTaskIdsByHostId(hostId int16) ([]interface{}, error) {
+func (th *TaskHost) GetTaskIdsByHostId(hostId int) ([]interface{}, error) {
 	list := make([]TaskHost, 0)
 	err := Db.Select("task_id").Where("host_id = ?", hostId).Find(&list).Error
 	if err != nil {
@@ -63,7 +63,7 @@ func (th *TaskHost) GetTaskIdsByHostId(hostId int16) ([]interface{}, error) {
 }
 
 // 判断主机id是否有引用
-func (th *TaskHost) HostIdExist(hostId int16) (bool, error) {
+func (th *TaskHost) HostIdExist(hostId int) (bool, error) {
 	var count int64
 	err := Db.Model(&TaskHost{}).Where("host_id = ?", hostId).Count(&count).Error
 	return count > 0, err

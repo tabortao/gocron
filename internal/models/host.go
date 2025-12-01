@@ -6,7 +6,7 @@ import (
 
 // 主机
 type Host struct {
-	Id        int16  `json:"id" gorm:"primaryKey;autoIncrement;type:smallint"`
+	Id        int    `json:"id" gorm:"primaryKey;autoIncrement"`
 	Name      string `json:"name" gorm:"type:varchar(64);not null"`
 	Alias     string `json:"alias" gorm:"type:varchar(32);not null;default:''"`
 	Port      int    `json:"port" gorm:"not null;default:5921"`
@@ -16,7 +16,7 @@ type Host struct {
 }
 
 // 新增
-func (host *Host) Create() (insertId int16, err error) {
+func (host *Host) Create() (insertId int, err error) {
 	result := Db.Create(host)
 	if result.Error == nil {
 		insertId = host.Id
@@ -25,7 +25,7 @@ func (host *Host) Create() (insertId int16, err error) {
 	return insertId, result.Error
 }
 
-func (host *Host) UpdateBean(id int16) (int64, error) {
+func (host *Host) UpdateBean(id int) (int64, error) {
 	result := Db.Model(&Host{}).Where("id = ?", id).
 		Select("name", "alias", "port", "remark").
 		Updates(host)
@@ -52,7 +52,7 @@ func (host *Host) Find(id int) error {
 	return Db.First(host, id).Error
 }
 
-func (host *Host) NameExists(name string, id int16) (bool, error) {
+func (host *Host) NameExists(name string, id int) (bool, error) {
 	var count int64
 	query := Db.Model(&Host{}).Where("name = ?", name)
 	if id != 0 {

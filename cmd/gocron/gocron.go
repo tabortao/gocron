@@ -22,7 +22,7 @@ import (
 )
 
 var (
-	AppVersion           = "1.5.3"
+	AppVersion           = "1.5.5"
 	BuildDate, GitCommit string
 )
 
@@ -61,16 +61,16 @@ func getCommands() []*cli.Command {
 				Usage: "bind host",
 			},
 			&cli.IntFlag{
-				Name:  "port",
+				Name:    "port",
 				Aliases: []string{"p"},
-				Value: DefaultPort,
-				Usage: "bind port",
+				Value:   DefaultPort,
+				Usage:   "bind port",
 			},
 			&cli.StringFlag{
-				Name:  "env",
+				Name:    "env",
 				Aliases: []string{"e"},
-				Value: "prod",
-				Usage: "runtime environment, dev|test|prod",
+				Value:   "prod",
+				Usage:   "runtime environment, dev|test|prod",
 			},
 		},
 	}

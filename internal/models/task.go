@@ -158,7 +158,7 @@ func (task *Task) ActiveList(page, pageSize int) ([]Task, error) {
 }
 
 // 获取某个主机下的所有激活任务
-func (task *Task) ActiveListByHostId(hostId int16) ([]Task, error) {
+func (task *Task) ActiveListByHostId(hostId int) ([]Task, error) {
 	taskHostModel := new(TaskHost)
 	taskIds, err := taskHostModel.GetTaskIdsByHostId(hostId)
 	if err != nil {

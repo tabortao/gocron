@@ -12,7 +12,7 @@ import (
 	"github.com/gocronx-team/gocron/internal/modules/logger"
 	"github.com/gocronx-team/gocron/internal/modules/rpc/client"
 	"github.com/gocronx-team/gocron/internal/modules/rpc/grpcpool"
-	"github.com/gocronx-team/gocron/internal/modules/rpc/proto"
+	rpc "github.com/gocronx-team/gocron/internal/modules/rpc/proto"
 	"github.com/gocronx-team/gocron/internal/modules/utils"
 	"github.com/gocronx-team/gocron/internal/routers/base"
 	"github.com/gocronx-team/gocron/internal/service"
@@ -73,7 +73,7 @@ func Detail(c *gin.Context) {
 }
 
 type HostForm struct {
-	Id     int16  `form:"id" json:"id"`
+	Id     int    `form:"id" json:"id"`
 	Name   string `form:"name" json:"name" binding:"required,max=64"`
 	Alias  string `form:"alias" json:"alias" binding:"required,max=32"`
 	Port   int    `form:"port" json:"port" binding:"required,min=1,max=65535"`
@@ -162,7 +162,7 @@ func Remove(c *gin.Context) {
 		return
 	}
 	taskHostModel := new(models.TaskHost)
-	exist, err := taskHostModel.HostIdExist(int16(id))
+	exist, err := taskHostModel.HostIdExist(id)
 	if err != nil {
 		result = json.CommonFailure(i18n.T(c, "operation_failed"), err)
 		c.String(http.StatusOK, result)

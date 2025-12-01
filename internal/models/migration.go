@@ -46,7 +46,7 @@ func (migration *Migration) Upgrade(oldVersionId int) {
 		return
 	}
 
-	versionIds := []int{110, 122, 130, 140, 150, 151, 152, 153, 154}
+	versionIds := []int{110, 122, 130, 140, 150, 151, 152, 153, 154, 155}
 	upgradeFuncs := []func(*gorm.DB) error{
 		migration.upgradeFor110,
 		migration.upgradeFor122,
@@ -57,6 +57,7 @@ func (migration *Migration) Upgrade(oldVersionId int) {
 		migration.upgradeFor152,
 		migration.upgradeFor153,
 		migration.upgradeFor154,
+		migration.upgradeFor155,
 	}
 
 	startIndex := -1
@@ -106,7 +107,7 @@ func (migration *Migration) upgradeFor110(tx *gorm.DB) error {
 	// 把task对应的host_id写入task_host表
 	type OldTask struct {
 		Id     int
-		HostId int16
+		HostId int
 	}
 	var results []OldTask
 	err = tx.Table(TablePrefix+"task").Select("id", "host_id").Where("host_id > ?", 0).Find(&results).Error
@@ -456,6 +457,21 @@ func (m *Migration) upgradeFor154(tx *gorm.DB) error {
 	}
 
 	logger.Info("已升级到v1.5.4\n")
+
+	return nil
+}
+
+// 升级到v1.5.5版本 - 修改 host.id 和 task_host.host_id 字段类型从 smallint 到 int
+func (m *Migration) upgradeFor155(tx *gorm.DB) error {
+	logger.Info("开始升级到v1.5.5 - 扩展主机ID字段类型")
+
+	// 使用 GORM AutoMigrate 自动调整字段类型
+	// GORM 会根据模型定义自动修改字段类型
+	if err := tx.AutoMigrate(&Host{}, &TaskHost{}); err != nil {
+		return err
+	}
+
+	logger.Info("已升级到v1.5.5\n")
 
 	return nil
 }
