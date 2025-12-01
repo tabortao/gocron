@@ -318,6 +318,30 @@ func Download(c *gin.Context) {
 		return
 	}
 
+	// 安全检查: 白名单验证,防止路径遍历攻击
+	validOS := map[string]bool{
+		"linux":   true,
+		"darwin":  true,
+		"windows": true,
+	}
+	validArch := map[string]bool{
+		"amd64": true,
+		"arm64": true,
+		"386":   true,
+	}
+
+	if !validOS[osName] {
+		logger.Warnf("非法的 os 参数: %s", osName)
+		c.String(http.StatusBadRequest, "invalid os parameter")
+		return
+	}
+
+	if !validArch[arch] {
+		logger.Warnf("非法的 arch 参数: %s", arch)
+		c.String(http.StatusBadRequest, "invalid arch parameter")
+		return
+	}
+
 	// 根据操作系统选择文件扩展名
 	ext := ".tar.gz"
 	if osName == "windows" {
@@ -340,12 +364,25 @@ func Download(c *gin.Context) {
 	execDir := filepath.Dir(execPath)
 
 	// 优先检查本地 gocron-node-package 目录（相对于可执行文件所在目录）
-	localPath := filepath.Join(execDir, "gocron-node-package", filename)
+	packageDir := filepath.Join(execDir, "gocron-node-package")
+	localPath := filepath.Join(packageDir, filename)
+
+	// 安全检查: 确保最终路径在 packageDir 内,防止路径遍历
+	cleanPath := filepath.Clean(localPath)
+	cleanPackageDir := filepath.Clean(packageDir)
+
+	// 使用 filepath.Rel 检查路径关系
+	rel, err := filepath.Rel(cleanPackageDir, cleanPath)
+	if err != nil || len(rel) > 0 && (rel[0] == '.' && len(rel) > 1 && rel[1] == '.') {
+		logger.Warnf("检测到路径遍历攻击尝试: %s (相对路径: %s)", localPath, rel)
+		c.String(http.StatusBadRequest, "invalid file path")
+		return
+	}
 
 	// 检查文件是否存在
-	if _, err := os.Stat(localPath); err == nil {
-		logger.Infof("✓ 本地安装包存在，提供文件: %s", localPath)
-		c.File(localPath)
+	if _, err := os.Stat(cleanPath); err == nil {
+		logger.Infof("✓ 本地安装包存在，提供文件: %s", cleanPath)
+		c.File(cleanPath)
 		return
 	}
 
