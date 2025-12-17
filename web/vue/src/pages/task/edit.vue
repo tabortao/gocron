@@ -149,8 +149,12 @@
                 type="textarea"
                 :rows="5"
                 :placeholder="commandPlaceholder"
-                v-model="form.command">
+                v-model="form.command"
+                @blur="validateCommand">
               </el-input>
+              <div v-if="commandWarning" class="command-warning" style="color: #E6A23C; font-size: 12px; margin-top: 4px;">
+                ⚠️ {{ commandWarning }}
+              </div>
             </el-form-item>
           </el-col>
         </el-row>
@@ -363,6 +367,13 @@ export default {
         return this.t('message.pleaseEnterUrl')
       }
       return this.t('message.pleaseEnterShellCommand')
+    },
+    commandWarning () {
+      if (!this.form.command) return ''
+      if (this.form.command.includes('&quot;')) {
+        return this.t('message.htmlEntityDetected') || 'HTML 实体编码已检测到，将自动转换为正确的引号'
+      }
+      return ''
     }
   },
   watch: {
@@ -510,6 +521,17 @@ export default {
       }
       callback()
     },
+    validateCommand () {
+      if (this.form.command && this.form.command.includes('&quot;')) {
+        // 自动修复 HTML 实体编码
+        this.form.command = this.form.command
+          .replace(/&quot;/g, '"')
+          .replace(/&apos;/g, "'")
+          .replace(/&lt;/g, '<')
+          .replace(/&gt;/g, '>')
+          .replace(/&amp;/g, '&')
+      }
+    },
     resetForm () {
       if (this.$refs.form) {
         this.$refs.form.clearValidate()
@@ -611,6 +633,16 @@ export default {
       })
     },
     save () {
+      // 清理命令中的 HTML 实体编码
+      if (this.form.command) {
+        this.form.command = this.form.command
+          .replace(/&quot;/g, '"')
+          .replace(/&apos;/g, "'")
+          .replace(/&lt;/g, '<')
+          .replace(/&gt;/g, '>')
+          .replace(/&amp;/g, '&')
+      }
+      
       if (Number(this.form.protocol) === 2) {
         this.form.host_id = this.form.host_ids.join(',')
       } else {

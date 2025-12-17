@@ -36,7 +36,9 @@ func (s Server) Run(ctx context.Context, req *pb.TaskRequest) (*pb.TaskResponse,
 			log.Error(err)
 		}
 	}()
+
 	log.Infof("execute cmd start: [id: %d cmd: %s]", req.Id, req.Command)
+
 	output, err := utils.ExecShell(ctx, req.Command)
 	resp := new(pb.TaskResponse)
 	resp.Output = output

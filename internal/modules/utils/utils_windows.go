@@ -20,12 +20,17 @@ type Result struct {
 
 // 执行shell命令，可设置执行超时时间
 func ExecShell(ctx context.Context, command string) (string, error) {
-	cmd := exec.Command("cmd", "/C", command)
-	// 隐藏cmd窗口
+	// 清理可能存在的 HTML 实体编码,防止 &quot; 等导致命令执行失败
+	// 例如: del &quot;C:\file.txt&quot; -> del "C:\file.txt"
+	command = CleanHTMLEntities(command)
+
+	// 使用 cmd.exe，通过 CmdLine 直接传递完整命令行，绕过 Go 的参数转义
+	cmd := exec.Command("cmd")
 	cmd.SysProcAttr = &syscall.SysProcAttr{
 		HideWindow: true,
+		CmdLine:    `cmd /c "` + command + `"`,
 	}
-	// 设置工作目录为用户家目录，避免目录不存在错误
+	// 设置工作目录为用户家目录
 	if homeDir, err := os.UserHomeDir(); err == nil {
 		cmd.Dir = homeDir
 	} else {
