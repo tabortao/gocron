@@ -1,19 +1,20 @@
 import { createI18n } from 'vue-i18n'
 import zhCN from './zh-CN'
 import enUS from './en-US'
+import { availableLanguages } from '@/const/index'
 
 const getDefaultLocale = () => {
   const savedLocale = localStorage.getItem('locale')
-  return savedLocale || 'zh-CN'
+  return savedLocale || availableLanguages.zhCN.value
 }
 
 const i18n = createI18n({
   legacy: false,
   locale: getDefaultLocale(),
-  fallbackLocale: 'zh-CN',
+  fallbackLocale: availableLanguages.zhCN.value,
   messages: {
-    'zh-CN': zhCN,
-    'en-US': enUS
+    [availableLanguages.zhCN.value]: zhCN,
+    [availableLanguages.enUS.value]: enUS
   }
 })
 
