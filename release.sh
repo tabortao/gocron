@@ -110,15 +110,10 @@ cd ../..
 echo "✓ Frontend built"
 echo ""
 
-# 3. 生成静态资源
-echo "3. Generating static assets..."
-go install github.com/rakyll/statik@latest
-go generate ./...
-echo "✓ Static assets generated"
-echo ""
 
-# 4. 构建所有平台的包
-echo "4. Building packages for all platforms..."
+
+# 3. 构建所有平台的包
+echo "3. Building packages for all platforms..."
 MISSING_PACKAGES=false
 
 # 检查 Linux/macOS gocron 包
@@ -150,8 +145,8 @@ fi
 echo "✓ All packages built"
 echo ""
 
-# 5. 显示构建结果
-echo "5. Build summary:"
+# 4. 显示构建结果
+echo "4. Build summary:"
 echo ""
 echo "gocron packages:"
 ls -lh gocron-package/
@@ -160,8 +155,8 @@ echo "gocron-node packages:"
 ls -lh gocron-node-package/
 echo ""
 
-# 6. 验证包内容
-echo "6. Verifying package contents..."
+# 5. 验证包内容
+echo "5. Verifying package contents..."
 SAMPLE_PACKAGE=$(ls gocron-package/*.tar.gz 2>/dev/null | head -1)
 if [ -n "$SAMPLE_PACKAGE" ]; then
     echo "Checking: $SAMPLE_PACKAGE"
@@ -177,8 +172,8 @@ else
 fi
 echo ""
 
-# 7. 创建 Git tag
-echo "7. Creating Git tag..."
+# 6. 创建 Git tag
+echo "6. Creating Git tag..."
 if git rev-parse "$VERSION" >/dev/null 2>&1; then
     echo "Tag $VERSION already exists"
     read -p "Delete and recreate? (y/N): " -n 1 -r
@@ -200,8 +195,8 @@ else
 fi
 echo ""
 
-# 8. 创建 GitHub Release
-echo "8. Creating GitHub Release..."
+# 7. 创建 GitHub Release
+echo "7. Creating GitHub Release..."
 echo ""
 
 PRERELEASE_FLAG=""
