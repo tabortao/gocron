@@ -2,7 +2,7 @@ package routers
 
 import (
 	"io"
-	"log"
+	"io/fs"
 	"net/http"
 	"strconv"
 	"strings"
@@ -21,9 +21,7 @@ import (
 	"github.com/gocronx-team/gocron/internal/routers/task"
 	"github.com/gocronx-team/gocron/internal/routers/tasklog"
 	"github.com/gocronx-team/gocron/internal/routers/user"
-	"github.com/rakyll/statik/fs"
-
-	_ "github.com/gocronx-team/gocron/internal/statik"
+	gocronembed "github.com/gocronx-team/gocron"
 )
 
 const (
@@ -31,13 +29,13 @@ const (
 	staticDir = "public"
 )
 
-var statikFS http.FileSystem
+var staticFS fs.FS
 
 func init() {
 	var err error
-	statikFS, err = fs.New()
+	staticFS, err = gocronembed.StaticFS()
 	if err != nil {
-		log.Fatal(err)
+		logger.Fatal("初始化静态文件系统失败", err)
 	}
 }
 
@@ -152,7 +150,7 @@ func Register(r *gin.Engine) {
 
 	// 首页路由（根路径）
 	r.GET("/", func(c *gin.Context) {
-		file, err := statikFS.Open("/index.html")
+		file, err := staticFS.Open("index.html")
 		if err != nil {
 			logger.Errorf("读取首页文件失败: %s", err)
 			c.Status(http.StatusInternalServerError)
@@ -169,9 +167,10 @@ func Register(r *gin.Engine) {
 
 		// 移除 /public 前缀（如果存在）
 		filepath = strings.TrimPrefix(filepath, "/public")
+		filepath = strings.TrimPrefix(filepath, "/")
 
-		// 尝试从 statikFS 读取文件
-		file, err := statikFS.Open(filepath)
+		// 尝试从 staticFS 读取文件
+		file, err := staticFS.Open(filepath)
 		if err == nil {
 			defer file.Close()
 
