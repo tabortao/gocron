@@ -16,7 +16,7 @@ require (
 	github.com/urfave/cli/v2 v2.27.7
 	golang.org/x/crypto v0.45.0
 	golang.org/x/text v0.31.0
-	google.golang.org/grpc v1.64.0
+	google.golang.org/grpc v1.64.1
 	google.golang.org/protobuf v1.36.9
 	gopkg.in/ini.v1 v1.67.0
 	gorm.io/driver/mysql v1.5.7
