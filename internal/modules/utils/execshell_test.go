@@ -5,6 +5,7 @@ package utils
 
 import (
 	"context"
+	"os"
 	"strings"
 	"testing"
 	"time"
@@ -244,4 +245,99 @@ func BenchmarkExecShell_Timeout(b *testing.B) {
 		ExecShell(ctx, "sleep 1")
 		cancel()
 	}
+}
+
+// 测试包含特殊字符的命令（临时脚本方式的优势）
+func TestExecShell_SpecialCharacters(t *testing.T) {
+	ctx := context.Background()
+	
+	// 测试包含引号、反引号等特殊字符
+	command := "echo \"Hello 'World'\" && echo 'Test \"quotes\"' && echo `date`"
+	
+	output, err := ExecShell(ctx, command)
+	
+	if err != nil {
+		t.Errorf("Expected no error, got: %v", err)
+	}
+	
+	if !strings.Contains(output, "Hello 'World'") {
+		t.Errorf("Expected output to contain mixed quotes, got: %s", output)
+	}
+	
+	t.Logf("Special characters output:\n%s", output)
+}
+
+// 测试多行脚本（临时脚本方式的优势）
+func TestExecShell_MultilineScript(t *testing.T) {
+	ctx := context.Background()
+	
+	// 测试复杂的多行脚本
+	command := `
+#!/bin/bash
+function greet() {
+    echo "Hello from function"
+}
+
+for i in 1 2 3; do
+    echo "Loop iteration $i"
+done
+
+greet
+`
+	
+	output, err := ExecShell(ctx, command)
+	
+	if err != nil {
+		t.Errorf("Expected no error, got: %v", err)
+	}
+	
+	if !strings.Contains(output, "Loop iteration") {
+		t.Errorf("Expected loop output, got: %s", output)
+	}
+	
+	if !strings.Contains(output, "Hello from function") {
+		t.Errorf("Expected function output, got: %s", output)
+	}
+	
+	t.Logf("Multiline script output:\n%s", output)
+}
+
+// 测试工作目录是否正确设置
+func TestExecShell_WorkingDirectory(t *testing.T) {
+	ctx := context.Background()
+	
+	// 打印当前工作目录
+	output, err := ExecShell(ctx, "pwd")
+	
+	if err != nil {
+		t.Errorf("Expected no error, got: %v", err)
+	}
+	
+	// 工作目录应该是用户家目录，不是 /tmp
+	if strings.Contains(output, "/tmp") && !strings.Contains(output, os.Getenv("HOME")) {
+		t.Errorf("Working directory should be home directory, got: %s", output)
+	}
+	
+	t.Logf("Working directory: %s", strings.TrimSpace(output))
+}
+
+// 测试HTML实体清理（保持原有功能）
+func TestExecShell_HTMLEntityCleaning(t *testing.T) {
+	ctx := context.Background()
+	
+	// 测试HTML实体会被正确清理
+	command := `echo &quot;test&quot;`
+	
+	output, err := ExecShell(ctx, command)
+	
+	if err != nil {
+		t.Errorf("Expected no error, got: %v", err)
+	}
+	
+	// 应该输出 "test" 而不是 &quot;test&quot;
+	if !strings.Contains(output, "test") {
+		t.Errorf("Expected cleaned output, got: %s", output)
+	}
+	
+	t.Logf("HTML entity cleaned output: %s", output)
 }

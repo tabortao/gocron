@@ -38,7 +38,7 @@ func TestExecShellWithQuotes(t *testing.T) {
 		{
 			name:    "Command with HTML entity quotes",
 			command: `copy &quot;C:\My Documents\report.docx&quot; &quot;D:\Backup&quot;`,
-			wantErr: true, // This should fail because &quot; is not valid in cmd
+			wantErr: false, // HTML实体会被CleanHTMLEntities清理，所以应该成功
 		},
 	}
 
