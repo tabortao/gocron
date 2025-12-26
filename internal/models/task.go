@@ -97,9 +97,38 @@ type Task struct {
 
 // 新增
 func (task *Task) Create() (insertId int, err error) {
-	result := Db.Create(task)
+	// 使用 Session 配置 FullSaveAssociations 为 false，并使用 Create 方法
+	// 通过设置 gorm 标签中没有 default 或使用指针类型来处理零值
+	// 但这里我们使用 map 来明确指定所有字段值
+	data := map[string]interface{}{
+		"name":                task.Name,
+		"level":               task.Level,
+		"dependency_task_id":  task.DependencyTaskId,
+		"dependency_status":   task.DependencyStatus,
+		"spec":                task.Spec,
+		"protocol":            task.Protocol,
+		"command":             task.Command,
+		"http_method":         task.HttpMethod,
+		"timeout":             task.Timeout,
+		"multi":               task.Multi,
+		"retry_times":         task.RetryTimes,
+		"retry_interval":      task.RetryInterval,
+		"notify_status":       task.NotifyStatus,
+		"notify_type":         task.NotifyType,
+		"notify_receiver_id":  task.NotifyReceiverId,
+		"notify_keyword":      task.NotifyKeyword,
+		"tag":                 task.Tag,
+		"remark":              task.Remark,
+		"status":              task.Status,
+	}
+	
+	result := Db.Model(&Task{}).Create(data)
 	if result.Error == nil {
-		insertId = task.Id
+		// 从 data 中获取自动生成的 ID
+		if id, ok := data["id"].(int); ok {
+			insertId = id
+			task.Id = insertId
+		}
 	}
 
 	return insertId, result.Error
@@ -111,7 +140,25 @@ func (task *Task) UpdateBean(id int) (int64, error) {
 			"retry_times", "retry_interval", "remark", "notify_status",
 			"notify_type", "notify_receiver_id", "dependency_task_id",
 			"dependency_status", "tag", "http_method", "notify_keyword").
-		Updates(task)
+		UpdateColumns(map[string]interface{}{
+			"name":                task.Name,
+			"spec":                task.Spec,
+			"protocol":            task.Protocol,
+			"command":             task.Command,
+			"timeout":             task.Timeout,
+			"multi":               task.Multi,
+			"retry_times":         task.RetryTimes,
+			"retry_interval":      task.RetryInterval,
+			"remark":              task.Remark,
+			"notify_status":       task.NotifyStatus,
+			"notify_type":         task.NotifyType,
+			"notify_receiver_id":  task.NotifyReceiverId,
+			"dependency_task_id":  task.DependencyTaskId,
+			"dependency_status":   task.DependencyStatus,
+			"tag":                 task.Tag,
+			"http_method":         task.HttpMethod,
+			"notify_keyword":      task.NotifyKeyword,
+		})
 	return result.RowsAffected, result.Error
 }
 

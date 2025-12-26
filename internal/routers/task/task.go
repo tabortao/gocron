@@ -18,7 +18,7 @@ import (
 type TaskForm struct {
 	Id               int                         `form:"id" json:"id"`
 	Level            models.TaskLevel            `form:"level" json:"level" binding:"required,oneof=1 2"`
-	DependencyStatus models.TaskDependencyStatus `form:"dependency_status" json:"dependency_status"`
+	DependencyStatus models.TaskDependencyStatus `form:"dependency_status" json:"dependency_status" binding:"oneof=1 2"`
 	DependencyTaskId string                      `form:"dependency_task_id" json:"dependency_task_id"`
 	Name             string                      `form:"name" json:"name" binding:"required,max=32"`
 	Spec             string                      `form:"spec" json:"spec"`
@@ -26,14 +26,14 @@ type TaskForm struct {
 	Command          string                      `form:"command" json:"command" binding:"required,max=256"`
 	HttpMethod       models.TaskHTTPMethod       `form:"http_method" json:"http_method" binding:"oneof=1 2"`
 	Timeout          int                         `form:"timeout" json:"timeout" binding:"min=0,max=86400"`
-	Multi            int8                        `form:"multi" json:"multi" binding:"oneof=1 2"`
+	Multi            int8                        `form:"multi" json:"multi" binding:"oneof=0 1"`
 	RetryTimes       int8                        `form:"retry_times" json:"retry_times"`
 	RetryInterval    int16                       `form:"retry_interval" json:"retry_interval"`
 	HostId           string                      `form:"host_id" json:"host_id"`
 	Tag              string                      `form:"tag" json:"tag"`
 	Remark           string                      `form:"remark" json:"remark"`
-	NotifyStatus     int8                        `form:"notify_status" json:"notify_status" binding:"required,oneof=1 2 3 4"`
-	NotifyType       int8                        `form:"notify_type" json:"notify_type" binding:"required,oneof=1 2 3 4"`
+	NotifyStatus     int8                        `form:"notify_status" json:"notify_status" binding:"oneof=0 1 2 3"`
+	NotifyType       int8                        `form:"notify_type" json:"notify_type" binding:"oneof=0 1 2"`
 	NotifyReceiverId string                      `form:"notify_receiver_id" json:"notify_receiver_id"`
 	NotifyKeyword    string                      `form:"notify_keyword" json:"notify_keyword"`
 }
@@ -81,6 +81,7 @@ func Detail(c *gin.Context) {
 func Store(c *gin.Context) {
 	var form TaskForm
 	if err := c.ShouldBind(&form); err != nil {
+		logger.Errorf("[Task Store] Form validation failed: %v", err)
 		json := utils.JsonResponse{}
 		result := json.CommonFailure(i18n.T(c, "form_validation_failed"))
 		c.String(http.StatusOK, result)
@@ -123,18 +124,15 @@ func Store(c *gin.Context) {
 	taskModel.Multi = form.Multi
 	taskModel.RetryTimes = form.RetryTimes
 	taskModel.RetryInterval = form.RetryInterval
-	if taskModel.Multi != 1 {
-		taskModel.Multi = 0
-	}
-	taskModel.NotifyStatus = form.NotifyStatus - 1
-	taskModel.NotifyType = form.NotifyType - 1
+	taskModel.NotifyStatus = form.NotifyStatus
+	taskModel.NotifyType = form.NotifyType
 	taskModel.NotifyReceiverId = form.NotifyReceiverId
 	taskModel.NotifyKeyword = form.NotifyKeyword
 	taskModel.Spec = form.Spec
 	taskModel.Level = form.Level
 	taskModel.DependencyStatus = form.DependencyStatus
 	taskModel.DependencyTaskId = strings.TrimSpace(form.DependencyTaskId)
-	if taskModel.NotifyStatus > 0 && taskModel.NotifyType != 3 && taskModel.NotifyReceiverId == "" {
+	if taskModel.NotifyStatus > 0 && taskModel.NotifyType != 2 && taskModel.NotifyReceiverId == "" {
 		result := json.CommonFailure(i18n.T(c, "select_at_least_one_receiver"))
 		c.String(http.StatusOK, result)
 		return
@@ -198,9 +196,21 @@ func Store(c *gin.Context) {
 
 	if id == 0 {
 		taskModel.Status = models.Running
+		logger.Infof("[Task Create] Before Create - Multi: %d", taskModel.Multi)
 		id, err = taskModel.Create()
+		if err == nil {
+			// 立即读取验证
+			verifyTask, _ := taskModel.Detail(id)
+			logger.Infof("[Task Create] After Create - ID: %d, Multi in DB: %d", id, verifyTask.Multi)
+		}
 	} else {
+		logger.Infof("[Task Update] Before Update - ID: %d, Multi: %d", id, taskModel.Multi)
 		_, err = taskModel.UpdateBean(id)
+		if err == nil {
+			// 立即读取验证
+			verifyTask, _ := taskModel.Detail(id)
+			logger.Infof("[Task Update] After Update - ID: %d, Multi in DB: %d", id, verifyTask.Multi)
+		}
 	}
 
 	if err != nil {

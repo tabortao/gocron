@@ -46,7 +46,7 @@ func (migration *Migration) Upgrade(oldVersionId int) {
 		return
 	}
 
-	versionIds := []int{110, 122, 130, 140, 150, 151, 152, 153, 154, 155}
+	versionIds := []int{110, 122, 130, 140, 150, 151, 152, 153, 154, 155, 156}
 	upgradeFuncs := []func(*gorm.DB) error{
 		migration.upgradeFor110,
 		migration.upgradeFor122,
@@ -58,6 +58,7 @@ func (migration *Migration) Upgrade(oldVersionId int) {
 		migration.upgradeFor153,
 		migration.upgradeFor154,
 		migration.upgradeFor155,
+		migration.upgradeFor156,
 	}
 
 	startIndex := -1
@@ -500,6 +501,30 @@ func (m *Migration) upgradeFor155(tx *gorm.DB) error {
 	}
 
 	logger.Info("已升级到v1.5.5\n")
+
+	return nil
+}
+
+// 升级到v1.5.6版本 - 更新字段默认值以支持基于0的索引
+func (m *Migration) upgradeFor156(tx *gorm.DB) error {
+	logger.Info("开始升级到v1.5.6 - 更新字段默认值")
+
+	// 更新 notify_status 默认值为 1 的旧数据为 0（禁用通知）
+	// 只更新 notify_type=0 且 notify_receiver_id 为空的记录，这些是真正的默认值
+	result := tx.Exec(`
+		UPDATE ` + TablePrefix + `task 
+		SET notify_status = 0 
+		WHERE notify_status = 1 
+		AND notify_type = 0 
+		AND (notify_receiver_id = '' OR notify_receiver_id IS NULL)
+	`)
+	if result.Error != nil {
+		logger.Warn("更新 notify_status 默认值失败", result.Error)
+	} else if result.RowsAffected > 0 {
+		logger.Infof("✓ 已更新 %d 条任务的 notify_status 默认值", result.RowsAffected)
+	}
+
+	logger.Info("已升级到v1.5.6\n")
 
 	return nil
 }
