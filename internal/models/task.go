@@ -75,7 +75,7 @@ type Task struct {
 	DependencyStatus TaskDependencyStatus `json:"dependency_status" gorm:"type:tinyint;not null;default:1"`
 	Spec             string               `json:"spec" gorm:"type:varchar(64);not null"`
 	Protocol         TaskProtocol         `json:"protocol" gorm:"type:tinyint;not null;index"`
-	Command          string               `json:"command" gorm:"type:varchar(256);not null"`
+	Command          string               `json:"command" gorm:"type:text;not null"`
 	HttpMethod       TaskHTTPMethod       `json:"http_method" gorm:"type:tinyint;not null;default:1"`
 	Timeout          int                  `json:"timeout" gorm:"type:mediumint;not null;default:0"`
 	Multi            int8                 `json:"multi" gorm:"type:tinyint;not null;default:1"`

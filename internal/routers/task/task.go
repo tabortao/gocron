@@ -23,7 +23,7 @@ type TaskForm struct {
 	Name             string                      `form:"name" json:"name" binding:"required,max=32"`
 	Spec             string                      `form:"spec" json:"spec"`
 	Protocol         models.TaskProtocol         `form:"protocol" json:"protocol" binding:"oneof=1 2"`
-	Command          string                      `form:"command" json:"command" binding:"required,max=256"`
+	Command          string                      `form:"command" json:"command" binding:"required,max=65535"`
 	HttpMethod       models.TaskHTTPMethod       `form:"http_method" json:"http_method" binding:"oneof=1 2"`
 	Timeout          int                         `form:"timeout" json:"timeout" binding:"min=0,max=86400"`
 	Multi            int8                        `form:"multi" json:"multi" binding:"oneof=0 1"`

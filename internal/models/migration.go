@@ -46,7 +46,7 @@ func (migration *Migration) Upgrade(oldVersionId int) {
 		return
 	}
 
-	versionIds := []int{110, 122, 130, 140, 150, 151, 152, 153, 154, 155, 156}
+	versionIds := []int{110, 122, 130, 140, 150, 151, 152, 153, 154, 155, 156, 157}
 	upgradeFuncs := []func(*gorm.DB) error{
 		migration.upgradeFor110,
 		migration.upgradeFor122,
@@ -59,6 +59,7 @@ func (migration *Migration) Upgrade(oldVersionId int) {
 		migration.upgradeFor154,
 		migration.upgradeFor155,
 		migration.upgradeFor156,
+		migration.upgradeFor157,
 	}
 
 	startIndex := -1
@@ -525,6 +526,22 @@ func (m *Migration) upgradeFor156(tx *gorm.DB) error {
 	}
 
 	logger.Info("已升级到v1.5.6\n")
+
+	return nil
+}
+
+// 升级到v1.5.7版本 - 扩展命令字段长度到TEXT类型
+func (m *Migration) upgradeFor157(tx *gorm.DB) error {
+	logger.Info("开始升级到v1.5.7 - 扩展命令字段长度")
+
+	// 扩展 command 字段从 varchar 到 text
+	if err := tx.Exec(`ALTER TABLE ` + TablePrefix + `task MODIFY COLUMN command text NOT NULL`).Error; err != nil {
+		logger.Warn("扩展 command 字段类型失败", err)
+	} else {
+		logger.Info("✓ command 字段已扩展为 TEXT 类型（最多 65535 字符）")
+	}
+
+	logger.Info("已升级到v1.5.7\n")
 
 	return nil
 }
