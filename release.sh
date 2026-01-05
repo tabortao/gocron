@@ -107,7 +107,7 @@ cd web/vue
 yarn install --frozen-lockfile
 yarn run build
 cd ../..
-echo "✓ Frontend built"
+echo "✓ Frontend built (output: web/vue/dist/)"
 echo ""
 
 

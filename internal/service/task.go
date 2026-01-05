@@ -518,7 +518,7 @@ func SendNotification(taskModel models.Task, taskResult TaskResult) {
 		// 执行失败才发送通知
 		return
 	}
-	if taskModel.NotifyType != 3 && taskModel.NotifyReceiverId == "" {
+	if taskModel.NotifyType != 2 && taskModel.NotifyReceiverId == "" {
 		return
 	}
 	if taskResult.Err != nil {

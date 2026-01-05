@@ -41,15 +41,15 @@ func run() {
 		msg["content"] = fmt.Sprintf("============\n============\n============\n任务名称: %s\n状态: %s\n输出:\n %s\n", msg["name"], msg["status"], msg["output"])
 		logger.Debugf("%+v", msg)
 		switch taskType.(int8) {
-		case 1:
+		case 0:
 			// 邮件
 			mail := Mail{}
 			go mail.Send(msg)
-		case 2:
+		case 1:
 			// Slack
 			slack := Slack{}
 			go slack.Send(msg)
-		case 3:
+		case 2:
 			// WebHook
 			webHook := WebHook{}
 			go webHook.Send(msg)
