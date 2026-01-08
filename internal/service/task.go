@@ -102,6 +102,13 @@ func (i *Instance) done(key int) {
 	i.m.Delete(key)
 }
 
+// tryAdd 原子地尝试添加任务实例
+// 返回 true 表示成功添加（任务未在运行），false 表示任务已在运行
+func (i *Instance) tryAdd(key int) bool {
+	_, loaded := i.m.LoadOrStore(key, struct{}{})
+	return !loaded
+}
+
 type Task struct{}
 
 type TaskResult struct {
@@ -403,8 +410,9 @@ func createJob(taskModel models.Task) cron.FuncJob {
 			return
 		}
 
+		// Multi=0 时，确保清理实例标记
+		// 注意：beforeExecJob 已经添加了实例标记，这里只需要清理
 		if taskModel.Multi == 0 {
-			runInstance.add(taskModel.Id)
 			defer runInstance.done(taskModel.Id)
 		}
 
@@ -434,14 +442,22 @@ func createHandler(taskModel models.Task) Handler {
 
 // 任务前置操作
 func beforeExecJob(taskModel models.Task) (taskLogId int64) {
-	if taskModel.Multi == 0 && runInstance.has(taskModel.Id) {
-		logger.Infof("任务已在运行中，取消本次执行#ID-%d", taskModel.Id)
-		taskLogId, _ = createTaskLog(taskModel, models.Cancel)
-		return
+	// Multi=0 时，原子地检查并添加实例标记
+	if taskModel.Multi == 0 {
+		if !runInstance.tryAdd(taskModel.Id) {
+			logger.Infof("任务已在运行中，取消本次执行#ID-%d", taskModel.Id)
+			taskLogId, _ = createTaskLog(taskModel, models.Cancel)
+			return
+		}
 	}
+	
 	taskLogId, err := createTaskLog(taskModel, models.Running)
 	if err != nil {
 		logger.Error("任务开始执行#写入任务日志失败-", err)
+		// 如果创建日志失败，需要回滚实例标记
+		if taskModel.Multi == 0 {
+			runInstance.done(taskModel.Id)
+		}
 		return
 	}
 	logger.Infof("任务前置操作完成#ID-%d#taskLogId-%d", taskModel.Id, taskLogId)
