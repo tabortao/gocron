@@ -43,7 +43,6 @@ docker-compose up -d
 
 # 3. 访问 Web 界面
 # http://localhost:5920
-# 默认账号：admin / admin123
 ```
 
 更多部署方式（二进制部署、开发环境）请查看 [安装部署指南](https://gocron-docs.pages.dev/zh/guide/quick-start)。

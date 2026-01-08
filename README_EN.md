@@ -43,7 +43,6 @@ docker-compose up -d
 
 # 3. Access Web Interface
 # http://localhost:5920
-# Default credentials: admin / admin123
 ```
 
 For more deployment methods (Binary, Development), please refer to the [Installation Guide](https://gocron-docs.pages.dev/en/guide/quick-start).
