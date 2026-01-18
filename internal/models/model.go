@@ -205,7 +205,7 @@ func ensureSqliteDir(dbPath string) {
 	// 清理并规范化路径
 	dbPath = filepath.Clean(dbPath)
 	dir := filepath.Dir(dbPath)
-	
+
 	if dir != "" && dir != "." {
 		// 验证路径不是绝对路径时，确保不包含父目录引用
 		if !filepath.IsAbs(dbPath) && strings.Contains(dbPath, "..") {

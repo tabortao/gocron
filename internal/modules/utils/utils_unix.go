@@ -17,8 +17,8 @@ import (
 )
 
 type Result struct {
-    output string
-    err    error
+	output string
+	err    error
 }
 
 // 执行shell命令，可设置执行超时时间

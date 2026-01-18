@@ -207,8 +207,14 @@ fi
 # 生成 release notes
 cat > /tmp/release_notes.md <<EOF
 
-feat: support for multiple webhook URLs #36
-fix: resolve Windows command execution failure with quoted paths and HTML entities #40
+fix:token timeout #73
+fix:resolve race condition in single-instance task execution #66
+fix: some fields may change unexpectedly on the first edit after task creation #63
+fix:incorrect options in the task log status filter dropdown menu #57
+feat:optimize shell execution by running commands via a temporary script #60
+feat(web): adapt to i18n changes #45
+refactor: reduce dependencies and enhance security
+
 
 EOF
 

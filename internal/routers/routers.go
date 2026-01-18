@@ -9,6 +9,7 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
+	gocronembed "github.com/gocronx-team/gocron"
 	"github.com/gocronx-team/gocron/internal/modules/app"
 	"github.com/gocronx-team/gocron/internal/modules/i18n"
 	"github.com/gocronx-team/gocron/internal/modules/logger"
@@ -21,7 +22,6 @@ import (
 	"github.com/gocronx-team/gocron/internal/routers/task"
 	"github.com/gocronx-team/gocron/internal/routers/tasklog"
 	"github.com/gocronx-team/gocron/internal/routers/user"
-	gocronembed "github.com/gocronx-team/gocron"
 )
 
 const (

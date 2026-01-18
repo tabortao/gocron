@@ -19,7 +19,7 @@ import (
 	"google.golang.org/grpc/keepalive"
 )
 
-type Server struct{
+type Server struct {
 	pb.UnimplementedTaskServer
 	taskContexts sync.Map // 存储正在运行的任务上下文
 	taskOutputs  sync.Map // 存储任务输出
@@ -62,7 +62,7 @@ func (s *Server) Run(ctx context.Context, req *pb.TaskRequest) (*pb.TaskResponse
 	timeout := time.Duration(req.Timeout) * time.Second
 	taskCtx, cancel := context.WithTimeout(context.Background(), timeout)
 	defer cancel()
-	
+
 	// 存储任务上下文和输出 buffer
 	outputBuf := &bytes.Buffer{}
 	stopChan := make(chan struct{})
@@ -77,7 +77,7 @@ func (s *Server) Run(ctx context.Context, req *pb.TaskRequest) (*pb.TaskResponse
 			s.taskOutputs.Delete(req.Id)
 		})
 	}()
-	
+
 	// 监听客户端取消或停止信号
 	wasStopped := false
 	go func() {
@@ -94,7 +94,7 @@ func (s *Server) Run(ctx context.Context, req *pb.TaskRequest) (*pb.TaskResponse
 	// 执行命令
 	output, execErr := utils.ExecShell(taskCtx, cleanedCmd)
 	outputBuf.WriteString(output)
-	
+
 	resp := new(pb.TaskResponse)
 	resp.Output = output
 	if execErr != nil {

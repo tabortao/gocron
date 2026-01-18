@@ -373,7 +373,7 @@ func updateTaskLog(taskLogId int64, taskResult TaskResult) (int64, error) {
 	taskLogModel := new(models.TaskLog)
 	var status models.Status
 	result := taskResult.Result
-	
+
 	// 根据错误类型设置状态
 	if taskResult.Err != nil {
 		// 检查是否是手动停止
@@ -385,7 +385,7 @@ func updateTaskLog(taskLogId int64, taskResult TaskResult) (int64, error) {
 	} else {
 		status = models.Finish
 	}
-	
+
 	return taskLogModel.Update(taskLogId, models.CommonMap{
 		"retry_times": taskResult.RetryTimes,
 		"status":      status,
@@ -450,7 +450,7 @@ func beforeExecJob(taskModel models.Task) (taskLogId int64) {
 			return
 		}
 	}
-	
+
 	taskLogId, err := createTaskLog(taskModel, models.Running)
 	if err != nil {
 		logger.Error("任务开始执行#写入任务日志失败-", err)
@@ -524,16 +524,18 @@ func SendNotification(taskModel models.Task, taskResult TaskResult) {
 	if taskModel.NotifyStatus == 0 {
 		return
 	}
+	if taskModel.NotifyStatus == 1 && taskResult.Err == nil {
+		// 执行失败才发送通知
+		return
+	}
 	if taskModel.NotifyStatus == 3 {
 		// 关键字匹配通知
 		if !strings.Contains(taskResult.Result, taskModel.NotifyKeyword) {
 			return
 		}
 	}
-	if taskModel.NotifyStatus == 1 && taskResult.Err == nil {
-		// 执行失败才发送通知
-		return
-	}
+	// NotifyType: 0=邮件, 1=Slack, 2=WebHook
+	// WebHook(type=2)不需要receiver_id，其他类型需要
 	if taskModel.NotifyType != 2 && taskModel.NotifyReceiverId == "" {
 		return
 	}

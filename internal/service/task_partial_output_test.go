@@ -19,12 +19,12 @@ func (m *mockRPCHandlerWithPartialOutput) Run(taskModel models.Task, taskUniqueI
 	switch m.errorType {
 	case "timeout":
 		// 模拟超时情况，返回部分输出和超时错误
-		return m.partialOutput + "\n\n[执行超时，强制结束]", 
-			   fmt.Errorf("执行超时, 强制结束")
+		return m.partialOutput + "\n\n[执行超时，强制结束]",
+			fmt.Errorf("执行超时, 强制结束")
 	case "manual_stop":
 		// 模拟手动停止情况，返回部分输出和手动停止错误
-		return m.partialOutput + "\n\n[手动停止]", 
-			   fmt.Errorf("手动停止")
+		return m.partialOutput + "\n\n[手动停止]",
+			fmt.Errorf("手动停止")
 	case "normal_error":
 		// 模拟普通错误，返回完整输出
 		return m.partialOutput, fmt.Errorf("command failed")
@@ -41,15 +41,15 @@ func TestExecJobWithPartialOutput_Timeout(t *testing.T) {
 		partialOutput: "Task started\nProcessing data...\nPartial result: 50%",
 		errorType:     "timeout",
 	}
-	
+
 	task := models.Task{
-		Id:          1,
-		Name:        "timeout-test",
-		RetryTimes:  0, // 不重试，直接测试超时
+		Id:         1,
+		Name:       "timeout-test",
+		RetryTimes: 0, // 不重试，直接测试超时
 	}
-	
+
 	result := execJob(handler, task, 1)
-	
+
 	if result.Err == nil {
 		t.Fatal("Expected timeout error")
 	}
@@ -72,15 +72,15 @@ func TestExecJobWithPartialOutput_ManualStop(t *testing.T) {
 		partialOutput: "Task started\nProcessing batch 1\nProcessing batch 2",
 		errorType:     "manual_stop",
 	}
-	
+
 	task := models.Task{
-		Id:          2,
-		Name:        "manual-stop-test",
-		RetryTimes:  0,
+		Id:         2,
+		Name:       "manual-stop-test",
+		RetryTimes: 0,
 	}
-	
+
 	result := execJob(handler, task, 2)
-	
+
 	if result.Err == nil {
 		t.Fatal("Expected manual stop error")
 	}
@@ -100,15 +100,15 @@ func TestExecJobWithPartialOutput_NormalError(t *testing.T) {
 		partialOutput: "Task started\nError occurred: file not found",
 		errorType:     "normal_error",
 	}
-	
+
 	task := models.Task{
-		Id:          3,
-		Name:        "error-test",
-		RetryTimes:  0,
+		Id:         3,
+		Name:       "error-test",
+		RetryTimes: 0,
 	}
-	
+
 	result := execJob(handler, task, 3)
-	
+
 	if result.Err == nil {
 		t.Fatal("Expected normal error")
 	}
@@ -129,15 +129,15 @@ func TestExecJobWithPartialOutput_Success(t *testing.T) {
 		partialOutput: "Task started\nProcessing completed\nResult: success",
 		errorType:     "success",
 	}
-	
+
 	task := models.Task{
-		Id:          4,
-		Name:        "success-test",
-		RetryTimes:  0,
+		Id:         4,
+		Name:       "success-test",
+		RetryTimes: 0,
 	}
-	
+
 	result := execJob(handler, task, 4)
-	
+
 	if result.Err != nil {
 		t.Fatalf("Expected no error for success, got: %v", result.Err)
 	}
@@ -165,7 +165,7 @@ func TestExecJobWithPartialOutput_RetryWithTimeout(t *testing.T) {
 		{result: "First attempt\nPartial output\n\n[执行超时，强制结束]", err: fmt.Errorf("执行超时, 强制结束")},
 		{result: "Second attempt\nSuccess!", err: nil},
 	}
-	
+
 	handler := &overridableHandler{
 		runFunc: func(taskModel models.Task, taskUniqueId int64) (string, error) {
 			result := results[callCount]
@@ -173,23 +173,23 @@ func TestExecJobWithPartialOutput_RetryWithTimeout(t *testing.T) {
 			return result.result, result.err
 		},
 	}
-	
+
 	task := models.Task{
 		Id:            5,
 		Name:          "retry-test",
 		RetryTimes:    1,
 		RetryInterval: 0, // 不等待，加快测试
 	}
-	
+
 	// 模拟sleep函数，避免实际等待
 	originalSleep := sleepFunc
 	sleepFunc = func(d time.Duration) {
 		// 不实际睡眠
 	}
 	defer func() { sleepFunc = originalSleep }()
-	
+
 	result := execJob(handler, task, 5)
-	
+
 	if result.Err != nil {
 		t.Fatalf("Expected success after retry, got: %v", result.Err)
 	}

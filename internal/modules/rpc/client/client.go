@@ -35,10 +35,10 @@ func Stop(ip string, port int, id int64) {
 			logger.Errorf("连接服务器失败#%s#%v", addr, err)
 			return
 		}
-		
+
 		ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
 		defer cancel()
-		
+
 		_, err = c.Run(ctx, &pb.TaskRequest{
 			Command: "__STOP__",
 			Id:      id,
@@ -118,5 +118,3 @@ func parseGRPCErrorOnly(err error) error {
 	}
 	return err
 }
-
-

@@ -3,8 +3,8 @@ package utils
 import (
 	"bytes"
 	"crypto/md5"
-	"crypto/sha256"
 	crand "crypto/rand"
+	"crypto/sha256"
 	"encoding/hex"
 	"fmt"
 	"math/rand"

@@ -124,5 +124,3 @@ func (user *User) Total() (int64, error) {
 	err := Db.Model(&User{}).Count(&count).Error
 	return count, err
 }
-
-
