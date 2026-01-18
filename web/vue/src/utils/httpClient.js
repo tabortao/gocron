@@ -4,7 +4,27 @@ import router from '../router/index'
 import { useUserStore } from '../stores/user'
 import qs from 'qs'
 
-const errorMessage = '加载失败, 请稍后再试'
+const getLocale = () => localStorage.getItem('locale') || 'zh-CN'
+
+const messages = {
+  'zh-CN': {
+    loadFailed: '加载失败, 请稍后再试',
+    requestTimeout: '请求超时，请稍后重试',
+    authExpired: '登录已过期，请重新登录',
+    requestFailed: '请求失败'
+  },
+  'en-US': {
+    loadFailed: 'Load failed, please try again later',
+    requestTimeout: 'Request timeout, please try again later',
+    authExpired: 'Login expired, please login again',
+    requestFailed: 'Request failed'
+  }
+}
+
+const t = (key) => {
+  const locale = getLocale()
+  return messages[locale]?.[key] || messages['zh-CN'][key]
+}
 // 成功状态码
 const SUCCESS_CODE = 0
 // 认证失败
@@ -13,7 +33,7 @@ const AUTH_ERROR_CODE = 401
 const APP_NOT_INSTALL_CODE = 801
 
 axios.defaults.baseURL = '/api'
-axios.defaults.timeout = 10000
+axios.defaults.timeout = 30000
 axios.defaults.responseType = 'json'
 axios.interceptors.request.use(config => {
   const userStore = useUserStore()
@@ -22,17 +42,44 @@ axios.interceptors.request.use(config => {
   return config
 }, error => {
   ElMessage.error({
-    message: errorMessage
+    message: t('loadFailed')
   })
 
   return Promise.reject(error)
 })
 
 axios.interceptors.response.use(data => {
+  // 检查是否有新的 token
+  const newToken = data.headers['new-auth-token']
+  if (newToken) {
+    const userStore = useUserStore()
+    userStore.token = newToken
+  }
   return data
 }, error => {
+  // 处理超时
+  if (error.code === 'ECONNABORTED' && error.message.includes('timeout')) {
+    ElMessage.error({
+      message: t('requestTimeout')
+    })
+    return Promise.reject(error)
+  }
+  
+  // 处理认证失败
+  if (error.response && error.response.status === 401) {
+    const userStore = useUserStore()
+    userStore.token = ''
+    ElMessage.warning({
+      message: t('authExpired')
+    })
+    setTimeout(() => {
+      window.location.href = '/'
+    }, 500)
+    return Promise.reject(error)
+  }
+  
   ElMessage.error({
-    message: errorMessage
+    message: t('loadFailed')
   })
 
   return Promise.reject(error)
@@ -51,7 +98,14 @@ function checkResponseCode (code, msg) {
       return false
     // 认证失败
     case AUTH_ERROR_CODE:
-      router.push('/user/login')
+      const userStore = useUserStore()
+      userStore.token = ''
+      ElMessage.warning({
+        message: t('authExpired')
+      })
+      setTimeout(() => {
+        window.location.href = '/'
+      }, 500)
       return false
   }
   if (code !== SUCCESS_CODE) {
@@ -81,8 +135,15 @@ function successCallback (res, next, errorCallback) {
 }
 
 function failureCallback (error) {
+  // 避免重复提示（已在 interceptor 中处理）
+  if (error.response && error.response.status === 401) {
+    return
+  }
+  if (error.code === 'ECONNABORTED') {
+    return
+  }
   ElMessage.error({
-    message: '请求失败 - ' + error
+    message: t('requestFailed') + ' - ' + error.message
   })
 }
 

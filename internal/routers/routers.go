@@ -283,7 +283,7 @@ func userAuth(c *gin.Context) {
 	}
 
 	// 尝试从token恢复用户信息
-	err := user.RestoreToken(c)
+	newToken, err := user.RestoreToken(c)
 	if err != nil {
 		logger.Warnf("token解析失败: %v, path: %s", err, path)
 		jsonResp := utils.JsonResponse{}
@@ -291,6 +291,10 @@ func userAuth(c *gin.Context) {
 		c.String(http.StatusOK, data)
 		c.Abort()
 		return
+	}
+	// 如果token被刷新，返回新token给前端
+	if newToken != "" {
+		c.Header("New-Auth-Token", newToken)
 	}
 
 	if !user.IsLogin(c) {

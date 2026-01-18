@@ -460,11 +460,11 @@ func generateToken(user *models.User) (string, error) {
 	return token.SignedString([]byte(app.Setting.AuthSecret))
 }
 
-// 还原jwt
-func RestoreToken(c *gin.Context) error {
+// 还原jwt，如果 token 即将过期（小于1小时），则自动刷新
+func RestoreToken(c *gin.Context) (string, error) {
 	authToken := c.GetHeader("Auth-Token")
 	if authToken == "" {
-		return nil
+		return "", nil
 	}
 	token, err := jwt.Parse(authToken, func(token *jwt.Token) (interface{}, error) {
 		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
@@ -473,20 +473,38 @@ func RestoreToken(c *gin.Context) error {
 		return []byte(app.Setting.AuthSecret), nil
 	})
 	if err != nil {
-		return err
+		return "", err
 	}
 
 	if !token.Valid {
-		return errors.New("token is invalid")
+		return "", errors.New("token is invalid")
 	}
 
 	claims, ok := token.Claims.(jwt.MapClaims)
 	if !ok {
-		return errors.New("invalid claims")
+		return "", errors.New("invalid claims")
 	}
 	c.Set("uid", int(claims["uid"].(float64)))
 	c.Set("username", claims["username"])
 	c.Set("is_admin", int(claims["is_admin"].(float64)))
 
-	return nil
+	// 检查 token 是否即将过期（小于 1 小时）
+	exp := int64(claims["exp"].(float64))
+	if time.Until(time.Unix(exp, 0)) < time.Hour {
+		// 生成新 token
+		userModel := &models.User{
+			Id:      int(claims["uid"].(float64)),
+			Name:    claims["username"].(string),
+			IsAdmin: int8(claims["is_admin"].(float64)),
+		}
+		newToken, err := generateToken(userModel)
+		if err != nil {
+			logger.Warnf("刷新token失败: %v", err)
+			return "", nil
+		}
+		logger.Infof("用户 %s 的 token 已自动刷新", userModel.Name)
+		return newToken, nil
+	}
+
+	return "", nil
 }
