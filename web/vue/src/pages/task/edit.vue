@@ -84,6 +84,7 @@
                       </ul>
                       <h4>{{ t('task.cronShortcut') }}</h4>
                       <ul style="padding-left: 20px; margin: 10px 0;">
+                        <li>@reboot - {{ t('message.reboot') }}</li>
                         <li>@yearly - {{ t('message.yearly') }}</li>
                         <li>@monthly - {{ t('message.monthly') }}</li>
                         <li>@weekly - {{ t('message.weekly') }}</li>
@@ -673,7 +674,7 @@ export default {
           .replace(/&gt;/g, '>')
           .replace(/&amp;/g, '&')
       }
-      
+
       if (Number(this.form.protocol) === 2) {
         this.form.host_id = this.form.host_ids.join(',')
       } else {

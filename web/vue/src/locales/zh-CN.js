@@ -370,6 +370,7 @@ export default {
     every20Seconds: '每隔20秒运行一次',
     everyDay21_30: '每天晚上21:30:00运行',
     everySaturday23: '每周六晚上23:00:00运行',
+    reboot: '仅在应用启动时执行一次',
     yearly: '每年运行一次',
     monthly: '每月运行一次',
     weekly: '每周运行一次',

@@ -6,6 +6,7 @@
 
 // 快捷语法列表
 const SHORTCUTS = [
+  '@reboot',
   '@yearly',
   '@annually',
   '@monthly',

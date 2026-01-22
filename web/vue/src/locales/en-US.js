@@ -370,6 +370,7 @@ export default {
     every20Seconds: 'Run every 20 seconds',
     everyDay21_30: 'Run at 21:30:00 every day',
     everySaturday23: 'Run at 23:00:00 every Saturday',
+    reboot: 'Run only once at application startup',
     yearly: 'Run once a year',
     monthly: 'Run once a month',
     weekly: 'Run once a week',
