@@ -97,7 +97,7 @@ build-vue:
 	cd web/vue && yarn install
 	@echo "Building Vue frontend..."
 	cd web/vue && yarn run build
-	cp -r web/vue/dist/* web/public/
+	@echo "✅ Vue build complete! Files will be embedded during Go build."
 
 .PHONY: install-vue
 install-vue:
