@@ -440,6 +440,7 @@ export default {
           {required: true, message: this.t('message.pleaseEnterNotifyKeyword'), trigger: 'blur'}
         ],
         host_ids: [
+          {required: true, message: this.t('message.selectTaskNode'), trigger: 'blur'},
           {validator: (rule, value, callback) => this.validateHostIds(rule, value, callback), trigger: 'change'}
         ]
       }
