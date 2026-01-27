@@ -322,7 +322,7 @@ const createDefaultForm = () => ({
   command: '',
   host_id: '',
   host_ids: [],
-  timeout: 0,
+  timeout: 3600,
   multi: 0,
   notify_status: 0,
   notify_type: 0,
