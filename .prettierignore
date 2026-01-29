@@ -1,0 +1,13 @@
+node_modules
+dist
+build
+.git
+.gocache
+.gocron
+bin
+data
+log
+tmp
+*.min.js
+*.min.css
+vendor
