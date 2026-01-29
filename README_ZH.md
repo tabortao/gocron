@@ -112,8 +112,6 @@ pnpm run commit
 - 🐛 fix(api): 修复任务状态更新问题
 - 📝 docs: 更新 API 文档
 
-更多详情请查看 [Git 提交规范指南](docs/GIT_COMMIT_GUIDE.md)。
-
 ### 其他贡献方式
 
 - 🐛 **提交 Bug**：请在 GitHub Issues 中提交

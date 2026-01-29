@@ -112,8 +112,6 @@ This will guide you through an interactive prompt to create properly formatted c
 - 🐛 fix(api): fix task status update issue
 - 📝 docs: update API documentation
 
-For more details, see [Git Commit Guide](docs/GIT_COMMIT_GUIDE.md).
-
 ### Other Ways to Contribute
 
 - 🐛 **Report Bugs**: Please submit via GitHub Issues
