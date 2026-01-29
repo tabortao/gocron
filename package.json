@@ -1,0 +1,36 @@
+{
+  "name": "gocron",
+  "version": "2.0.0",
+  "description": "定时任务管理系统",
+  "author": "gocronx <gocronx@gmail.com>",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "prepare": "husky",
+    "commit": "git-cz",
+    "lint:lint-staged": "lint-staged"
+  },
+  "config": {
+    "commitizen": {
+      "path": "node_modules/cz-git"
+    }
+  },
+  "lint-staged": {
+    "*.{js,ts,vue}": [
+      "eslint --fix",
+      "prettier --write"
+    ],
+    "*.{json,md,yml,yaml}": [
+      "prettier --write"
+    ]
+  },
+  "devDependencies": {
+    "@commitlint/cli": "^19.4.1",
+    "@commitlint/config-conventional": "^19.4.1",
+    "commitizen": "^4.3.0",
+    "cz-git": "^1.11.1",
+    "husky": "^9.1.5",
+    "lint-staged": "^15.5.2",
+    "prettier": "^3.5.3"
+  }
+}
