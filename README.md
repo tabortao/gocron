@@ -17,17 +17,17 @@ Full documentation is available at: **[document](https://gocron-docs.pages.dev/e
 
 ## ✨ Features
 
-* **Web Interface**: Intuitive task management interface
-* **Second-level Precision**: Supports Crontab expressions with second precision
-* **Distributed Architecture**: Master-Worker architecture, high availability
-* **Task Retry**: Configurable retry policies for failed tasks
-* **Task Dependency**: Supports task dependency configuration
-* **Access Control**: Comprehensive user and permission management
-* **2FA Security**: Two-Factor Authentication support
-* **Agent Auto-Registration**: One-click installation for Linux/macOS
-* **Multi-Database**: MySQL / PostgreSQL / SQLite support
-* **Log Management**: Complete execution logs with auto-cleanup
-* **Notifications**: Email, Slack, Webhook support
+- **Web Interface**: Intuitive task management interface
+- **Second-level Precision**: Supports Crontab expressions with second precision
+- **Distributed Architecture**: Master-Worker architecture, high availability
+- **Task Retry**: Configurable retry policies for failed tasks
+- **Task Dependency**: Supports task dependency configuration
+- **Access Control**: Comprehensive user and permission management
+- **2FA Security**: Two-Factor Authentication support
+- **Agent Auto-Registration**: One-click installation for Linux/macOS
+- **Multi-Database**: MySQL / PostgreSQL / SQLite support
+- **Log Management**: Complete execution logs with auto-cleanup
+- **Notifications**: Email, Slack, Webhook support
 
 ## 🚀 Quick Start (Docker)
 
@@ -61,8 +61,62 @@ For more deployment methods (Binary, Development), please refer to the [Installa
 
 We warmly welcome community contributions!
 
+### How to Contribute
+
+1. **Fork the repository**
+2. **Clone your fork**
+
+   ```bash
+   git clone https://github.com/YOUR_USERNAME/gocron.git
+   cd gocron
+   ```
+
+3. **Install dependencies**
+
+   ```bash
+   pnpm install
+   pnpm run prepare
+   ```
+
+4. **Create a feature branch**
+
+   ```bash
+   git checkout -b feature/your-feature-name
+   ```
+
+5. **Make your changes and commit**
+
+   ```bash
+   git add .
+   pnpm run commit  # Use interactive commit tool
+   ```
+
+6. **Push and create a Pull Request**
+   ```bash
+   git push origin feature/your-feature-name
+   ```
+
+### Commit Message Guidelines
+
+This project uses [commitizen](https://github.com/commitizen/cz-cli) and [cz-git](https://cz-git.qbb.sh/) for standardized commit messages with emoji prefixes.
+
+Instead of `git commit`, use:
+
+```bash
+pnpm run commit
+```
+
+This will guide you through an interactive prompt to create properly formatted commit messages like:
+
+- ✨ feat(task): add task dependency configuration
+- 🐛 fix(api): fix task status update issue
+- 📝 docs: update API documentation
+
+### Other Ways to Contribute
+
 - 🐛 **Report Bugs**: Please submit via GitHub Issues
-- 💡 **Submit Code**: Please follow the [Contributing Guide](https://gocron-docs.pages.dev/en/guide/contributing) to submit PRs
+- 💡 **Feature Requests**: Share your ideas through Issues
+- 📝 **Documentation**: Help improve our documentation
 
 ## 📄 License
 
