@@ -1,8 +1,6 @@
 package loginlog
 
 import (
-	"net/http"
-
 	"github.com/gin-gonic/gin"
 	"github.com/gocronx-team/gocron/internal/models"
 	"github.com/gocronx-team/gocron/internal/modules/logger"
@@ -23,10 +21,8 @@ func Index(c *gin.Context) {
 		logger.Error(err)
 	}
 
-	jsonResp := utils.JsonResponse{}
-	result := jsonResp.Success(utils.SuccessContent, map[string]interface{}{
+	base.RespondSuccess(c, utils.SuccessContent, map[string]interface{}{
 		"total": total,
 		"data":  loginLogs,
 	})
-	c.String(http.StatusOK, result)
 }

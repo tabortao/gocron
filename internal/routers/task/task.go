@@ -81,31 +81,24 @@ func Detail(c *gin.Context) {
 func Store(c *gin.Context) {
 	var form TaskForm
 	if err := c.ShouldBind(&form); err != nil {
-		logger.Errorf("[Task Store] Form validation failed: %v", err)
-		json := utils.JsonResponse{}
-		result := json.CommonFailure(i18n.T(c, "form_validation_failed"))
-		c.String(http.StatusOK, result)
+		base.RespondValidationError(c, err)
 		return
 	}
 
-	json := utils.JsonResponse{}
 	taskModel := models.Task{}
 	var id = form.Id
 	nameExists, err := taskModel.NameExist(form.Name, form.Id)
 	if err != nil {
-		result := json.CommonFailure(utils.FailureContent, err)
-		c.String(http.StatusOK, result)
+		base.RespondErrorWithDefaultMsg(c, err)
 		return
 	}
 	if nameExists {
-		result := json.CommonFailure(i18n.T(c, "task_name_exists"))
-		c.String(http.StatusOK, result)
+		base.RespondError(c, i18n.T(c, "task_name_exists"))
 		return
 	}
 
 	if form.Protocol == models.TaskRPC && form.HostId == "" {
-		result := json.CommonFailure(i18n.T(c, "select_hostname"))
-		c.String(http.StatusOK, result)
+		base.RespondError(c, i18n.T(c, "select_hostname"))
 		return
 	}
 
@@ -133,41 +126,35 @@ func Store(c *gin.Context) {
 	taskModel.DependencyStatus = form.DependencyStatus
 	taskModel.DependencyTaskId = strings.TrimSpace(form.DependencyTaskId)
 	if taskModel.NotifyStatus > 0 && taskModel.NotifyType != 2 && taskModel.NotifyReceiverId == "" {
-		result := json.CommonFailure(i18n.T(c, "select_at_least_one_receiver"))
-		c.String(http.StatusOK, result)
+		base.RespondError(c, i18n.T(c, "select_at_least_one_receiver"))
 		return
 	}
 	taskModel.HttpMethod = form.HttpMethod
 	if taskModel.Protocol == models.TaskHTTP {
 		command := strings.ToLower(taskModel.Command)
 		if !strings.HasPrefix(command, "http://") && !strings.HasPrefix(command, "https://") {
-			result := json.CommonFailure(i18n.T(c, "invalid_url"))
-			c.String(http.StatusOK, result)
+			base.RespondError(c, i18n.T(c, "invalid_url"))
 			return
 		}
 		if taskModel.Timeout > 300 {
-			result := json.CommonFailure(i18n.T(c, "http_task_timeout_max_300"))
-			c.String(http.StatusOK, result)
+			base.RespondError(c, i18n.T(c, "http_task_timeout_max_300"))
 			return
 		}
 	}
 
 	if taskModel.RetryTimes > 10 || taskModel.RetryTimes < 0 {
-		result := json.CommonFailure(i18n.T(c, "retry_times_range_0_10"))
-		c.String(http.StatusOK, result)
+		base.RespondError(c, i18n.T(c, "retry_times_range_0_10"))
 		return
 	}
 
 	if taskModel.RetryInterval > 3600 || taskModel.RetryInterval < 0 {
-		result := json.CommonFailure(i18n.T(c, "retry_interval_range_0_3600"))
-		c.String(http.StatusOK, result)
+		base.RespondError(c, i18n.T(c, "retry_interval_range_0_3600"))
 		return
 	}
 
 	if taskModel.DependencyStatus != models.TaskDependencyStatusStrong &&
 		taskModel.DependencyStatus != models.TaskDependencyStatusWeak {
-		result := json.CommonFailure(i18n.T(c, "select_dependency"))
-		c.String(http.StatusOK, result)
+		base.RespondError(c, i18n.T(c, "select_dependency"))
 		return
 	}
 
@@ -176,8 +163,7 @@ func Store(c *gin.Context) {
 			cron.Parse(form.Spec)
 		})
 		if err != nil {
-			result := json.CommonFailure(i18n.T(c, "crontab_parse_failed"), err)
-			c.String(http.StatusOK, result)
+			base.RespondError(c, i18n.T(c, "crontab_parse_failed"), err)
 			return
 		}
 	} else {
@@ -188,8 +174,7 @@ func Store(c *gin.Context) {
 	if id > 0 && taskModel.DependencyTaskId != "" {
 		dependencyTaskIds := strings.Split(taskModel.DependencyTaskId, ",")
 		if utils.InStringSlice(dependencyTaskIds, strconv.Itoa(id)) {
-			result := json.CommonFailure(i18n.T(c, "cannot_set_self_as_child"))
-			c.String(http.StatusOK, result)
+			base.RespondError(c, i18n.T(c, "cannot_set_self_as_child"))
 			return
 		}
 	}
@@ -214,8 +199,7 @@ func Store(c *gin.Context) {
 	}
 
 	if err != nil {
-		result := json.CommonFailure(i18n.T(c, "save_failed"), err)
-		c.String(http.StatusOK, result)
+		base.RespondError(c, i18n.T(c, "save_failed"), err)
 		return
 	}
 
@@ -236,26 +220,22 @@ func Store(c *gin.Context) {
 		addTaskToTimer(id)
 	}
 
-	result := json.Success(i18n.T(c, "save_success"), nil)
-	c.String(http.StatusOK, result)
+	base.RespondSuccess(c, i18n.T(c, "save_success"), nil)
 }
 
 // 删除任务
 func Remove(c *gin.Context) {
 	id, _ := strconv.Atoi(c.Param("id"))
-	json := utils.JsonResponse{}
 	taskModel := new(models.Task)
 	_, err := taskModel.Delete(id)
-	var result string
 	if err != nil {
-		result = json.CommonFailure(utils.FailureContent, err)
+		base.RespondErrorWithDefaultMsg(c, err)
 	} else {
 		taskHostModel := new(models.TaskHost)
 		_ = taskHostModel.Remove(id)
 		service.ServiceTask.Remove(id)
-		result = json.Success(utils.SuccessContent, nil)
+		base.RespondSuccessWithDefaultMsg(c, nil)
 	}
-	c.String(http.StatusOK, result)
 }
 
 // 激活任务
@@ -271,18 +251,15 @@ func Disable(c *gin.Context) {
 // 手动运行任务
 func Run(c *gin.Context) {
 	id, _ := strconv.Atoi(c.Param("id"))
-	json := utils.JsonResponse{}
 	taskModel := new(models.Task)
 	task, err := taskModel.Detail(id)
-	var result string
 	if err != nil || task.Id <= 0 {
-		result = json.CommonFailure(i18n.T(c, "get_task_detail_failed"), err)
+		base.RespondError(c, i18n.T(c, "get_task_detail_failed"), err)
 	} else {
 		task.Spec = i18n.T(c, "manual_run")
 		service.ServiceTask.Run(task)
-		result = json.Success(i18n.T(c, "task_started_check_log"), nil)
+		base.RespondSuccess(c, i18n.T(c, "task_started_check_log"), nil)
 	}
-	c.String(http.StatusOK, result)
 }
 
 // 批量启用任务
@@ -301,13 +278,10 @@ func batchChangeStatus(c *gin.Context, status models.Status) {
 		Ids []int `json:"ids" binding:"required"`
 	}
 	if err := c.ShouldBindJSON(&form); err != nil {
-		json := utils.JsonResponse{}
-		result := json.CommonFailure(i18n.T(c, "param_error"))
-		c.String(http.StatusOK, result)
+		base.RespondError(c, i18n.T(c, "param_error"))
 		return
 	}
 
-	json := utils.JsonResponse{}
 	taskModel := new(models.Task)
 	successCount := 0
 	for _, id := range form.Ids {
@@ -324,11 +298,10 @@ func batchChangeStatus(c *gin.Context, status models.Status) {
 		}
 	}
 
-	result := json.Success(i18n.T(c, "operation_success"), map[string]interface{}{
+	base.RespondSuccess(c, i18n.T(c, "operation_success"), map[string]interface{}{
 		"success_count": successCount,
 		"total_count":   len(form.Ids),
 	})
-	c.String(http.StatusOK, result)
 }
 
 // 批量删除任务
@@ -337,13 +310,10 @@ func BatchRemove(c *gin.Context) {
 		Ids []int `json:"ids" binding:"required"`
 	}
 	if err := c.ShouldBindJSON(&form); err != nil {
-		json := utils.JsonResponse{}
-		result := json.CommonFailure(i18n.T(c, "param_error"))
-		c.String(http.StatusOK, result)
+		base.RespondError(c, i18n.T(c, "param_error"))
 		return
 	}
 
-	json := utils.JsonResponse{}
 	taskModel := new(models.Task)
 	taskHostModel := new(models.TaskHost)
 	successCount := 0
@@ -356,33 +326,29 @@ func BatchRemove(c *gin.Context) {
 		}
 	}
 
-	result := json.Success("操作成功", map[string]interface{}{
+	base.RespondSuccess(c, "操作成功", map[string]interface{}{
 		"success_count": successCount,
 		"total_count":   len(form.Ids),
 	})
-	c.String(http.StatusOK, result)
 }
 
 // 改变任务状态
 func changeStatus(c *gin.Context, status models.Status) {
 	id, _ := strconv.Atoi(c.Param("id"))
-	json := utils.JsonResponse{}
 	taskModel := new(models.Task)
 	_, err := taskModel.Update(id, models.CommonMap{
 		"status": status,
 	})
-	var result string
 	if err != nil {
-		result = json.CommonFailure(utils.FailureContent, err)
+		base.RespondErrorWithDefaultMsg(c, err)
 	} else {
 		if status == models.Enabled {
 			addTaskToTimer(id)
 		} else {
 			service.ServiceTask.Remove(id)
 		}
-		result = json.Success(utils.SuccessContent, nil)
+		base.RespondSuccessWithDefaultMsg(c, nil)
 	}
-	c.String(http.StatusOK, result)
 }
 
 // 添加任务到定时器

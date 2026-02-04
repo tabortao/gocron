@@ -2,7 +2,6 @@ package host
 
 import (
 	"fmt"
-	"net/http"
 	"strconv"
 	"strings"
 
@@ -34,12 +33,10 @@ func Index(c *gin.Context) {
 		logger.Error(err)
 	}
 
-	jsonResp := utils.JsonResponse{}
-	result := jsonResp.Success(utils.SuccessContent, map[string]interface{}{
+	base.RespondSuccess(c, utils.SuccessContent, map[string]interface{}{
 		"total": total,
 		"data":  hosts,
 	})
-	c.String(http.StatusOK, result)
 }
 
 // All 获取所有主机
@@ -51,9 +48,7 @@ func All(c *gin.Context) {
 		logger.Error(err)
 	}
 
-	jsonResp := utils.JsonResponse{}
-	result := jsonResp.Success(utils.SuccessContent, hosts)
-	c.String(http.StatusOK, result)
+	base.RespondSuccess(c, utils.SuccessContent, hosts)
 }
 
 // Detail 主机详情
@@ -61,15 +56,12 @@ func Detail(c *gin.Context) {
 	hostModel := new(models.Host)
 	id, _ := strconv.Atoi(c.Param("id"))
 	err := hostModel.Find(id)
-	jsonResp := utils.JsonResponse{}
-	var result string
 	if err != nil || hostModel.Id == 0 {
 		logger.Errorf("获取主机详情失败#主机id-%d", id)
-		result = jsonResp.Success(utils.SuccessContent, nil)
+		base.RespondSuccess(c, utils.SuccessContent, nil)
 	} else {
-		result = jsonResp.Success(utils.SuccessContent, hostModel)
+		base.RespondSuccess(c, utils.SuccessContent, hostModel)
 	}
-	c.String(http.StatusOK, result)
 }
 
 type HostForm struct {
@@ -84,24 +76,19 @@ type HostForm struct {
 func Store(c *gin.Context) {
 	var form HostForm
 	if err := c.ShouldBind(&form); err != nil {
-		json := utils.JsonResponse{}
-		result := json.CommonFailure(i18n.T(c, "form_validation_failed"))
-		c.String(http.StatusOK, result)
+		base.RespondValidationError(c, err)
 		return
 	}
 
-	json := utils.JsonResponse{}
 	hostModel := new(models.Host)
 	id := form.Id
 	nameExist, err := hostModel.NameExists(form.Name, form.Id)
 	if err != nil {
-		result := json.CommonFailure(i18n.T(c, "operation_failed"), err)
-		c.String(http.StatusOK, result)
+		base.RespondError(c, i18n.T(c, "operation_failed"), err)
 		return
 	}
 	if nameExist {
-		result := json.CommonFailure(i18n.T(c, "hostname_exists"))
-		c.String(http.StatusOK, result)
+		base.RespondError(c, i18n.T(c, "hostname_exists"))
 		return
 	}
 
@@ -115,8 +102,7 @@ func Store(c *gin.Context) {
 	if id > 0 {
 		err = oldHostModel.Find(int(id))
 		if err != nil {
-			result := json.CommonFailure(i18n.T(c, "host_not_exist"))
-			c.String(http.StatusOK, result)
+			base.RespondError(c, i18n.T(c, "host_not_exist"))
 			return
 		}
 		_, err = hostModel.UpdateBean(id)
@@ -125,8 +111,7 @@ func Store(c *gin.Context) {
 		id, err = hostModel.Create()
 	}
 	if err != nil {
-		result := json.CommonFailure(i18n.T(c, "save_failed"), err)
-		c.String(http.StatusOK, result)
+		base.RespondError(c, i18n.T(c, "save_failed"), err)
 		return
 	}
 
@@ -140,60 +125,50 @@ func Store(c *gin.Context) {
 		taskModel := new(models.Task)
 		tasks, err := taskModel.ActiveListByHostId(id)
 		if err != nil {
-			result := json.CommonFailure(i18n.T(c, "refresh_task_host_failed"), err)
-			c.String(http.StatusOK, result)
+			base.RespondError(c, i18n.T(c, "refresh_task_host_failed"), err)
 			return
 		}
 		service.ServiceTask.BatchAdd(tasks)
 	}
 
-	result := json.Success(i18n.T(c, "save_success"), nil)
-	c.String(http.StatusOK, result)
+	base.RespondSuccess(c, i18n.T(c, "save_success"), nil)
 }
 
 // Remove 删除主机
 func Remove(c *gin.Context) {
 	id, err := strconv.Atoi(c.Param("id"))
-	json := utils.JsonResponse{}
-	var result string
 	if err != nil {
-		result = json.CommonFailure(i18n.T(c, "param_error"), err)
-		c.String(http.StatusOK, result)
+		base.RespondError(c, i18n.T(c, "param_error"), err)
 		return
 	}
 	taskHostModel := new(models.TaskHost)
 	exist, err := taskHostModel.HostIdExist(id)
 	if err != nil {
-		result = json.CommonFailure(i18n.T(c, "operation_failed"), err)
-		c.String(http.StatusOK, result)
+		base.RespondError(c, i18n.T(c, "operation_failed"), err)
 		return
 	}
 	if exist {
-		result = json.CommonFailure(i18n.T(c, "host_in_use_cannot_delete"))
-		c.String(http.StatusOK, result)
+		base.RespondError(c, i18n.T(c, "host_in_use_cannot_delete"))
 		return
 	}
 
 	hostModel := new(models.Host)
 	err = hostModel.Find(int(id))
 	if err != nil {
-		result = json.CommonFailure(i18n.T(c, "host_not_exist"))
-		c.String(http.StatusOK, result)
+		base.RespondError(c, i18n.T(c, "host_not_exist"))
 		return
 	}
 
 	_, err = hostModel.Delete(id)
 	if err != nil {
-		result = json.CommonFailure(i18n.T(c, "operation_failed"), err)
-		c.String(http.StatusOK, result)
+		base.RespondError(c, i18n.T(c, "operation_failed"), err)
 		return
 	}
 
 	addr := fmt.Sprintf("%s:%d", hostModel.Name, hostModel.Port)
 	grpcpool.Pool.Release(addr)
 
-	result = json.Success(i18n.T(c, "operation_success"), nil)
-	c.String(http.StatusOK, result)
+	base.RespondSuccess(c, i18n.T(c, "operation_success"), nil)
 }
 
 // Ping 测试主机是否可连接
@@ -201,11 +176,8 @@ func Ping(c *gin.Context) {
 	id, _ := strconv.Atoi(c.Param("id"))
 	hostModel := new(models.Host)
 	err := hostModel.Find(id)
-	json := utils.JsonResponse{}
-	var result string
 	if err != nil || hostModel.Id <= 0 {
-		result = json.CommonFailure(i18n.T(c, "host_not_exist"), err)
-		c.String(http.StatusOK, result)
+		base.RespondError(c, i18n.T(c, "host_not_exist"), err)
 		return
 	}
 
@@ -214,11 +186,10 @@ func Ping(c *gin.Context) {
 	taskReq.Timeout = testConnectionTimeout
 	output, err := client.Exec(hostModel.Name, hostModel.Port, taskReq)
 	if err != nil {
-		result = json.CommonFailure(i18n.T(c, "connection_failed")+"-"+err.Error()+" "+output, err)
+		base.RespondError(c, i18n.T(c, "connection_failed")+"-"+err.Error()+" "+output, err)
 	} else {
-		result = json.Success(i18n.T(c, "connection_success"), nil)
+		base.RespondSuccess(c, i18n.T(c, "connection_success"), nil)
 	}
-	c.String(http.StatusOK, result)
 }
 
 // 解析查询参数

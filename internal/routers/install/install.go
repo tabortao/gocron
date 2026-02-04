@@ -3,7 +3,6 @@ package install
 import (
 	"errors"
 	"fmt"
-	"net/http"
 	"strconv"
 
 	"github.com/gin-gonic/gin"
@@ -12,6 +11,7 @@ import (
 	"github.com/gocronx-team/gocron/internal/modules/app"
 	"github.com/gocronx-team/gocron/internal/modules/setting"
 	"github.com/gocronx-team/gocron/internal/modules/utils"
+	"github.com/gocronx-team/gocron/internal/routers/base"
 	"github.com/gocronx-team/gocron/internal/service"
 	"github.com/lib/pq"
 )
@@ -36,42 +36,33 @@ type InstallForm struct {
 func Store(c *gin.Context) {
 	var form InstallForm
 	if err := c.ShouldBind(&form); err != nil {
-		json := utils.JsonResponse{}
-		result := json.CommonFailure("表单验证失败, 请检测输入")
-		c.String(http.StatusOK, result)
+		base.RespondError(c, "表单验证失败, 请检测输入")
 		return
 	}
 
-	json := utils.JsonResponse{}
-	var result string
 	if app.Installed {
-		result = json.CommonFailure("系统已安装!")
-		c.String(http.StatusOK, result)
+		base.RespondError(c, "系统已安装!")
 		return
 	}
 	if form.AdminPassword != form.ConfirmAdminPassword {
-		result = json.CommonFailure("两次输入密码不匹配")
-		c.String(http.StatusOK, result)
+		base.RespondError(c, "两次输入密码不匹配")
 		return
 	}
 	err := testDbConnection(form)
 	if err != nil {
-		result = json.CommonFailure(err.Error())
-		c.String(http.StatusOK, result)
+		base.RespondError(c, err.Error())
 		return
 	}
 	// 写入数据库配置
 	err = writeConfig(form)
 	if err != nil {
-		result = json.CommonFailure("数据库配置写入文件失败", err)
-		c.String(http.StatusOK, result)
+		base.RespondError(c, "数据库配置写入文件失败", err)
 		return
 	}
 
 	appConfig, err := setting.Read(app.AppConfig)
 	if err != nil {
-		result = json.CommonFailure("读取应用配置失败", err)
-		c.String(http.StatusOK, result)
+		base.RespondError(c, "读取应用配置失败", err)
 		return
 	}
 	app.Setting = appConfig
@@ -81,24 +72,21 @@ func Store(c *gin.Context) {
 	migration := new(models.Migration)
 	err = migration.Install(form.DbName)
 	if err != nil {
-		result = json.CommonFailure(fmt.Sprintf("创建数据库表失败-%s", err.Error()), err)
-		c.String(http.StatusOK, result)
+		base.RespondError(c, fmt.Sprintf("创建数据库表失败-%s", err.Error()), err)
 		return
 	}
 
 	// 创建管理员账号
 	err = createAdminUser(form)
 	if err != nil {
-		result = json.CommonFailure("创建管理员账号失败", err)
-		c.String(http.StatusOK, result)
+		base.RespondError(c, "创建管理员账号失败", err)
 		return
 	}
 
 	// 创建安装锁
 	err = app.CreateInstallLock()
 	if err != nil {
-		result = json.CommonFailure("创建文件安装锁失败", err)
-		c.String(http.StatusOK, result)
+		base.RespondError(c, "创建文件安装锁失败", err)
 		return
 	}
 
@@ -110,8 +98,7 @@ func Store(c *gin.Context) {
 	// 初始化定时任务
 	service.ServiceTask.Initialize()
 
-	result = json.Success("安装成功", nil)
-	c.String(http.StatusOK, result)
+	base.RespondSuccess(c, "安装成功", nil)
 }
 
 // 配置写入文件
