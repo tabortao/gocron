@@ -13,7 +13,7 @@ import (
 	"github.com/gocronx-team/gocron/internal/models"
 	"github.com/gocronx-team/gocron/internal/modules/i18n"
 	"github.com/gocronx-team/gocron/internal/modules/logger"
-	"github.com/gocronx-team/gocron/internal/modules/utils"
+	"github.com/gocronx-team/gocron/internal/routers/base"
 )
 
 const tokenExpiration = 3 * time.Hour
@@ -30,20 +30,18 @@ func GenerateToken(c *gin.Context) {
 
 	if err := agentToken.Create(); err != nil {
 		logger.Error("创建token失败:", err)
-		json := utils.JsonResponse{}
-		c.String(http.StatusOK, json.CommonFailure(i18n.T(c, "operation_failed"), err))
+		base.RespondError(c, i18n.T(c, "operation_failed"), err)
 		return
 	}
 
 	serverURL := getServerURL(c)
 	installCmdLinux := fmt.Sprintf("curl -fsSL '%s/api/agent/install.sh?token=%s' | bash", serverURL, token)
 
-	json := utils.JsonResponse{}
-	c.String(http.StatusOK, json.Success(i18n.T(c, "operation_success"), map[string]interface{}{
+	base.RespondSuccess(c, i18n.T(c, "operation_success"), map[string]interface{}{
 		"token":       token,
 		"expires_at":  expiresAt,
 		"install_cmd": installCmdLinux,
-	}))
+	})
 }
 
 // InstallScript 返回安装脚本
@@ -258,22 +256,19 @@ func Register(c *gin.Context) {
 	}
 
 	if err := c.ShouldBindJSON(&req); err != nil {
-		json := utils.JsonResponse{}
-		c.String(http.StatusOK, json.CommonFailure("Invalid request", err))
+		base.RespondError(c, "Invalid request", err)
 		return
 	}
 
 	agentToken := &models.AgentToken{}
 	if err := agentToken.FindByToken(req.Token); err != nil {
-		json := utils.JsonResponse{}
-		c.String(http.StatusOK, json.CommonFailure("Invalid token"))
+		base.RespondError(c, "Invalid token")
 		return
 	}
 
 	// 只检查是否过期，不检查是否已使用
 	if time.Now().After(agentToken.ExpiresAt) {
-		json := utils.JsonResponse{}
-		c.String(http.StatusOK, json.CommonFailure("Token expired"))
+		base.RespondError(c, "Token expired")
 		return
 	}
 
@@ -287,16 +282,14 @@ func Register(c *gin.Context) {
 	exists, err := host.NameExists(req.Hostname, 0)
 	if err != nil {
 		logger.Error("检查主机是否存在失败:", err)
-		json := utils.JsonResponse{}
-		c.String(http.StatusOK, json.CommonFailure("Operation failed", err))
+		base.RespondError(c, "Operation failed", err)
 		return
 	}
 
 	if !exists {
 		if _, err := host.Create(); err != nil {
 			logger.Error("创建主机失败:", err)
-			json := utils.JsonResponse{}
-			c.String(http.StatusOK, json.CommonFailure("Failed to create host", err))
+			base.RespondError(c, "Failed to create host", err)
 			return
 		}
 		logger.Infof("主机注册成功: %s", req.Hostname)
@@ -304,8 +297,7 @@ func Register(c *gin.Context) {
 		logger.Infof("主机已存在，跳过创建: %s", req.Hostname)
 	}
 
-	json := utils.JsonResponse{}
-	c.String(http.StatusOK, json.Success("Registration successful", nil))
+	base.RespondSuccess(c, "Registration successful", nil)
 }
 
 // Download 优先从本地 gocron-node-package 目录下载，如果不存在则重定向到 GitHub Release

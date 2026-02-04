@@ -3,7 +3,6 @@ package user
 import (
 	"errors"
 	"fmt"
-	"net/http"
 	"strconv"
 	"strings"
 	"time"
@@ -58,12 +57,10 @@ func Index(c *gin.Context) {
 		logger.Error(err)
 	}
 
-	jsonResp := utils.JsonResponse{}
-	result := jsonResp.Success(utils.SuccessContent, map[string]interface{}{
+	base.RespondSuccess(c, utils.SuccessContent, map[string]interface{}{
 		"total": total,
 		"data":  users,
 	})
-	c.String(http.StatusOK, result)
 }
 
 // 解析查询参数
@@ -82,23 +79,18 @@ func Detail(c *gin.Context) {
 	if err != nil {
 		logger.Error(err)
 	}
-	jsonResp := utils.JsonResponse{}
-	var result string
 	if userModel.Id == 0 {
-		result = jsonResp.Success(utils.SuccessContent, nil)
+		base.RespondSuccess(c, utils.SuccessContent, nil)
 	} else {
-		result = jsonResp.Success(utils.SuccessContent, userModel)
+		base.RespondSuccess(c, utils.SuccessContent, userModel)
 	}
-	c.String(http.StatusOK, result)
 }
 
 // 保存任务
 func Store(c *gin.Context) {
 	var form UserForm
 	if err := c.ShouldBind(&form); err != nil {
-		json := utils.JsonResponse{}
-		result := json.CommonFailure(i18n.T(c, "form_validation_failed"))
-		c.String(http.StatusOK, result)
+		base.RespondValidationError(c, err)
 		return
 	}
 
@@ -106,52 +98,44 @@ func Store(c *gin.Context) {
 	form.Email = strings.TrimSpace(form.Email)
 	form.Password = strings.TrimSpace(form.Password)
 	form.ConfirmPassword = strings.TrimSpace(form.ConfirmPassword)
-	json := utils.JsonResponse{}
+
 	userModel := models.User{}
 	nameExists, err := userModel.UsernameExists(form.Name, form.Id)
 	if err != nil {
-		result := json.CommonFailure(utils.FailureContent, err)
-		c.String(http.StatusOK, result)
+		base.RespondErrorWithDefaultMsg(c, err)
 		return
 	}
 	if nameExists > 0 {
-		result := json.CommonFailure(i18n.T(c, "username_exists"))
-		c.String(http.StatusOK, result)
+		base.RespondError(c, i18n.T(c, "username_exists"))
 		return
 	}
 
 	emailExists, err := userModel.EmailExists(form.Email, form.Id)
 	if err != nil {
-		result := json.CommonFailure(utils.FailureContent, err)
-		c.String(http.StatusOK, result)
+		base.RespondErrorWithDefaultMsg(c, err)
 		return
 	}
 	if emailExists > 0 {
-		result := json.CommonFailure(i18n.T(c, "email_exists"))
-		c.String(http.StatusOK, result)
+		base.RespondError(c, i18n.T(c, "email_exists"))
 		return
 	}
 
 	if form.Id == 0 {
 		if form.Password == "" {
-			result := json.CommonFailure(i18n.T(c, "password_required"))
-			c.String(http.StatusOK, result)
+			base.RespondError(c, i18n.T(c, "password_required"))
 			return
 		}
 		if form.ConfirmPassword == "" {
-			result := json.CommonFailure(i18n.T(c, "password_confirm_required"))
-			c.String(http.StatusOK, result)
+			base.RespondError(c, i18n.T(c, "password_confirm_required"))
 			return
 		}
 		// 验证密码复杂度
 		if valid, errKey := utils.ValidatePassword(form.Password); !valid {
-			result := json.CommonFailure(i18n.T(c, errKey))
-			c.String(http.StatusOK, result)
+			base.RespondError(c, i18n.T(c, errKey))
 			return
 		}
 		if form.Password != form.ConfirmPassword {
-			result := json.CommonFailure(i18n.T(c, "password_mismatch"))
-			c.String(http.StatusOK, result)
+			base.RespondError(c, i18n.T(c, "password_mismatch"))
 			return
 		}
 	}
@@ -164,8 +148,7 @@ func Store(c *gin.Context) {
 	if form.Id == 0 {
 		_, err = userModel.Create()
 		if err != nil {
-			result := json.CommonFailure(i18n.T(c, "save_failed"), err)
-			c.String(http.StatusOK, result)
+			base.RespondError(c, i18n.T(c, "save_failed"), err)
 			return
 		}
 	} else {
@@ -176,30 +159,24 @@ func Store(c *gin.Context) {
 			"is_admin": form.IsAdmin,
 		})
 		if err != nil {
-			result := json.CommonFailure(i18n.T(c, "update_failed"), err)
-			c.String(http.StatusOK, result)
+			base.RespondError(c, i18n.T(c, "update_failed"), err)
 			return
 		}
 	}
 
-	result := json.Success(i18n.T(c, "save_success"), nil)
-	c.String(http.StatusOK, result)
+	base.RespondSuccess(c, i18n.T(c, "save_success"), nil)
 }
 
 // 删除用户
 func Remove(c *gin.Context) {
 	id, _ := strconv.Atoi(c.Param("id"))
-	json := utils.JsonResponse{}
-
 	userModel := new(models.User)
 	_, err := userModel.Delete(id)
-	var result string
 	if err != nil {
-		result = json.CommonFailure(utils.FailureContent, err)
+		base.RespondErrorWithDefaultMsg(c, err)
 	} else {
-		result = json.Success(utils.SuccessContent, nil)
+		base.RespondSuccessWithDefaultMsg(c, nil)
 	}
-	c.String(http.StatusOK, result)
 }
 
 // 激活用户
@@ -215,18 +192,15 @@ func Disable(c *gin.Context) {
 // 改变任务状态
 func changeStatus(c *gin.Context, status models.Status) {
 	id, _ := strconv.Atoi(c.Param("id"))
-	json := utils.JsonResponse{}
 	userModel := new(models.User)
 	_, err := userModel.Update(id, models.CommonMap{
 		"status": status,
 	})
-	var result string
 	if err != nil {
-		result = json.CommonFailure(utils.FailureContent, err)
+		base.RespondErrorWithDefaultMsg(c, err)
 	} else {
-		result = json.Success(utils.SuccessContent, nil)
+		base.RespondSuccessWithDefaultMsg(c, nil)
 	}
-	c.String(http.StatusOK, result)
 }
 
 // UpdatePassword 更新密码
@@ -234,76 +208,60 @@ func UpdatePassword(c *gin.Context) {
 	id, _ := strconv.Atoi(c.Param("id"))
 	var form UpdatePasswordForm
 	if err := c.ShouldBind(&form); err != nil {
-		json := utils.JsonResponse{}
-		result := json.CommonFailure(i18n.T(c, "form_validation_failed"))
-		c.String(http.StatusOK, result)
+		base.RespondValidationError(c, err)
 		return
 	}
 
-	json := utils.JsonResponse{}
-	var result string
 	if form.NewPassword != form.ConfirmNewPassword {
-		result = json.CommonFailure(i18n.T(c, "password_mismatch"))
-		c.String(http.StatusOK, result)
+		base.RespondError(c, i18n.T(c, "password_mismatch"))
 		return
 	}
 	// 验证密码复杂度
 	if valid, errKey := utils.ValidatePassword(form.NewPassword); !valid {
-		result = json.CommonFailure(i18n.T(c, errKey))
-		c.String(http.StatusOK, result)
+		base.RespondError(c, i18n.T(c, errKey))
 		return
 	}
 	userModel := new(models.User)
 	_, err := userModel.UpdatePassword(id, form.NewPassword)
 	if err != nil {
-		result = json.CommonFailure(i18n.T(c, "update_failed"))
+		base.RespondError(c, i18n.T(c, "update_failed"))
 	} else {
-		result = json.Success(i18n.T(c, "update_success"), nil)
+		base.RespondSuccess(c, i18n.T(c, "update_success"), nil)
 	}
-	c.String(http.StatusOK, result)
 }
 
 // UpdateMyPassword 更新我的密码
 func UpdateMyPassword(c *gin.Context) {
 	var form UpdateMyPasswordForm
 	if err := c.ShouldBind(&form); err != nil {
-		json := utils.JsonResponse{}
-		result := json.CommonFailure(i18n.T(c, "form_validation_failed"))
-		c.String(http.StatusOK, result)
+		base.RespondValidationError(c, err)
 		return
 	}
 
-	json := utils.JsonResponse{}
-	var result string
 	if form.NewPassword != form.ConfirmNewPassword {
-		result = json.CommonFailure(i18n.T(c, "password_mismatch"))
-		c.String(http.StatusOK, result)
+		base.RespondError(c, i18n.T(c, "password_mismatch"))
 		return
 	}
 	if form.OldPassword == form.NewPassword {
-		result = json.CommonFailure(i18n.T(c, "password_same_as_old"))
-		c.String(http.StatusOK, result)
+		base.RespondError(c, i18n.T(c, "password_same_as_old"))
 		return
 	}
 	// 验证密码复杂度
 	if valid, errKey := utils.ValidatePassword(form.NewPassword); !valid {
-		result = json.CommonFailure(i18n.T(c, errKey))
-		c.String(http.StatusOK, result)
+		base.RespondError(c, i18n.T(c, errKey))
 		return
 	}
 	userModel := new(models.User)
 	if !userModel.Match(Username(c), form.OldPassword) {
-		result = json.CommonFailure(i18n.T(c, "old_password_error"))
-		c.String(http.StatusOK, result)
+		base.RespondError(c, i18n.T(c, "old_password_error"))
 		return
 	}
 	_, err := userModel.UpdatePassword(Uid(c), form.NewPassword)
 	if err != nil {
-		result = json.CommonFailure(i18n.T(c, "update_failed"))
+		base.RespondError(c, i18n.T(c, "update_failed"))
 	} else {
-		result = json.Success(i18n.T(c, "update_success"), nil)
+		base.RespondSuccess(c, i18n.T(c, "update_success"), nil)
 	}
-	c.String(http.StatusOK, result)
 }
 
 // ValidateLogin 验证用户登录
@@ -311,12 +269,9 @@ func ValidateLogin(c *gin.Context) {
 	username := strings.TrimSpace(c.PostForm("username"))
 	password := strings.TrimSpace(c.PostForm("password"))
 	twoFactorCode := strings.TrimSpace(c.PostForm("two_factor_code"))
-	json := utils.JsonResponse{}
-	var result string
 
 	if username == "" || password == "" {
-		result = json.CommonFailure(i18n.T(c, "username_password_empty"))
-		c.String(http.StatusOK, result)
+		base.RespondError(c, i18n.T(c, "username_password_empty"))
 		return
 	}
 
@@ -329,8 +284,7 @@ func ValidateLogin(c *gin.Context) {
 		if remainingTime < 1 {
 			remainingTime = 1
 		}
-		result = json.CommonFailure(fmt.Sprintf(i18n.T(c, "account_locked"), remainingTime))
-		c.String(http.StatusOK, result)
+		base.RespondError(c, fmt.Sprintf(i18n.T(c, "account_locked"), remainingTime))
 		return
 	}
 
@@ -341,21 +295,19 @@ func ValidateLogin(c *gin.Context) {
 		remaining := limiter.GetRemainingAttempts(username)
 
 		if remaining > 0 {
-			result = json.CommonFailure(fmt.Sprintf(i18n.T(c, "login_failed_with_attempts"), remaining))
+			base.RespondError(c, fmt.Sprintf(i18n.T(c, "login_failed_with_attempts"), remaining))
 		} else {
-			result = json.CommonFailure(i18n.T(c, "username_password_error"))
+			base.RespondError(c, i18n.T(c, "username_password_error"))
 		}
-		c.String(http.StatusOK, result)
 		return
 	}
 
 	// 检查是否启用2FA
 	if userModel.TwoFactorOn == 1 {
 		if twoFactorCode == "" {
-			result = json.Success(i18n.T(c, "2fa_code_required"), map[string]interface{}{
+			base.RespondSuccess(c, i18n.T(c, "2fa_code_required"), map[string]interface{}{
 				"require_2fa": true,
 			})
-			c.String(http.StatusOK, result)
 			return
 		}
 		// 验证TOTP码
@@ -363,8 +315,7 @@ func ValidateLogin(c *gin.Context) {
 		if !valid {
 			// 2FA验证失败也记录失败次数
 			limiter.RecordFailure(username)
-			result = json.CommonFailure(i18n.T(c, "2fa_code_error"))
-			c.String(http.StatusOK, result)
+			base.RespondError(c, i18n.T(c, "2fa_code_error"))
 			return
 		}
 	}
@@ -387,18 +338,16 @@ func ValidateLogin(c *gin.Context) {
 	token, err := generateToken(userModel)
 	if err != nil {
 		logger.Errorf("生成jwt失败: %s", err)
-		result = json.Failure(utils.AuthError, i18n.T(c, "auth_failed"))
-		c.String(http.StatusOK, result)
+		base.RespondAuthError(c, i18n.T(c, "auth_failed"))
 		return
 	}
 
-	result = json.Success(utils.SuccessContent, map[string]interface{}{
+	base.RespondSuccess(c, utils.SuccessContent, map[string]interface{}{
 		"token":    token,
 		"uid":      userModel.Id,
 		"username": userModel.Name,
 		"is_admin": userModel.IsAdmin,
 	})
-	c.String(http.StatusOK, result)
 }
 
 // Username 获取session中的用户名

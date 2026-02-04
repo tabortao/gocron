@@ -2,7 +2,6 @@ package manage
 
 import (
 	"encoding/json"
-	"net/http"
 	"strconv"
 	"strings"
 
@@ -10,67 +9,68 @@ import (
 	"github.com/gocronx-team/gocron/internal/models"
 	"github.com/gocronx-team/gocron/internal/modules/logger"
 	"github.com/gocronx-team/gocron/internal/modules/utils"
+	"github.com/gocronx-team/gocron/internal/routers/base"
 	"github.com/gocronx-team/gocron/internal/service"
 )
 
 func Slack(c *gin.Context) {
 	settingModel := new(models.Setting)
 	slack, err := settingModel.Slack()
-	jsonResp := utils.JsonResponse{}
-	var result string
 	if err != nil {
 		logger.Error(err)
-		result = jsonResp.Success(utils.SuccessContent, nil)
+		base.RespondSuccess(c, utils.SuccessContent, nil)
 	} else {
-		result = jsonResp.Success(utils.SuccessContent, slack)
+		base.RespondSuccess(c, utils.SuccessContent, slack)
 	}
-	c.String(http.StatusOK, result)
 }
 
 func UpdateSlack(c *gin.Context) {
 	var form UpdateSlackForm
 	if err := c.ShouldBind(&form); err != nil {
 		logger.Errorf("Slack配置表单验证失败: %v", err)
-		json := utils.JsonResponse{}
-		result := json.CommonFailure("表单验证失败, 请检测输入")
-		c.String(http.StatusOK, result)
+		base.RespondError(c, "表单验证失败, 请检测输入")
 		return
 	}
 
 	settingModel := new(models.Setting)
 	err := settingModel.UpdateSlack(form.Url, form.Template)
-	result := utils.JsonResponseByErr(err)
-	c.String(http.StatusOK, result)
+	if err != nil {
+		base.RespondErrorWithDefaultMsg(c, err)
+	} else {
+		base.RespondSuccessWithDefaultMsg(c, nil)
+	}
 }
 
 func CreateSlackChannel(c *gin.Context) {
 	var form CreateSlackChannelForm
 	if err := c.ShouldBind(&form); err != nil {
 		logger.Errorf("创建Slack频道表单验证失败: %v", err)
-		json := utils.JsonResponse{}
-		result := json.CommonFailure("表单验证失败, 请检测输入")
-		c.String(http.StatusOK, result)
+		base.RespondError(c, "表单验证失败, 请检测输入")
 		return
 	}
 
 	settingModel := new(models.Setting)
-	var result string
 	if settingModel.IsChannelExist(form.Channel) {
-		jsonResp := utils.JsonResponse{}
-		result = jsonResp.CommonFailure("Channel已存在")
+		base.RespondError(c, "Channel已存在")
 	} else {
 		_, err := settingModel.CreateChannel(form.Channel)
-		result = utils.JsonResponseByErr(err)
+		if err != nil {
+			base.RespondErrorWithDefaultMsg(c, err)
+		} else {
+			base.RespondSuccessWithDefaultMsg(c, nil)
+		}
 	}
-	c.String(http.StatusOK, result)
 }
 
 func RemoveSlackChannel(c *gin.Context) {
 	id, _ := strconv.Atoi(c.Param("id"))
 	settingModel := new(models.Setting)
 	_, err := settingModel.RemoveChannel(id)
-	result := utils.JsonResponseByErr(err)
-	c.String(http.StatusOK, result)
+	if err != nil {
+		base.RespondErrorWithDefaultMsg(c, err)
+	} else {
+		base.RespondSuccessWithDefaultMsg(c, nil)
+	}
 }
 
 // endregion
@@ -79,15 +79,12 @@ func RemoveSlackChannel(c *gin.Context) {
 func Mail(c *gin.Context) {
 	settingModel := new(models.Setting)
 	mail, err := settingModel.Mail()
-	jsonResp := utils.JsonResponse{}
-	var result string
 	if err != nil {
 		logger.Error(err)
-		result = jsonResp.Success(utils.SuccessContent, nil)
+		base.RespondSuccess(c, utils.SuccessContent, nil)
 	} else {
-		result = jsonResp.Success("", mail)
+		base.RespondSuccess(c, "", mail)
 	}
-	c.String(http.StatusOK, result)
 }
 
 type MailServerForm struct {
@@ -130,7 +127,6 @@ func UpdateMail(c *gin.Context) {
 	var form MailServerForm
 	if err := c.ShouldBind(&form); err != nil {
 		logger.Errorf("邮件配置表单验证失败: %v", err)
-		json := utils.JsonResponse{}
 		// 提供更具体的错误信息
 		errorMsg := "表单验证失败: "
 		if strings.Contains(err.Error(), "email") {
@@ -144,8 +140,7 @@ func UpdateMail(c *gin.Context) {
 		} else {
 			errorMsg += "请检查输入格式"
 		}
-		result := json.CommonFailure(errorMsg)
-		c.String(http.StatusOK, result)
+		base.RespondError(c, errorMsg)
 		return
 	}
 
@@ -168,86 +163,95 @@ func UpdateMail(c *gin.Context) {
 
 	settingModel := new(models.Setting)
 	err := settingModel.UpdateMail(string(jsonByte), template)
-	result := utils.JsonResponseByErr(err)
-	c.String(http.StatusOK, result)
+	if err != nil {
+		base.RespondErrorWithDefaultMsg(c, err)
+	} else {
+		base.RespondSuccessWithDefaultMsg(c, nil)
+	}
 }
 
 func CreateMailUser(c *gin.Context) {
 	var form CreateMailUserForm
 	if err := c.ShouldBind(&form); err != nil {
 		logger.Errorf("创建邮件用户表单验证失败: %v", err)
-		json := utils.JsonResponse{}
-		result := json.CommonFailure("表单验证失败, 请检测输入")
-		c.String(http.StatusOK, result)
+		base.RespondError(c, "表单验证失败, 请检测输入")
 		return
 	}
 
 	settingModel := new(models.Setting)
 	_, err := settingModel.CreateMailUser(form.Username, form.Email)
-	result := utils.JsonResponseByErr(err)
-	c.String(http.StatusOK, result)
+	if err != nil {
+		base.RespondErrorWithDefaultMsg(c, err)
+	} else {
+		base.RespondSuccessWithDefaultMsg(c, nil)
+	}
 }
 
 func RemoveMailUser(c *gin.Context) {
 	id, _ := strconv.Atoi(c.Param("id"))
 	settingModel := new(models.Setting)
 	_, err := settingModel.RemoveMailUser(id)
-	result := utils.JsonResponseByErr(err)
-	c.String(http.StatusOK, result)
+	if err != nil {
+		base.RespondErrorWithDefaultMsg(c, err)
+	} else {
+		base.RespondSuccessWithDefaultMsg(c, nil)
+	}
 }
 
 func WebHook(c *gin.Context) {
 	settingModel := new(models.Setting)
 	webHook, err := settingModel.Webhook()
-	jsonResp := utils.JsonResponse{}
-	var result string
 	if err != nil {
 		logger.Error(err)
-		result = jsonResp.Success(utils.SuccessContent, nil)
+		base.RespondSuccess(c, utils.SuccessContent, nil)
 	} else {
-		result = jsonResp.Success("", webHook)
+		base.RespondSuccess(c, "", webHook)
 	}
-	c.String(http.StatusOK, result)
 }
 
 func UpdateWebHook(c *gin.Context) {
 	var form UpdateWebHookForm
 	if err := c.ShouldBind(&form); err != nil {
 		logger.Errorf("Webhook配置表单验证失败: %v", err)
-		json := utils.JsonResponse{}
-		result := json.CommonFailure("表单验证失败, 请检测输入")
-		c.String(http.StatusOK, result)
+		base.RespondError(c, "表单验证失败, 请检测输入")
 		return
 	}
 
 	settingModel := new(models.Setting)
 	err := settingModel.UpdateWebHook(form.Template)
-	result := utils.JsonResponseByErr(err)
-	c.String(http.StatusOK, result)
+	if err != nil {
+		base.RespondErrorWithDefaultMsg(c, err)
+	} else {
+		base.RespondSuccessWithDefaultMsg(c, nil)
+	}
 }
 
 func CreateWebhookUrl(c *gin.Context) {
 	var form CreateWebhookUrlForm
 	if err := c.ShouldBind(&form); err != nil {
 		logger.Errorf("创建Webhook地址表单验证失败: %v", err)
-		json := utils.JsonResponse{}
-		result := json.CommonFailure("表单验证失败, 请检测输入")
-		c.String(http.StatusOK, result)
+		base.RespondError(c, "表单验证失败, 请检测输入")
 		return
 	}
 
 	settingModel := new(models.Setting)
 	_, err := settingModel.CreateWebhookUrl(form.Name, form.Url)
-	result := utils.JsonResponseByErr(err)
-	c.String(http.StatusOK, result)
+	if err != nil {
+		base.RespondErrorWithDefaultMsg(c, err)
+	} else {
+		base.RespondSuccessWithDefaultMsg(c, nil)
+	}
 }
 
 func RemoveWebhookUrl(c *gin.Context) {
 	id, _ := strconv.Atoi(c.Param("id"))
 	settingModel := new(models.Setting)
 	_, err := settingModel.RemoveWebhookUrl(id)
-	result := utils.JsonResponseByErr(err)
-	c.String(http.StatusOK, result)
+	if err != nil {
+		base.RespondErrorWithDefaultMsg(c, err)
+	} else {
+		base.RespondSuccessWithDefaultMsg(c, nil)
+	}
 }
 
 // endregion
@@ -258,13 +262,11 @@ func GetLogRetentionDays(c *gin.Context) {
 	days := settingModel.GetLogRetentionDays()
 	cleanupTime := settingModel.GetLogCleanupTime()
 	fileSizeLimit := settingModel.GetLogFileSizeLimit()
-	jsonResp := utils.JsonResponse{}
-	result := jsonResp.Success("", map[string]interface{}{
+	base.RespondSuccess(c, "", map[string]interface{}{
 		"days":            days,
 		"cleanup_time":    cleanupTime,
 		"file_size_limit": fileSizeLimit,
 	})
-	c.String(http.StatusOK, result)
 }
 
 func UpdateLogRetentionDays(c *gin.Context) {
@@ -274,35 +276,29 @@ func UpdateLogRetentionDays(c *gin.Context) {
 		FileSizeLimit int    `json:"file_size_limit" binding:"min=0,max=10240"`
 	}
 	if err := c.ShouldBindJSON(&form); err != nil {
-		json := utils.JsonResponse{}
-		result := json.CommonFailure("表单验证失败, 请检测输入")
-		c.String(http.StatusOK, result)
+		base.RespondError(c, "表单验证失败, 请检测输入")
 		return
 	}
 
 	settingModel := new(models.Setting)
 	err := settingModel.UpdateLogRetentionDays(form.Days)
 	if err != nil {
-		result := utils.JsonResponseByErr(err)
-		c.String(http.StatusOK, result)
+		base.RespondErrorWithDefaultMsg(c, err)
 		return
 	}
 	err = settingModel.UpdateLogCleanupTime(form.CleanupTime)
 	if err != nil {
-		result := utils.JsonResponseByErr(err)
-		c.String(http.StatusOK, result)
+		base.RespondErrorWithDefaultMsg(c, err)
 		return
 	}
 	err = settingModel.UpdateLogFileSizeLimit(form.FileSizeLimit)
 	if err != nil {
-		result := utils.JsonResponseByErr(err)
-		c.String(http.StatusOK, result)
+		base.RespondErrorWithDefaultMsg(c, err)
 		return
 	}
 	// 重新加载日志清理任务
 	service.ServiceTask.ReloadLogCleanupTask()
-	result := utils.JsonResponseByErr(nil)
-	c.String(http.StatusOK, result)
+	base.RespondSuccessWithDefaultMsg(c, nil)
 }
 
 // endregion
