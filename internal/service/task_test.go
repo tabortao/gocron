@@ -218,8 +218,8 @@ func TestSendNotificationBehavior(t *testing.T) {
 			result: TaskResult{Result: "found ERROR", Err: nil},
 			count:  1,
 			check: func(t *testing.T, msg notify.Message) {
-				if msg["status"] != "成功" {
-					t.Fatalf("expected status 成功, got %v", msg["status"])
+				if msg["status"] != "Success" {
+					t.Fatalf("expected status Success, got %v", msg["status"])
 				}
 			},
 		},

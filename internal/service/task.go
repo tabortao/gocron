@@ -187,7 +187,7 @@ func (task Task) ReloadLogCleanupTask() {
 	serviceCron.RemoveJob("log-cleanup")
 	// 重新添加任务
 	task.initLogCleanupTask()
-	logger.Info("日志清理任务已重新加载")
+	logger.Info("Log cleanup task reloaded")
 }
 
 // 批量添加任务
@@ -206,12 +206,12 @@ func (task Task) RemoveAndAdd(taskModel models.Task) {
 // 添加任务
 func (task Task) Add(taskModel models.Task) {
 	if taskModel.Level == models.TaskLevelChild {
-		logger.Errorf("添加任务失败#不允许添加子任务到调度器#任务Id-%d", taskModel.Id)
+		logger.Errorf("Failed to add task#Child tasks cannot be added to scheduler#Task ID-%d", taskModel.Id)
 		return
 	}
 	taskFunc := createJob(taskModel)
 	if taskFunc == nil {
-		logger.Error("创建任务处理Job失败,不支持的任务协议#", taskModel.Protocol)
+		logger.Error("Failed to create task job#Unsupported task protocol#", taskModel.Protocol)
 		return
 	}
 
@@ -220,7 +220,7 @@ func (task Task) Add(taskModel models.Task) {
 		serviceCron.AddFunc(taskModel.Spec, taskFunc, cronName)
 	})
 	if err != nil {
-		logger.Error("添加任务到调度器失败#", err)
+		logger.Error("Failed to add task to scheduler#", err)
 	}
 }
 
@@ -288,7 +288,7 @@ func (h *HTTPHandler) Run(taskModel models.Task, taskUniqueId int64) (result str
 	}
 	// 返回状态码非200，均为失败
 	if resp.StatusCode != http.StatusOK {
-		return resp.Body, fmt.Errorf("HTTP状态码非200-->%d", resp.StatusCode)
+		return resp.Body, fmt.Errorf("HTTP status code is not 200-->%d", resp.StatusCode)
 	}
 
 	return resp.Body, err
@@ -298,9 +298,9 @@ func (h *HTTPHandler) Run(taskModel models.Task, taskUniqueId int64) (result str
 type RPCHandler struct{}
 
 func (h *RPCHandler) Run(taskModel models.Task, taskUniqueId int64) (result string, err error) {
-	logger.Infof("RPC任务开始执行#任务ID-%d#主机数量-%d", taskModel.Id, len(taskModel.Hosts))
+	logger.Infof("RPC task execution started#Task ID-%d#Host count-%d", taskModel.Id, len(taskModel.Hosts))
 	if len(taskModel.Hosts) == 0 {
-		return "", fmt.Errorf("任务未关联任何主机")
+		return "", fmt.Errorf("task is not associated with any host")
 	}
 	taskRequest := new(pb.TaskRequest)
 	taskRequest.Timeout = int32(taskModel.Timeout)
@@ -308,14 +308,14 @@ func (h *RPCHandler) Run(taskModel models.Task, taskUniqueId int64) (result stri
 	taskRequest.Id = taskUniqueId
 	resultChan := make(chan TaskResult, len(taskModel.Hosts))
 	for _, taskHost := range taskModel.Hosts {
-		logger.Infof("准备执行RPC调用#主机-%s:%d#命令-%s", taskHost.Name, taskHost.Port, taskModel.Command)
+		logger.Infof("Preparing RPC call#Host-%s:%d#Command-%s", taskHost.Name, taskHost.Port, taskModel.Command)
 		go func(th models.TaskHostDetail) {
 			output, err := rpcClient.Exec(th.Name, th.Port, taskRequest)
 			errorMessage := ""
 			if err != nil {
 				// 如果是手动停止错误，保留原始错误以便后续判断，但显示翻译后的文本
 				if errors.Is(err, rpcClient.ErrManualStop) {
-					errorMessage = "手动停止"
+					errorMessage = "Manually stopped"
 				} else {
 					errorMessage = err.Error()
 				}
@@ -327,7 +327,7 @@ func (h *RPCHandler) Run(taskModel models.Task, taskUniqueId int64) (result stri
 			outputMessage := fmt.Sprintf("Host: [%s-%s:%d]\n%s%s",
 				th.Alias, th.Name, th.Port, errorMessage, output,
 			)
-			logger.Infof("RPC调用完成#Host-%s:%d#输出长度-%d#错误-%v", th.Name, th.Port, len(output), err)
+			logger.Infof("RPC call completed#Host-%s:%d#Output length-%d#Error-%v", th.Name, th.Port, len(output), err)
 			resultChan <- TaskResult{Err: err, Result: outputMessage}
 		}(taskHost)
 	}
@@ -401,7 +401,7 @@ func createJob(taskModel models.Task) cron.FuncJob {
 		return nil
 	}
 	taskFunc := func() {
-		logger.Infof("任务闭包执行#ID-%d#名称-%s#主机数量-%d", taskModel.Id, taskModel.Name, len(taskModel.Hosts))
+		logger.Infof("Task closure execution#ID-%d#Name-%s#Host count-%d", taskModel.Id, taskModel.Name, len(taskModel.Hosts))
 		taskCount.Add()
 		defer taskCount.Done()
 
@@ -419,9 +419,9 @@ func createJob(taskModel models.Task) cron.FuncJob {
 		concurrencyQueue.Add()
 		defer concurrencyQueue.Done()
 
-		logger.Infof("开始执行任务#%s#命令-%s", taskModel.Name, taskModel.Command)
+		logger.Infof("Starting task execution#%s#Command-%s", taskModel.Name, taskModel.Command)
 		taskResult := execJob(handler, taskModel, taskLogId)
-		logger.Infof("任务完成#%s#命令-%s", taskModel.Name, taskModel.Command)
+		logger.Infof("Task completed#%s#Command-%s", taskModel.Name, taskModel.Command)
 		afterExecJob(taskModel, taskResult, taskLogId)
 	}
 
@@ -445,7 +445,7 @@ func beforeExecJob(taskModel models.Task) (taskLogId int64) {
 	// Multi=0 时，原子地检查并添加实例标记
 	if taskModel.Multi == 0 {
 		if !runInstance.tryAdd(taskModel.Id) {
-			logger.Infof("任务已在运行中，取消本次执行#ID-%d", taskModel.Id)
+			logger.Infof("Task already running, canceling this execution#ID-%d", taskModel.Id)
 			taskLogId, _ = createTaskLog(taskModel, models.Cancel)
 			return
 		}
@@ -453,15 +453,15 @@ func beforeExecJob(taskModel models.Task) (taskLogId int64) {
 
 	taskLogId, err := createTaskLog(taskModel, models.Running)
 	if err != nil {
-		logger.Error("任务开始执行#写入任务日志失败-", err)
+		logger.Error("Task execution started#Failed to write task log-", err)
 		// 如果创建日志失败，需要回滚实例标记
 		if taskModel.Multi == 0 {
 			runInstance.done(taskModel.Id)
 		}
 		return
 	}
-	logger.Infof("任务前置操作完成#ID-%d#taskLogId-%d", taskModel.Id, taskLogId)
-	logger.Debugf("任务命令-%s", taskModel.Command)
+	logger.Infof("Task pre-execution completed#ID-%d#taskLogId-%d", taskModel.Id, taskLogId)
+	logger.Debugf("Task command-%s", taskModel.Command)
 
 	return taskLogId
 }
@@ -470,7 +470,7 @@ func beforeExecJob(taskModel models.Task) (taskLogId int64) {
 func afterExecJob(taskModel models.Task, taskResult TaskResult, taskLogId int64) {
 	_, err := updateTaskLog(taskLogId, taskResult)
 	if err != nil {
-		logger.Error("任务结束#更新任务日志失败-", err)
+		logger.Error("Task ended#Failed to update task log-", err)
 	}
 
 	// 发送邮件
@@ -494,7 +494,7 @@ func execDependencyTask(taskModel models.Task, taskResult TaskResult) {
 
 	// 父子任务关系为强依赖, 父任务执行失败, 不执行依赖任务
 	if taskModel.DependencyStatus == models.TaskDependencyStatusStrong && taskResult.Err != nil {
-		logger.Infof("父子任务为强依赖关系, 父任务执行失败, 不运行依赖任务#主任务ID-%d", taskModel.Id)
+		logger.Infof("Parent-child tasks have strong dependency, parent task failed, dependency tasks will not run#Parent task ID-%d", taskModel.Id)
 		return
 	}
 
@@ -502,17 +502,17 @@ func execDependencyTask(taskModel models.Task, taskResult TaskResult) {
 	model := new(models.Task)
 	tasks, err := model.GetDependencyTaskList(dependencyTaskId)
 	if err != nil {
-		logger.Errorf("获取依赖任务失败#主任务ID-%d#%s", taskModel.Id, err.Error())
+		logger.Errorf("Failed to get dependency tasks#Parent task ID-%d#%s", taskModel.Id, err.Error())
 		return
 	}
 	if len(tasks) == 0 {
-		logger.Warnf("依赖任务列表为空或任务未启用#主任务ID-%d#依赖任务ID-%s", taskModel.Id, dependencyTaskId)
+		logger.Warnf("Dependency task list is empty or tasks are disabled#Parent task ID-%d#Dependency task ID-%s", taskModel.Id, dependencyTaskId)
 		return
 	}
-	logger.Infof("开始执行依赖任务#主任务ID-%d#依赖任务数量-%d", taskModel.Id, len(tasks))
+	logger.Infof("Starting dependency tasks execution#Parent task ID-%d#Dependency task count-%d", taskModel.Id, len(tasks))
 	for _, task := range tasks {
-		logger.Infof("执行依赖任务#主任务ID-%d#依赖任务ID-%d#依赖任务名称-%s", taskModel.Id, task.Id, task.Name)
-		task.Spec = fmt.Sprintf("依赖任务(主任务ID-%d)", taskModel.Id)
+		logger.Infof("Executing dependency task#Parent task ID-%d#Dependency task ID-%d#Dependency task name-%s", taskModel.Id, task.Id, task.Name)
+		task.Spec = fmt.Sprintf("Dependency task (Parent task ID-%d)", taskModel.Id)
 		ServiceTask.Run(task)
 	}
 }
@@ -540,9 +540,9 @@ func SendNotification(taskModel models.Task, taskResult TaskResult) {
 		return
 	}
 	if taskResult.Err != nil {
-		statusName = "失败"
+		statusName = "Failed"
 	} else {
-		statusName = "成功"
+		statusName = "Success"
 	}
 	// 发送通知
 	msg := notify.Message{
@@ -579,7 +579,7 @@ func execJob(handler Handler, taskModel models.Task, taskUniqueId int64) TaskRes
 		}
 		i++
 		if i < execTimes {
-			logger.Warnf("任务执行失败#任务id-%d#重试第%d次#输出-%s#错误-%s", taskModel.Id, i, output, err.Error())
+			logger.Warnf("Task execution failed#Task ID-%d#Retry attempt %d#Output-%s#Error-%s", taskModel.Id, i, output, err.Error())
 			if taskModel.RetryInterval > 0 {
 				sleepFunc(time.Duration(taskModel.RetryInterval) * time.Second)
 			} else {
@@ -610,7 +610,7 @@ func cleanupLogFiles() {
 	fileInfo, err := os.Stat(logPath)
 	if err != nil {
 		if !os.IsNotExist(err) {
-			logger.Errorf("检查日志文件失败: %s", err)
+			logger.Errorf("Failed to check log file: %s", err)
 		}
 		return
 	}
@@ -620,9 +620,9 @@ func cleanupLogFiles() {
 	if fileInfo.Size() > maxSize {
 		err := os.Truncate(logPath, 0)
 		if err != nil {
-			logger.Errorf("清空日志文件失败: %s", err)
+			logger.Errorf("Failed to truncate log file: %s", err)
 		} else {
-			logger.Infof("日志文件超过%dMB，已清空: %s", fileSizeLimit, logPath)
+			logger.Infof("Log file exceeded %dMB, truncated: %s", fileSizeLimit, logPath)
 		}
 	}
 }

@@ -112,7 +112,7 @@
             </g>
             
             <!-- X轴刻度和标签 -->
-            <g v-for="(item, index) in stats.last7Days" :key="'x-tick-' + index">
+            <g v-for="(item, index) in stats.chartData" :key="'x-tick-' + index">
               <line 
                 :x1="getChartPointX(index)" 
                 :y1="180" 
@@ -134,7 +134,7 @@
             
             <!-- 成功折线 -->
             <polyline 
-              v-if="stats.last7Days.length > 0"
+              v-if="stats.chartData.length > 0"
               :points="getChartLinePoints('success')"
               fill="none"
               stroke="#67C23A"
@@ -145,7 +145,7 @@
             
             <!-- 失败折线 -->
             <polyline 
-              v-if="stats.last7Days.length > 0"
+              v-if="stats.chartData.length > 0"
               :points="getChartLinePoints('failed')"
               fill="none"
               stroke="#F56C6C"
@@ -155,7 +155,7 @@
             />
             
             <!-- 成功数据点 -->
-            <g v-for="(item, index) in stats.last7Days" :key="'success-point-' + index">
+            <g v-for="(item, index) in stats.chartData" :key="'success-point-' + index">
               <circle 
                 :cx="getChartPointX(index)"
                 :cy="getChartPointY(item.success)"
@@ -169,7 +169,7 @@
             </g>
             
             <!-- 失败数据点 -->
-            <g v-for="(item, index) in stats.last7Days" :key="'failed-point-' + index">
+            <g v-for="(item, index) in stats.chartData" :key="'failed-point-' + index">
               <circle 
                 :cx="getChartPointX(index)"
                 :cy="getChartPointY(item.failed)"
@@ -251,7 +251,8 @@ const stats = ref({
   todayExecutions: 0,
   successRate: 0,
   failedCount: 0,
-  last7Days: []
+  last7Days: [], // 表格数据（新到旧）
+  chartData: []  // 折线图数据（旧到新）
 })
 
 // 获取统计数据
@@ -277,7 +278,8 @@ const fetchStatistics = () => {
         todayExecutions: total7DaysExecutions, // 改为显示7天总执行次数
         successRate: successRate7Days, // 改为7天成功率
         failedCount: total7DaysFailed, // 改为7天失败总数
-        last7Days: last7Days
+        last7Days: last7Days, // 表格数据保持DESC顺序（新到旧）
+        chartData: [...last7Days].reverse() // 折线图数据反转为ASC顺序（旧到新）
       }
     }
   })
@@ -298,14 +300,14 @@ const getProgressColor = (percentage) => {
 
 // 获取最大值（用于折线图高度计算）
 const getMaxValue = () => {
-  if (stats.value.last7Days.length === 0) return 1
-  const allValues = stats.value.last7Days.flatMap(item => [item.success, item.failed])
+  if (stats.value.chartData.length === 0) return 1
+  const allValues = stats.value.chartData.flatMap(item => [item.success, item.failed])
   return Math.max(...allValues, 1)
 }
 
 // 计算折线图点的X坐标（图表区域：70-870）
 const getChartPointX = (index) => {
-  const totalDays = stats.value.last7Days.length
+  const totalDays = stats.value.chartData.length
   if (totalDays <= 1) return 470 // 中心位置
   const chartWidth = 800 // 870 - 70
   const spacing = chartWidth / (totalDays - 1)
@@ -323,7 +325,7 @@ const getChartPointY = (value) => {
 
 // 获取折线的点坐标字符串
 const getChartLinePoints = (type) => {
-  return stats.value.last7Days.map((item, index) => {
+  return stats.value.chartData.map((item, index) => {
     const x = getChartPointX(index)
     const y = getChartPointY(type === 'success' ? item.success : item.failed)
     return `${x},${y}`

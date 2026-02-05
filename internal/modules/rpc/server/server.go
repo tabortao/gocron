@@ -101,14 +101,14 @@ func (s *Server) Run(ctx context.Context, req *pb.TaskRequest) (*pb.TaskResponse
 		// 如果是手动停止，使用特定的错误信息
 		if wasStopped {
 			resp.Error = "manual stop"
-			log.Infof("[id: %d] 手动停止\n%s", req.Id, output)
+			log.Infof("[id: %d] Manually stopped\n%s", req.Id, output)
 		} else {
 			resp.Error = execErr.Error()
-			log.Infof("[id: %d] 执行失败: %s\n%s", req.Id, execErr.Error(), output)
+			log.Infof("[id: %d] Execution failed: %s\n%s", req.Id, execErr.Error(), output)
 		}
 	} else {
 		resp.Error = ""
-		log.Infof("[id: %d] 执行成功\n%s", req.Id, output)
+		log.Infof("[id: %d] Execution successful\n%s", req.Id, output)
 	}
 
 	return resp, nil
