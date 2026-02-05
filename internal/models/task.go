@@ -251,7 +251,7 @@ func (task *Task) setHostsForTasks(tasks []Task) ([]Task, error) {
 		} else {
 			tasks[i].Hosts = []TaskHostDetail{}
 		}
-		logger.Debugf("任务ID-%d 关联主机数量-%d", tasks[i].Id, len(tasks[i].Hosts))
+		logger.Debugf("Task ID-%d Associated host count-%d", tasks[i].Id, len(tasks[i].Hosts))
 	}
 
 	return tasks, nil

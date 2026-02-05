@@ -151,3 +151,66 @@ func (taskLog *TaskLog) parseWhere(query *gorm.DB, params CommonMap) {
 		query.Where("status = ?", status)
 	}
 }
+
+// 统计相关方法
+
+// DailyStats 每日统计数据
+type DailyStats struct {
+	Date    string `json:"date"`
+	Total   int    `json:"total"`
+	Success int    `json:"success"`
+	Failed  int    `json:"failed"`
+}
+
+// GetLast7DaysTrend 获取最近7天的执行趋势
+func (taskLog *TaskLog) GetLast7DaysTrend() ([]DailyStats, error) {
+	var stats []DailyStats
+
+	// 使用 Go 计算7天前的日期，兼容所有数据库
+	sevenDaysAgo := time.Now().AddDate(0, 0, -7).Format("2006-01-02")
+	tomorrow := time.Now().AddDate(0, 0, 1).Format("2006-01-02")
+
+	err := Db.Raw(`
+		SELECT 
+			DATE(start_time) as date,
+			COUNT(*) as total,
+			SUM(CASE WHEN status = ? THEN 1 ELSE 0 END) as success,
+			SUM(CASE WHEN status = ? THEN 1 ELSE 0 END) as failed
+		FROM task_log
+		WHERE start_time >= ? AND start_time < ?
+		GROUP BY DATE(start_time)
+		ORDER BY date DESC
+	`, Finish, Failure, sevenDaysAgo, tomorrow).Scan(&stats).Error
+
+	return stats, err
+}
+
+// GetTodayStats 获取今日统计数据
+func (taskLog *TaskLog) GetTodayStats() (total, success, failed int64, err error) {
+	// 使用 Go 计算今天的日期范围
+	today := time.Now().Format("2006-01-02")
+	tomorrow := time.Now().AddDate(0, 0, 1).Format("2006-01-02")
+
+	// 今日总执行次数
+	err = Db.Model(&TaskLog{}).
+		Where("start_time >= ? AND start_time < ?", today, tomorrow).
+		Count(&total).Error
+	if err != nil {
+		return
+	}
+
+	// 今日成功次数
+	err = Db.Model(&TaskLog{}).
+		Where("start_time >= ? AND start_time < ? AND status = ?", today, tomorrow, Finish).
+		Count(&success).Error
+	if err != nil {
+		return
+	}
+
+	// 今日失败次数
+	err = Db.Model(&TaskLog{}).
+		Where("start_time >= ? AND start_time < ? AND status = ?", today, tomorrow, Failure).
+		Count(&failed).Error
+
+	return
+}

@@ -178,10 +178,10 @@ func catchSignal() {
 	signal.Notify(c, syscall.SIGHUP, syscall.SIGINT, syscall.SIGTERM)
 	for {
 		s := <-c
-		logger.Info("收到信号 -- ", s)
+		logger.Info("Received signal -- ", s)
 		switch s {
 		case syscall.SIGHUP:
-			logger.Info("收到终端断开信号, 忽略")
+			logger.Info("Received terminal disconnect signal, ignoring")
 		case syscall.SIGINT, syscall.SIGTERM:
 			shutdown()
 		}
@@ -191,7 +191,7 @@ func catchSignal() {
 // 应用退出
 func shutdown() {
 	defer func() {
-		logger.Info("已退出")
+		logger.Info("Exited")
 		logger.Close() // 确保日志刷新
 		os.Exit(0)
 	}()
@@ -199,9 +199,9 @@ func shutdown() {
 	if !app.Installed {
 		return
 	}
-	logger.Info("应用准备退出")
+	logger.Info("Application preparing to exit")
 	// 停止所有任务调度
-	logger.Info("停止定时任务调度")
+	logger.Info("Stopping scheduled task scheduler")
 	service.ServiceTask.WaitAndExit()
 }
 

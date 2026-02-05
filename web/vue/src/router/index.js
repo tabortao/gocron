@@ -121,6 +121,12 @@ const routes = [
     path: '/system/log-retention',
     name: 'log-retention',
     component: () => import('../pages/system/logRetention.vue')
+  },
+  {
+    path: '/statistics',
+    name: 'statistics',
+    component: () => import('../pages/statistics/index.vue'),
+    meta: { noNeedAdmin: true }
   }
 ]
 

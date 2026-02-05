@@ -9,6 +9,7 @@
       router>
       <el-menu-item index="/task">{{ t('task.list') }}</el-menu-item>
       <el-menu-item index="/task/log">{{ t('task.log') }}</el-menu-item>
+      <el-menu-item index="/statistics">{{ t('nav.statistics') }}</el-menu-item>
     </el-menu>
     <div class="sidebar-language-switcher">
       <LanguageSwitcher />
@@ -34,6 +35,9 @@ export default {
     currentRoute () {
       if (this.$route.path === '/task/log') {
         return '/task/log'
+      }
+      if (this.$route.path === '/statistics') {
+        return '/statistics'
       }
       return '/task'
     }

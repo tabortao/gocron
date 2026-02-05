@@ -19,13 +19,15 @@ export default {
     yes: 'Yes',
     no: 'No',
     total: 'Total',
-    items: 'items'
+    items: 'items',
+    date: 'Date'
   },
   nav: {
     taskManage: 'Task Management',
     taskNode: 'Task Node',
     userManage: 'User Management',
     systemManage: 'System Management',
+    statistics: 'Statistics',
     logout: 'Logout',
     changePassword: 'Change Password',
     twoFactor: 'Two-Factor Authentication'
@@ -396,5 +398,20 @@ export default {
     hourly: 'Run once an hour',
     every30s: 'Run every 30 seconds',
     every1m20s: 'Run every 1 minute and 20 seconds'
+  },
+  statistics: {
+    title: 'Statistics',
+    totalTasks: 'Total Tasks',
+    todayExecutions: 'Today Executions',
+    last7DaysExecutions: '7-Day Executions',
+    successRate: '7-Day Success Rate',
+    failedCount: '7-Day Failed Tasks',
+    last7DaysTrend: 'Last 7 Days Trend',
+    success: 'Success',
+    failed: 'Failed',
+    total: 'Total',
+    executionCount: 'Execution Count',
+    date: 'Date',
+    detailedData: 'Detailed Data'
   }
 }

@@ -19,13 +19,15 @@ export default {
     yes: '是',
     no: '否',
     total: '共',
-    items: '条'
+    items: '条',
+    date: '日期'
   },
   nav: {
     taskManage: '任务管理',
     taskNode: '任务节点',
     userManage: '用户管理',
     systemManage: '系统管理',
+    statistics: '数据统计',
     logout: '退出',
     changePassword: '修改密码',
     twoFactor: '双因素认证'
@@ -396,5 +398,20 @@ export default {
     hourly: '每小时运行一次',
     every30s: '每隔30秒运行一次',
     every1m20s: '每隔1分钟20秒运行一次'
+  },
+  statistics: {
+    title: '数据统计',
+    totalTasks: '任务总数',
+    todayExecutions: '今日执行',
+    last7DaysExecutions: '7天执行次数',
+    successRate: '7天成功率',
+    failedCount: '7天失败任务',
+    last7DaysTrend: '最近7天趋势',
+    success: '成功',
+    failed: '失败',
+    total: '总计',
+    executionCount: '执行次数',
+    date: '日期',
+    detailedData: '详细数据'
   }
 }

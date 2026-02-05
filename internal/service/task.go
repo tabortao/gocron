@@ -125,7 +125,7 @@ func (task Task) Initialize() {
 	taskCount = TaskCount{sync.WaitGroup{}, make(chan struct{})}
 	go taskCount.Wait()
 
-	logger.Info("开始初始化定时任务")
+	logger.Info("Starting to initialize scheduled tasks")
 	taskModel := new(models.Task)
 	taskNum := 0
 	page := 1
@@ -134,19 +134,19 @@ func (task Task) Initialize() {
 	for page < maxPage {
 		taskList, err := taskModel.ActiveList(page, pageSize)
 		if err != nil {
-			logger.Fatalf("定时任务初始化#获取任务列表错误: %s", err)
+			logger.Fatalf("Scheduled task initialization#Failed to get task list: %s", err)
 		}
 		if len(taskList) == 0 {
 			break
 		}
 		for _, item := range taskList {
-			logger.Infof("添加任务到调度器#ID-%d#名称-%s#协议-%d#主机数量-%d", item.Id, item.Name, item.Protocol, len(item.Hosts))
+			logger.Infof("Adding task to scheduler#ID-%d#Name-%s#Protocol-%d#Host count-%d", item.Id, item.Name, item.Protocol, len(item.Hosts))
 			task.Add(item)
 			taskNum++
 		}
 		page++
 	}
-	logger.Infof("定时任务初始化完成, 共%d个定时任务添加到调度器", taskNum)
+	logger.Infof("Scheduled task initialization completed, %d tasks added to scheduler", taskNum)
 
 	// 添加日志自动清理任务
 	task.initLogCleanupTask()
@@ -170,15 +170,15 @@ func (task Task) initLogCleanupTask() {
 			taskLogModel := new(models.TaskLog)
 			count, err := taskLogModel.RemoveByDays(days)
 			if err != nil {
-				logger.Errorf("自动清理数据库日志失败: %s", err)
+				logger.Errorf("Failed to auto-cleanup database logs: %s", err)
 			} else {
-				logger.Infof("自动清理%d天前的数据库日志, 删除%d条记录", days, count)
+				logger.Infof("Auto-cleanup database logs older than %d days, deleted %d records", days, count)
 			}
 			// 清理日志文件
 			cleanupLogFiles()
 		}
 	}, "log-cleanup")
-	logger.Infof("日志自动清理任务已添加, 执行时间: %s", cleanupTime)
+	logger.Infof("Log auto-cleanup task added, execution time: %s", cleanupTime)
 }
 
 // 重新加载日志清理任务
@@ -395,7 +395,7 @@ func updateTaskLog(taskLogId int64, taskResult TaskResult) (int64, error) {
 }
 
 func createJob(taskModel models.Task) cron.FuncJob {
-	logger.Infof("创建任务Job#ID-%d#名称-%s#主机数量-%d", taskModel.Id, taskModel.Name, len(taskModel.Hosts))
+	logger.Infof("Creating task job#ID-%d#Name-%s#Host count-%d", taskModel.Id, taskModel.Name, len(taskModel.Hosts))
 	handler := createHandler(taskModel)
 	if handler == nil {
 		return nil

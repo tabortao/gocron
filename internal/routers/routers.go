@@ -19,6 +19,7 @@ import (
 	"github.com/gocronx-team/gocron/internal/routers/install"
 	"github.com/gocronx-team/gocron/internal/routers/loginlog"
 	"github.com/gocronx-team/gocron/internal/routers/manage"
+	"github.com/gocronx-team/gocron/internal/routers/statistics"
 	"github.com/gocronx-team/gocron/internal/routers/task"
 	"github.com/gocronx-team/gocron/internal/routers/tasklog"
 	"github.com/gocronx-team/gocron/internal/routers/user"
@@ -137,6 +138,12 @@ func Register(r *gin.Engine) {
 		systemGroup.GET("/login-log", loginlog.Index)
 		systemGroup.GET("/log-retention", manage.GetLogRetentionDays)
 		systemGroup.POST("/log-retention", manage.UpdateLogRetentionDays)
+	}
+
+	// 统计
+	statisticsGroup := api.Group("/statistics")
+	{
+		statisticsGroup.GET("/overview", statistics.Overview)
 	}
 
 	// API
