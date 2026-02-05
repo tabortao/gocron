@@ -1,8 +1,6 @@
 <template>
-  <el-container>
-    <task-sidebar></task-sidebar>
-    <el-main class="statistics-main">
-      <div class="page-header">
+  <el-main class="statistics-main">
+    <div class="page-header">
         <h2>{{ t('statistics.title') }}</h2>
         <el-button type="primary" size="small" @click="refresh">{{ t('common.refresh') }}</el-button>
       </div>
@@ -238,14 +236,12 @@
         </el-table>
       </el-card>
     </el-main>
-  </el-container>
 </template>
 
 <script setup>
 import { ref, onMounted } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { Document, CircleCheck, CircleClose, TrendCharts } from '@element-plus/icons-vue'
-import TaskSidebar from '../task/sidebar.vue'
 import statisticsApi from '../../api/statistics'
 
 const { t } = useI18n()

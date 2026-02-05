@@ -1,8 +1,6 @@
 <template>
-  <el-container >
-    <task-sidebar></task-sidebar>
-    <el-main>
-      <el-form ref="form" :model="form" :rules="formRules" label-width="auto">
+  <el-main>
+    <el-form ref="form" :model="form" :rules="formRules" label-width="auto">
         <el-input v-model="form.id" type="hidden"></el-input>
         <el-row>
           <el-col :span="12">
@@ -298,13 +296,11 @@
         </el-form-item>
       </el-form>
     </el-main>
-  </el-container>
 </template>
 
 
 <script>
 import { useI18n } from 'vue-i18n'
-import taskSidebar from './sidebar.vue'
 import taskService from '../../api/task'
 import notificationService from '../../api/notification'
 import { validateCronSpec, getCronExamples } from '../../utils/cronValidator'
@@ -335,7 +331,6 @@ const createDefaultForm = () => ({
 
 export default {
   name: 'task-edit',
-  components: {taskSidebar},
   setup() {
     const { t, locale } = useI18n()
     return { t, locale }

@@ -1,43 +1,41 @@
 <template>
-  <el-container>
-    <el-main>
-      <el-form ref="form" :model="form" :rules="formRules" label-width="auto" style="width: 500px;">
-        <el-form-item>
-          <el-input v-model="form.id" type="hidden"></el-input>
+  <el-main>
+    <el-form ref="form" :model="form" :rules="formRules" label-width="auto" style="width: 500px;">
+      <el-form-item>
+        <el-input v-model="form.id" type="hidden"></el-input>
+      </el-form-item>
+      <el-form-item :label="t('user.username')" prop="name">
+        <el-input v-model="form.name"></el-input>
+      </el-form-item>
+      <el-form-item :label="t('user.email')" prop="email">
+        <el-input v-model="form.email"></el-input>
+      </el-form-item>
+      <template v-if="!form.id">
+        <el-form-item :label="t('user.password')" prop="password">
+          <el-input v-model="form.password" type="password" :placeholder="t('user.passwordPlaceholder')"></el-input>
         </el-form-item>
-        <el-form-item :label="t('user.username')" prop="name">
-          <el-input v-model="form.name"></el-input>
+        <el-form-item :label="t('user.confirmPassword')" prop="confirm_password">
+          <el-input v-model="form.confirm_password" type="password" :placeholder="t('user.passwordPlaceholder')"></el-input>
         </el-form-item>
-        <el-form-item :label="t('user.email')" prop="email">
-          <el-input v-model="form.email"></el-input>
-        </el-form-item>
-        <template v-if="!form.id">
-          <el-form-item :label="t('user.password')" prop="password">
-            <el-input v-model="form.password" type="password" :placeholder="t('user.passwordPlaceholder')"></el-input>
-          </el-form-item>
-          <el-form-item :label="t('user.confirmPassword')" prop="confirm_password">
-            <el-input v-model="form.confirm_password" type="password" :placeholder="t('user.passwordPlaceholder')"></el-input>
-          </el-form-item>
-        </template>
-        <el-form-item :label="t('user.role')" prop="is_admin">
-          <el-radio-group v-model="form.is_admin">
-            <el-radio :label="0">{{ t('user.normalUser') }}</el-radio>
-            <el-radio :label="1">{{ t('user.admin') }}</el-radio>
-          </el-radio-group>
-        </el-form-item>
-        <el-form-item :label="t('common.status')" prop="status">
-          <el-radio-group v-model="form.status">
-            <el-radio :label="1">{{ t('common.enabled') }}</el-radio>
-            <el-radio :label="0">{{ t('common.disabled') }}</el-radio>
-          </el-radio-group>
-        </el-form-item>
-        <el-form-item>
-          <el-button type="primary" @click="submit()">{{ t('common.save') }}</el-button>
-          <el-button @click="cancel">{{ t('common.cancel') }}</el-button>
-        </el-form-item>
-      </el-form>
-    </el-main>
-  </el-container>
+      </template>
+      <el-form-item :label="t('user.role')" prop="is_admin">
+        <el-radio-group v-model="form.is_admin">
+          <el-radio :label="0">{{ t('user.normalUser') }}</el-radio>
+          <el-radio :label="1">{{ t('user.admin') }}</el-radio>
+        </el-radio-group>
+      </el-form-item>
+      <el-form-item :label="t('common.status')" prop="status">
+        <el-radio-group v-model="form.status">
+          <el-radio :label="1">{{ t('common.enabled') }}</el-radio>
+          <el-radio :label="0">{{ t('common.disabled') }}</el-radio>
+        </el-radio-group>
+      </el-form-item>
+      <el-form-item>
+        <el-button type="primary" @click="submit()">{{ t('common.save') }}</el-button>
+        <el-button @click="cancel">{{ t('common.cancel') }}</el-button>
+      </el-form-item>
+    </el-form>
+  </el-main>
 </template>
 
 <script>

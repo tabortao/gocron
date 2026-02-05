@@ -1,8 +1,6 @@
 <template>
-  <el-container>
-    <task-sidebar></task-sidebar>
-    <el-main>
-      <el-form :inline="true">
+  <el-main>
+    <el-form :inline="true">
         <el-form-item :label="t('task.id')">
           <el-input v-model.trim="searchParams.task_id"></el-input>
         </el-form-item>
@@ -183,13 +181,11 @@
         </div>
       </el-dialog>
     </el-main>
-  </el-container>
 </template>
 
 <script>
 import { useI18n } from 'vue-i18n'
 import { ElMessageBox } from 'element-plus'
-import taskSidebar from '../task/sidebar.vue'
 import taskLogService from '../../api/taskLog'
 import { useUserStore } from '../../stores/user'
 import { availableLanguages } from '@/const/index'
@@ -258,7 +254,6 @@ export default {
       }
     }
   },
-  components: { taskSidebar },
   created() {
     this.updateTaskIdFromRoute()
     this.search()

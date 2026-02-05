@@ -1,8 +1,6 @@
 <template>
-  <el-container>
-    <system-sidebar></system-sidebar>
-    <el-main>
-      <h3>{{ t('system.logRetentionSettings') }}</h3>
+  <el-main>
+    <h3>{{ t('system.logRetentionSettings') }}</h3>
       <el-form :model="form" label-width="auto" style="width: 600px;">
         <el-form-item :label="t('system.dbLogRetentionDays')">
           <el-input-number v-model="form.days" :min="0" :max="3650" style="width: 200px;"></el-input-number>
@@ -34,17 +32,14 @@
         </el-form-item>
       </el-form>
     </el-main>
-  </el-container>
 </template>
 
 <script>
 import { useI18n } from 'vue-i18n'
-import systemSidebar from './sidebar.vue'
 import httpClient from '../../utils/httpClient'
 
 export default {
   name: 'log-retention',
-  components: { systemSidebar },
   setup() {
     const { t, locale } = useI18n()
     return { t, locale }

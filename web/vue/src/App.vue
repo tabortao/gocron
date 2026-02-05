@@ -1,30 +1,32 @@
 <template>
   <el-container style="height: 100vh">
-    <el-header v-if="userStore.isLogin">
-      <app-header></app-header>
-      <app-nav-menu></app-nav-menu>
-    </el-header>
-    <el-main style="padding: 0; display: flex; flex-direction: column; overflow: hidden">
-      <div id="main-container" v-cloak>
-        <el-config-provider :locale="activeLang">
-          <router-view v-slot="{ Component }">
-            <keep-alive>
-              <component :is="Component" />
-            </keep-alive>
-          </router-view>
-        </el-config-provider>
-      </div>
-    </el-main>
+    <app-sidebar v-if="userStore.isLogin"></app-sidebar>
+    <el-container style="flex-direction: column">
+      <el-header v-if="userStore.isLogin" height="60px">
+        <app-header></app-header>
+      </el-header>
+      <el-main style="padding: 0; overflow-y: auto">
+        <div id="main-container" v-cloak>
+          <el-config-provider :locale="activeLang">
+            <router-view v-slot="{ Component }">
+              <keep-alive>
+                <component :is="Component" />
+              </keep-alive>
+            </router-view>
+          </el-config-provider>
+        </div>
+      </el-main>
+    </el-container>
   </el-container>
 </template>
 
 <script setup>
-import { onMounted } from 'vue'
+import { computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useUserStore } from './stores/user'
 import installService from './api/install'
 import appHeader from './components/common/header.vue'
-import appNavMenu from './components/common/navMenu.vue'
+import appSidebar from './components/common/sidebar.vue'
 import { ElConfigProvider } from 'element-plus'
 import zhCN from 'element-plus/es/locale/lang/zh-cn'
 import en from 'element-plus/es/locale/lang/en'
@@ -64,7 +66,7 @@ body {
   margin: 0;
   padding: 0;
   height: 100%;
-  overflow-x: hidden;
+  overflow: hidden;
 }
 .el-header {
   padding: 0;
@@ -76,30 +78,24 @@ body {
   width: 100%;
 }
 .el-main {
-  padding: 0;
+  padding: 20px;
   margin: 0;
+  background-color: #f5f7fa;
 }
 #main-container {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  overflow: hidden;
+  height: 100%;
 }
 
 #main-container .el-container {
   height: 100%;
+  background-color: transparent;
 }
 
 #main-container .el-main {
   height: auto;
-  flex: 1;
   overflow-y: auto;
-  margin: 20px;
 }
 
-.el-aside .el-menu {
-  height: 100%;
-}
 .custom-message-box {
   min-width: 420px;
 }

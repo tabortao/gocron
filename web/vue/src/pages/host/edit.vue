@@ -1,33 +1,31 @@
 <template>
-  <el-container>
-    <el-main>
-      <el-form ref="form" :model="form" :rules="formRules" label-width="auto" style="width: 500px;">
-        <el-form-item>
-          <el-input v-model="form.id" type="hidden"></el-input>
-        </el-form-item>
-        <el-form-item :label="t('host.alias')" prop="alias">
-          <el-input v-model="form.alias"></el-input>
-        </el-form-item>
-        <el-form-item :label="t('host.name')" prop="name">
-          <el-input v-model="form.name"></el-input>
-        </el-form-item>
-        <el-form-item :label="t('host.port')" prop="port">
-          <el-input v-model.number="form.port"></el-input>
-        </el-form-item>
-        <el-form-item :label="t('host.remark')">
-          <el-input
-            type="textarea"
-            :rows="5"
-            v-model="form.remark">
-          </el-input>
-        </el-form-item>
-        <el-form-item>
-          <el-button type="primary" @click="submit()">{{ t('common.save') }}</el-button>
-          <el-button @click="cancel">{{ t('common.cancel') }}</el-button>
-        </el-form-item>
-      </el-form>
-    </el-main>
-  </el-container>
+  <el-main>
+    <el-form ref="form" :model="form" :rules="formRules" label-width="auto" style="width: 500px;">
+      <el-form-item>
+        <el-input v-model="form.id" type="hidden"></el-input>
+      </el-form-item>
+      <el-form-item :label="t('host.alias')" prop="alias">
+        <el-input v-model="form.alias"></el-input>
+      </el-form-item>
+      <el-form-item :label="t('host.name')" prop="name">
+        <el-input v-model="form.name"></el-input>
+      </el-form-item>
+      <el-form-item :label="t('host.port')" prop="port">
+        <el-input v-model.number="form.port"></el-input>
+      </el-form-item>
+      <el-form-item :label="t('host.remark')">
+        <el-input
+          type="textarea"
+          :rows="5"
+          v-model="form.remark">
+        </el-input>
+      </el-form-item>
+      <el-form-item>
+        <el-button type="primary" @click="submit()">{{ t('common.save') }}</el-button>
+        <el-button @click="cancel">{{ t('common.cancel') }}</el-button>
+      </el-form-item>
+    </el-form>
+  </el-main>
 </template>
 
 <script>

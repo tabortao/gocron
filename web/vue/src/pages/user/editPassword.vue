@@ -1,20 +1,18 @@
 <template>
-  <el-container>
-    <el-main>
-      <el-form ref="form" :model="form" :rules="formRules" label-width="auto" style="width: 500px;">
-        <el-form-item label="新密码" prop="new_password">
-          <el-input v-model="form.new_password" type="password" placeholder="至少8位，包含字母和数字"></el-input>
-        </el-form-item>
-        <el-form-item label="确认新密码" prop="confirm_new_password">
-          <el-input v-model="form.confirm_new_password" type="password" placeholder="至少8位，包含字母和数字"></el-input>
-        </el-form-item>
-        <el-form-item>
-          <el-button type="primary" @click="submit()">保存</el-button>
-          <el-button @click="cancel">取消</el-button>
-        </el-form-item>
-      </el-form>
-    </el-main>
-  </el-container>
+  <el-main>
+    <el-form ref="form" :model="form" :rules="formRules" label-width="auto" style="width: 500px;">
+      <el-form-item label="新密码" prop="new_password">
+        <el-input v-model="form.new_password" type="password" placeholder="至少8位，包含字母和数字"></el-input>
+      </el-form-item>
+      <el-form-item label="确认新密码" prop="confirm_new_password">
+        <el-input v-model="form.confirm_new_password" type="password" placeholder="至少8位，包含字母和数字"></el-input>
+      </el-form-item>
+      <el-form-item>
+        <el-button type="primary" @click="submit()">保存</el-button>
+        <el-button @click="cancel">取消</el-button>
+      </el-form-item>
+    </el-form>
+  </el-main>
 </template>
 
 <script>

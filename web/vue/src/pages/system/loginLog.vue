@@ -1,8 +1,6 @@
 <template>
-  <el-container>
-    <system-sidebar></system-sidebar>
-    <el-main>
-      <el-pagination
+  <el-main>
+    <el-pagination
         background
         layout="prev, pager, next, sizes, total"
         :total="logTotal"
@@ -37,12 +35,10 @@
         </el-table-column>
       </el-table>
     </el-main>
-  </el-container>
 </template>
 
 <script>
 import { useI18n } from 'vue-i18n'
-import systemSidebar from './sidebar.vue'
 import systemService from '../../api/system'
 export default {
   name: 'login-log',
@@ -63,7 +59,6 @@ export default {
   created () {
     this.search()
   },
-  components: {systemSidebar},
   methods: {
     changePage (page) {
       this.searchParams.page = page

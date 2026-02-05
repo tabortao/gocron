@@ -1,8 +1,6 @@
 <template>
-  <el-container>
-    <system-sidebar></system-sidebar>
-    <el-main>
-      <notification-tab></notification-tab>
+  <el-main>
+    <notification-tab></notification-tab>
       <el-form ref="form" :model="form" :rules="formRules" label-width="auto" style="width: 800px;">
         <h3>{{ t('system.emailServerConfig') }}</h3>
         <el-row>
@@ -67,12 +65,10 @@
         </el-form>
       </el-dialog>
     </el-main>
-  </el-container>
 </template>
 
 <script>
 import { useI18n } from 'vue-i18n'
-import systemSidebar from '../sidebar.vue'
 import notificationTab from './tab.vue'
 import notificationService from '../../../api/notification'
 export default {
@@ -133,7 +129,7 @@ ${this.t('task.remark')}: {{.Remark}}`
       immediate: true
     }
   },
-  components: {notificationTab, systemSidebar},
+  components: {notificationTab},
   created () {
     this.init()
   },

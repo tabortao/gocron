@@ -27,7 +27,6 @@ import (
 
 const (
 	urlPrefix = "/api"
-	staticDir = "public"
 )
 
 var staticFS fs.FS
@@ -352,6 +351,7 @@ func urlAuth(c *gin.Context) {
 		"/api/user/2fa/setup",
 		"/api/user/2fa/enable",
 		"/api/user/2fa/disable",
+		"/api/statistics/overview",
 		"/api/agent/install.sh",
 		"/api/agent/register",
 		"/api/agent/download",
