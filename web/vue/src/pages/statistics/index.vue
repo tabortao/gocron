@@ -167,7 +167,7 @@
                 stroke-width="2"
                 class="data-point"
               />
-              <title>{{ item.date }}: 成功 {{ item.success }}</title>
+              <title>{{ item.date }}: {{ t('statistics.success') }} {{ item.success }}</title>
             </g>
             
             <!-- 失败数据点 -->
@@ -181,7 +181,7 @@
                 stroke-width="2"
                 class="data-point"
               />
-              <title>{{ item.date }}: 失败 {{ item.failed }}</title>
+              <title>{{ item.date }}: {{ t('statistics.failed') }} {{ item.failed }}</title>
             </g>
             
             <!-- Y轴标签 -->
@@ -283,7 +283,6 @@ const fetchStatistics = () => {
         failedCount: total7DaysFailed, // 改为7天失败总数
         last7Days: last7Days
       }
-      console.log('统计数据已加载:', stats.value)
     }
   })
 }
