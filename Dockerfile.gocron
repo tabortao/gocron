@@ -2,11 +2,13 @@
 FROM node:20-alpine AS frontend
 
 WORKDIR /app/web/vue
-COPY web/vue/package.json web/vue/yarn.lock ./
-RUN yarn install --frozen-lockfile
+RUN npm install -g pnpm
+
+COPY web/vue/package.json web/vue/pnpm-lock.yaml ./
+RUN pnpm install --frozen-lockfile
 
 COPY web/vue ./
-RUN yarn build
+RUN pnpm run build
 
 # Backend build stage
 FROM golang:1.24-alpine AS builder

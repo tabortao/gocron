@@ -3,7 +3,7 @@ services:
     # build:
     #   context: .
     #   dockerfile: Dockerfile.gocron
-    image: tabortao/gocron:latest
+    image: tabortoa/gocron:latest
     container_name: gocron
     ports:
       - '5920:5920'
