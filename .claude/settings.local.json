@@ -1,0 +1,13 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(make:*)",
+      "Bash(go version:*)",
+      "Bash(curl:*)",
+      "Bash(go build:*)",
+      "Bash(pnpm install)",
+      "Bash(pnpm run build)",
+      "Bash(npx vite build:*)"
+    ]
+  }
+}

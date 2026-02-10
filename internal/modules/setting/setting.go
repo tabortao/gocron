@@ -3,6 +3,7 @@ package setting
 import (
 	"errors"
 	"os"
+	"strconv"
 
 	"github.com/gocronx-team/gocron/internal/modules/logger"
 	"github.com/gocronx-team/gocron/internal/modules/utils"
@@ -41,7 +42,14 @@ type Setting struct {
 
 // 读取配置
 func Read(filename string) (*Setting, error) {
-	config, err := ini.Load(filename)
+	var config *ini.File
+	var err error
+	if utils.FileExist(filename) {
+		config, err = ini.Load(filename)
+	} else {
+		config = ini.Empty()
+	}
+
 	if err != nil {
 		return nil, err
 	}
@@ -49,16 +57,38 @@ func Read(filename string) (*Setting, error) {
 
 	var s Setting
 
-	s.Db.Engine = section.Key("db.engine").MustString("mysql")
+	s.Db.Engine = section.Key("db.engine").MustString("sqlite")
 	s.Db.Host = section.Key("db.host").MustString("127.0.0.1")
 	s.Db.Port = section.Key("db.port").MustInt(3306)
 	s.Db.User = section.Key("db.user").MustString("")
 	s.Db.Password = section.Key("db.password").MustString("")
-	s.Db.Database = section.Key("db.database").MustString("gocron")
+	s.Db.Database = section.Key("db.database").MustString("gocron.db")
 	s.Db.Prefix = section.Key("db.prefix").MustString("")
 	s.Db.Charset = section.Key("db.charset").MustString("utf8")
 	s.Db.MaxIdleConns = section.Key("db.max.idle.conns").MustInt(30)
 	s.Db.MaxOpenConns = section.Key("db.max.open.conns").MustInt(100)
+
+	// 环境变量覆盖
+	if envEngine := os.Getenv("GOCRON_DB_ENGINE"); envEngine != "" {
+		s.Db.Engine = envEngine
+	}
+	if envHost := os.Getenv("GOCRON_DB_HOST"); envHost != "" {
+		s.Db.Host = envHost
+	}
+	if envPort := os.Getenv("GOCRON_DB_PORT"); envPort != "" {
+		if port, err := strconv.Atoi(envPort); err == nil {
+			s.Db.Port = port
+		}
+	}
+	if envUser := os.Getenv("GOCRON_DB_USER"); envUser != "" {
+		s.Db.User = envUser
+	}
+	if envPassword := os.Getenv("GOCRON_DB_PASSWORD"); envPassword != "" {
+		s.Db.Password = envPassword
+	}
+	if envDatabase := os.Getenv("GOCRON_DB_DATABASE"); envDatabase != "" {
+		s.Db.Database = envDatabase
+	}
 
 	s.AllowIps = section.Key("allow_ips").MustString("")
 	s.AppName = section.Key("app.name").MustString("定时任务管理系统")
@@ -67,6 +97,9 @@ func Read(filename string) (*Setting, error) {
 	s.ApiSignEnable = section.Key("api.sign.enable").MustBool(true)
 	s.ConcurrencyQueue = section.Key("concurrency.queue").MustInt(500)
 	s.AuthSecret = section.Key("auth_secret").MustString("")
+	if envAuthSecret := os.Getenv("GOCRON_AUTH_SECRET"); envAuthSecret != "" {
+		s.AuthSecret = envAuthSecret
+	}
 	if s.AuthSecret == "" {
 		s.AuthSecret = utils.RandAuthToken()
 	}

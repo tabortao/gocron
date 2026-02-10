@@ -51,6 +51,43 @@ func TestReadReturnsConfiguredValues(t *testing.T) {
 	}
 }
 
+func TestReadOverridesWithEnvironmentVariables(t *testing.T) {
+	dir := t.TempDir()
+	configPath := filepath.Join(dir, "app.ini")
+	content := `[default]
+		db.engine=mysql
+		db.host=127.0.0.1
+		db.port=3306
+	`
+	if err := os.WriteFile(configPath, []byte(content), 0o600); err != nil {
+		t.Fatalf("write config failed: %v", err)
+	}
+
+	// Set environment variables
+	os.Setenv("GOCRON_DB_ENGINE", "sqlite")
+	os.Setenv("GOCRON_DB_HOST", "ignored")
+	os.Setenv("GOCRON_DB_PORT", "0")
+	os.Setenv("GOCRON_DB_DATABASE", "/tmp/gocron.db")
+	defer func() {
+		os.Unsetenv("GOCRON_DB_ENGINE")
+		os.Unsetenv("GOCRON_DB_HOST")
+		os.Unsetenv("GOCRON_DB_PORT")
+		os.Unsetenv("GOCRON_DB_DATABASE")
+	}()
+
+	s, err := Read(configPath)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+
+	if s.Db.Engine != "sqlite" {
+		t.Fatalf("expected engine sqlite, got %s", s.Db.Engine)
+	}
+	if s.Db.Database != "/tmp/gocron.db" {
+		t.Fatalf("expected database /tmp/gocron.db, got %s", s.Db.Database)
+	}
+}
+
 func TestReadGeneratesAuthSecretWhenMissing(t *testing.T) {
 	dir := t.TempDir()
 	configPath := filepath.Join(dir, "app.ini")

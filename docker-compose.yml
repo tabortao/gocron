@@ -6,13 +6,25 @@ services:
     image: gocron:latest
     container_name: gocron
     ports:
-      - "5920:5920"
+      - '5920:5920'
     volumes:
       - gocron-data:/.gocron
     environment:
       - TZ=Asia/Shanghai
+      # Database configuration (sqlite by default)
+      - GOCRON_DB_ENGINE=sqlite
+      - GOCRON_DB_DATABASE=/.gocron/gocron.db
+      # It is recommended to set a fixed AuthSecret
+      # - GOCRON_AUTH_SECRET=my_secret_token
+      # For MySQL, uncomment and configure:
+      # - GOCRON_DB_ENGINE=mysql
+      # - GOCRON_DB_HOST=mysql_host
+      # - GOCRON_DB_PORT=3306
+      # - GOCRON_DB_USER=gocron
+      # - GOCRON_DB_PASSWORD=password
+      # - GOCRON_DB_DATABASE=gocron
     restart: unless-stopped
-    
+
 volumes:
   gocron-data:
     driver: local

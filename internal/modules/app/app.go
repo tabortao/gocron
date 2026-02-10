@@ -62,6 +62,10 @@ func InitEnv(versionString string) {
 
 // IsInstalled 判断应用是否已安装
 func IsInstalled() bool {
+	// 如果配置了 DB 引擎环境变量，视为已安装（自动配置模式）
+	if os.Getenv("GOCRON_DB_ENGINE") != "" {
+		return true
+	}
 	_, err := os.Stat(filepath.Join(ConfDir, "install.lock"))
 	return !os.IsNotExist(err)
 }
