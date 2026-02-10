@@ -78,7 +78,7 @@
     ```bash
     pnpm run dev
     ```
-    访问终端输出的地址（通常是 `http://localhost:5173`）。
+    访问终端输出的地址（通常是 `http://localhost:8080`）。
 
 ## 数据库配置
 
