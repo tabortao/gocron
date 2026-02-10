@@ -35,7 +35,7 @@ The easiest way to deploy is using Docker Compose:
 
 ```bash
 # 1. Clone the project
-git clone https://github.com/gocronx-team/gocron.git
+git clone https://github.com/tabortao/gocron.git
 cd gocron
 
 # 2. Start services

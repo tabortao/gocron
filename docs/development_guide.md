@@ -58,6 +58,17 @@
     ```
     服务默认运行在 `0.0.0.0:5920`。
 
+#### 3. Docker 运行 (推荐)
+
+如果您希望在容器中运行：
+
+```bash
+docker-compose up -d
+```
+
+默认使用 SQLite 数据库，数据文件将持久化在项目根目录的 `./data/data` 目录中，配置文件在 `./data/conf`。
+访问地址：http://localhost:5920
+
 #### 2. 前端 (Vue.js)
 
 前端管理界面基于 Vue 3 + Vite。
