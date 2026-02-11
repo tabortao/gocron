@@ -207,5 +207,5 @@ jobs:
           tag_name: ${{ env.TAG }}
           fail_on_unmatched_files: true
           files: |
-            dist/*.tar.gz
-            dist/*.zip
+            dist/**/*.tar.gz
+            dist/**/*.zip

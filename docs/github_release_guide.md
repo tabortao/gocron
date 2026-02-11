@@ -83,10 +83,22 @@ Windows PowerShell：
 pwsh .\scripts\release.ps1 -Version v1.4.10
 ```
 
+如果你的 Windows 没有安装 PowerShell 7（没有 `pwsh` 命令），可以用 Windows PowerShell 5.1：
+
+```powershell
+powershell -ExecutionPolicy Bypass -File .\scripts\release.ps1 -Version v1.4.10
+```
+
 Linux/macOS（bash）：
 
 ```bash
 bash ./scripts/release.sh -Version v1.4.10
+```
+
+也可以用 Python 一键完成（commit/push + tag/push）：
+
+```bash
+python ./scripts/release.py --version v1.4.10 --message "chore: release v1.4.10"
 ```
 
 ## 4. 常见问题
