@@ -105,7 +105,7 @@ func Exec(ip string, port int, taskReq *pb.TaskRequest) (string, error) {
 func parseGRPCError(err error) (string, error) {
 	switch status.Code(err) {
 	case codes.Unavailable:
-		return "", errUnavailable
+		return "", errors.New(errUnavailable.Error() + ": " + err.Error())
 	case codes.DeadlineExceeded:
 		return "", errors.New(i18n.Translate("rpc_timeout"))
 	case codes.Canceled:
@@ -118,7 +118,7 @@ func parseGRPCError(err error) (string, error) {
 func parseGRPCErrorOnly(err error) error {
 	switch status.Code(err) {
 	case codes.Unavailable:
-		return errUnavailable
+		return errors.New(errUnavailable.Error() + ": " + err.Error())
 	case codes.DeadlineExceeded:
 		return errors.New(i18n.Translate("rpc_timeout"))
 	case codes.Canceled:

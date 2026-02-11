@@ -89,10 +89,14 @@ export default {
     viewLog: 'View Log',
     enable: 'Enable',
     disable: 'Disable',
-    mainTaskTip: 'Main task can configure multiple child tasks. Child tasks will be executed automatically after main task completes.\nTask type cannot be changed after creation.',
-    dependencyTip: 'Strong Dependency: Child tasks run only when main task succeeds\nWeak Dependency: Child tasks run regardless of main task result',
-    timeoutTip: 'Force terminate task on timeout, range 0-86400 (seconds), default 3600, 0 means no limit',
-    singleInstanceTip: 'Single instance mode: whether to execute next scheduled task if previous task is still running',
+    mainTaskTip:
+      'Main task can configure multiple child tasks. Child tasks will be executed automatically after main task completes.\nTask type cannot be changed after creation.',
+    dependencyTip:
+      'Strong Dependency: Child tasks run only when main task succeeds\nWeak Dependency: Child tasks run regardless of main task result',
+    timeoutTip:
+      'Force terminate task on timeout, range 0-86400 (seconds), default 3600, 0 means no limit',
+    singleInstanceTip:
+      'Single instance mode: whether to execute next scheduled task if previous task is still running',
     cronStandard: 'Standard Syntax (Second Minute Hour Day Month Week)',
     cronShortcut: 'Shortcut Syntax',
     notifyDisabled: 'Disabled',
@@ -116,20 +120,26 @@ export default {
     aliasPlaceholder: 'Please enter alias',
     portPlaceholder: 'Please enter port',
     nameRequired: 'Please enter host name',
+    nameTip:
+      'Enter the address of the machine running gocron-node. If gocron runs inside Docker/container, use the host/LAN IP instead of 127.0.0.1.',
     portRequired: 'Please enter port',
+    portTip:
+      'Default is 5921. Make sure the port is reachable from gocron (firewall/container network).',
     aliasRequired: 'Please enter node name',
     portInvalid: 'Invalid port',
     autoRegister: 'Auto Register',
     agentInstall: 'Agent Installation',
     installCommand: 'Install Command',
-    installTip: 'Run the corresponding command on the target server to automatically install and register the Agent node. Note: Must be executed by a non-root user',
+    installTip:
+      'Run the corresponding command on the target server to automatically install and register the Agent node. Note: Must be executed by a non-root user',
     tokenExpires: 'Token Expires',
     tokenUsage: 'Usage',
     tokenReusable: 'This token can be reused within the validity period for batch installation',
     bashCommand: 'Run the following command in terminal (non-root user):',
     powershellCommand: 'Run in PowerShell (Administrator):',
     windowsManualInstall: 'Windows Manual Installation',
-    windowsManualInstallTip: 'For security reasons, manual installation of gocron-node is recommended for Windows systems',
+    windowsManualInstallTip:
+      'For security reasons, manual installation of gocron-node is recommended for Windows systems',
     windowsStep1: 'Download Package',
     windowsStep1Desc: 'Download gocron-node-windows-amd64.zip from GitHub Releases',
     windowsStep2: 'Extract and Configure',
@@ -163,6 +173,7 @@ export default {
   },
   system: {
     manage: 'System Management',
+    help: 'Help',
     loginLog: 'Login Log',
     logRetention: 'Log Retention',
     notification: 'Notifications',
@@ -185,10 +196,12 @@ export default {
     dbLogRetentionDays: 'Database Log Retention Days',
     dbLogRetentionTip: 'Set to 0 to disable automatic database log cleanup',
     cleanupTime: 'Cleanup Time',
-    cleanupTimeTip: 'Automatically execute log cleanup at this time every day, takes effect immediately after modification',
+    cleanupTimeTip:
+      'Automatically execute log cleanup at this time every day, takes effect immediately after modification',
     selectTime: 'Select Time',
     logFileSizeLimit: 'Log File Size Limit',
-    logFileSizeLimitTip: 'Set to 0 to disable log file cleanup, greater than 0 will automatically clear when log file exceeds this size',
+    logFileSizeLimitTip:
+      'Set to 0 to disable log file cleanup, greater than 0 will automatically clear when log file exceeds this size',
     logRetentionSaveSuccess: 'Saved successfully, cleanup task has been reloaded',
     emailServerConfig: 'Email Server Configuration',
     templateSupportsHtml: 'Notification template supports HTML',
@@ -217,9 +230,12 @@ export default {
     taskNameVar: 'Task Name',
     statusVar: 'Task Execution Result Status',
     resultVar: 'Task Execution Output',
-    emailTemplatePlaceholder: 'Task ID: {{.TaskId}}\nTask Name: {{.TaskName}}\nStatus: {{.Status}}\nResult: {{.Result}}\nRemark: {{.Remark}}',
-    slackTemplatePlaceholder: 'Task ID: {{.TaskId}}\nTask Name: {{.TaskName}}\nStatus: {{.Status}}\nResult: {{.Result}}\nRemark: {{.Remark}}',
-    webhookTemplatePlaceholder: '{"task_id": "{{.TaskId}}", "task_name": "{{.TaskName}}", "status": "{{.Status}}", "result": "{{.Result}}", "remark": "{{.Remark}}"}'
+    emailTemplatePlaceholder:
+      'Task ID: {{.TaskId}}\nTask Name: {{.TaskName}}\nStatus: {{.Status}}\nResult: {{.Result}}\nRemark: {{.Remark}}',
+    slackTemplatePlaceholder:
+      'Task ID: {{.TaskId}}\nTask Name: {{.TaskName}}\nStatus: {{.Status}}\nResult: {{.Result}}\nRemark: {{.Remark}}',
+    webhookTemplatePlaceholder:
+      '{"task_id": "{{.TaskId}}", "task_name": "{{.TaskName}}", "status": "{{.Status}}", "result": "{{.Result}}", "remark": "{{.Remark}}"}'
   },
   taskLog: {
     list: 'Task Log',
@@ -256,11 +272,13 @@ export default {
     disableSuccess: '2FA disabled',
     verifyFailed: 'Verification code is incorrect',
     alertTitle: 'Notice',
-    alertDescription: 'Enabling two-factor authentication greatly enhances account security. It is recommended for all users, especially administrators.',
+    alertDescription:
+      'Enabling two-factor authentication greatly enhances account security. It is recommended for all users, especially administrators.',
     enabledAlertTitle: '2FA Enabled',
     enabledAlertDescription: 'Your account is protected by two-factor authentication.',
     disableDialogTitle: 'Disable Two-Factor Authentication',
-    disableDialogDescription: 'Please enter the 6-digit code displayed in your authenticator app to disable 2FA:',
+    disableDialogDescription:
+      'Please enter the 6-digit code displayed in your authenticator app to disable 2FA:',
     copySecret: 'Copy',
     secretCopied: 'Secret key copied to clipboard',
     verifyCodeLength: 'Please enter 6-digit code',
@@ -351,7 +369,8 @@ export default {
     batchDelete: 'Batch Delete',
     confirmBatchEnable: 'Are you sure you want to enable {count} selected tasks?',
     confirmBatchDisable: 'Are you sure you want to disable {count} selected tasks?',
-    confirmBatchDelete: 'Are you sure you want to delete {count} selected tasks? This operation cannot be undone!',
+    confirmBatchDelete:
+      'Are you sure you want to delete {count} selected tasks? This operation cannot be undone!',
     batchEnableSuccess: 'Batch enable successful',
     batchDisableSuccess: 'Batch disable successful',
     batchDeleteSuccess: 'Batch delete successful',

@@ -89,10 +89,13 @@ export default {
     viewLog: '查看日志',
     enable: '启用',
     disable: '禁用',
-    mainTaskTip: '主任务可以配置多个子任务, 当主任务执行完成后，自动执行子任务\\n任务类型新增后不能变更',
-    dependencyTip: '强依赖: 主任务执行成功，才会运行子任务\\n弱依赖: 无论主任务执行是否成功，都会运行子任务',
+    mainTaskTip:
+      '主任务可以配置多个子任务, 当主任务执行完成后，自动执行子任务\\n任务类型新增后不能变更',
+    dependencyTip:
+      '强依赖: 主任务执行成功，才会运行子任务\\n弱依赖: 无论主任务执行是否成功，都会运行子任务',
     timeoutTip: '任务执行超时强制结束, 取值0-86400(秒), 默认3600, 0表示不限制',
-    singleInstanceTip: '单实例运行, 前次任务未执行完成，下次任务调度时间到了是否要执行, 即是否允许多进程执行同一任务',
+    singleInstanceTip:
+      '单实例运行, 前次任务未执行完成，下次任务调度时间到了是否要执行, 即是否允许多进程执行同一任务',
     cronStandard: '标准语法（秒 分 时 天 月 周）',
     cronShortcut: '快捷语法',
     notifyDisabled: '不通知',
@@ -116,13 +119,17 @@ export default {
     aliasPlaceholder: '请输入别名',
     portPlaceholder: '请输入端口',
     nameRequired: '请输入主机名',
+    nameTip:
+      '填写运行 gocron-node 的机器地址。若 gocron 在 Docker/容器内运行，请填写宿主机/局域网 IP，不要填 127.0.0.1。',
     portRequired: '请输入端口',
+    portTip: '默认 5921。请确保该端口对 gocron 所在机器可达（防火墙/容器网络需放行）。',
     aliasRequired: '请输入节点名称',
     portInvalid: '端口无效',
     autoRegister: '自动注册',
     agentInstall: 'Agent安装',
     installCommand: '安装命令',
-    installTip: '在目标服务器上执行对应的命令，将自动安装并注册Agent节点。注意：必须使用非root用户执行安装脚本',
+    installTip:
+      '在目标服务器上执行对应的命令，将自动安装并注册Agent节点。注意：必须使用非root用户执行安装脚本',
     tokenExpires: 'Token有效期',
     tokenUsage: '使用说明',
     tokenReusable: '此Token可在有效期内重复使用，适用于批量安装',
@@ -163,6 +170,7 @@ export default {
   },
   system: {
     manage: '系统管理',
+    help: '使用帮助',
     loginLog: '登录日志',
     logRetention: '日志保留',
     notification: '通知设置',
@@ -217,9 +225,14 @@ export default {
     taskNameVar: '任务名称',
     statusVar: '任务执行结果状态',
     resultVar: '任务执行输出',
-    emailTemplatePlaceholder: function () { return `${this.taskIdVar}: {{.TaskId}}\\n${this.taskNameVar}: {{.TaskName}}\\n${this.statusVar}: {{.Status}}\\n${this.resultVar}: {{.Result}}` },
-    slackTemplatePlaceholder: function () { return `${this.taskIdVar}: {{.TaskId}}\\n${this.taskNameVar}: {{.TaskName}}\\n${this.statusVar}: {{.Status}}\\n${this.resultVar}: {{.Result}}` },
-    webhookTemplatePlaceholder: '{"task_id": "{{.TaskId}}", "task_name": "{{.TaskName}}", "status": "{{.Status}}", "result": "{{.Result}}", "remark": "{{.Remark}}"}'
+    emailTemplatePlaceholder: function () {
+      return `${this.taskIdVar}: {{.TaskId}}\\n${this.taskNameVar}: {{.TaskName}}\\n${this.statusVar}: {{.Status}}\\n${this.resultVar}: {{.Result}}`
+    },
+    slackTemplatePlaceholder: function () {
+      return `${this.taskIdVar}: {{.TaskId}}\\n${this.taskNameVar}: {{.TaskName}}\\n${this.statusVar}: {{.Status}}\\n${this.resultVar}: {{.Result}}`
+    },
+    webhookTemplatePlaceholder:
+      '{"task_id": "{{.TaskId}}", "task_name": "{{.TaskName}}", "status": "{{.Status}}", "result": "{{.Result}}", "remark": "{{.Remark}}"}'
   },
   taskLog: {
     list: '任务日志',

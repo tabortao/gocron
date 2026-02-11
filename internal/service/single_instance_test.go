@@ -44,7 +44,7 @@ func TestSingleInstanceControl(t *testing.T) {
 		var mu sync.Mutex
 
 		// 模拟10个并发请求
-		for i := 0; i < 10; i++ {
+		for range 10 {
 			wg.Add(1)
 			go func() {
 				defer wg.Done()
@@ -101,7 +101,6 @@ func TestBeforeExecJobSingleInstance(t *testing.T) {
 
 		task := models.Task{
 			Id:    1,
-			Name:  "测试任务",
 			Multi: 0, // 不允许并发
 		}
 
@@ -129,7 +128,6 @@ func TestBeforeExecJobSingleInstance(t *testing.T) {
 
 		task := models.Task{
 			Id:    2,
-			Name:  "测试任务",
 			Multi: 1, // 允许并发
 		}
 
@@ -200,7 +198,7 @@ func TestInstanceThreadSafety(t *testing.T) {
 	var wg sync.WaitGroup
 
 	// 并发添加和删除
-	for i := 0; i < 100; i++ {
+	for i := range 100 {
 		wg.Add(3)
 
 		taskId := i
@@ -245,28 +243,41 @@ func TestSingleInstanceRealScenario(t *testing.T) {
 		var executionCount int
 		var mu sync.Mutex
 
-		// 模拟第一次执行（耗时较长）
+		started := make(chan struct{})
+		finished := make(chan struct{})
+		block := make(chan struct{})
+
 		go func() {
 			if task.Multi == 0 && runInstance.has(task.Id) {
+				close(started)
+				close(finished)
 				return
 			}
 
 			if task.Multi == 0 {
 				runInstance.add(task.Id)
-				defer runInstance.done(task.Id)
+				close(started)
+				defer func() {
+					runInstance.done(task.Id)
+					close(finished)
+				}()
+			} else {
+				close(started)
 			}
 
 			mu.Lock()
 			executionCount++
 			mu.Unlock()
 
-			time.Sleep(50 * time.Millisecond)
+			<-block
 		}()
 
-		// 等待第一次执行开始
-		time.Sleep(5 * time.Millisecond)
+		select {
+		case <-started:
+		case <-time.After(200 * time.Millisecond):
+			t.Fatal("等待第一次执行开始超时")
+		}
 
-		// 模拟第二次触发（应该被阻止）
 		if task.Multi == 0 && runInstance.has(task.Id) {
 			t.Log("第二次执行被正确阻止")
 		} else {
@@ -274,14 +285,18 @@ func TestSingleInstanceRealScenario(t *testing.T) {
 				runInstance.add(task.Id)
 				defer runInstance.done(task.Id)
 			}
-
 			mu.Lock()
 			executionCount++
 			mu.Unlock()
 		}
 
-		// 等待第一次执行完成
-		time.Sleep(60 * time.Millisecond)
+		close(block)
+
+		select {
+		case <-finished:
+		case <-time.After(200 * time.Millisecond):
+			t.Fatal("等待第一次执行完成超时")
+		}
 
 		mu.Lock()
 		count := executionCount

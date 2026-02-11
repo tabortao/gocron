@@ -6,10 +6,12 @@
       background-color="#545c64"
       text-color="#fff"
       active-text-color="#ffd04b"
-      router>
+      router
+    >
       <el-menu-item index="/system">{{ t('system.notification') }}</el-menu-item>
       <el-menu-item index="/system/login-log">{{ t('system.loginLog') }}</el-menu-item>
       <el-menu-item index="/system/log-retention">{{ t('system.logCleanup') }}</el-menu-item>
+      <el-menu-item index="/system/help">{{ t('system.help') }}</el-menu-item>
     </el-menu>
   </el-aside>
 </template>
@@ -22,16 +24,19 @@ export default {
     const { t } = useI18n()
     return { t }
   },
-  data () {
+  data() {
     return {}
   },
   computed: {
-    currentRoute () {
+    currentRoute() {
       if (this.$route.path === '/system/login-log') {
         return '/system/login-log'
       }
       if (this.$route.path === '/system/log-retention') {
         return '/system/log-retention'
+      }
+      if (this.$route.path === '/system/help') {
+        return '/system/help'
       }
       return '/system'
     }

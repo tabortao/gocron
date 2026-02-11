@@ -17,7 +17,7 @@ import (
 
 const (
 	backOffMaxDelay = 3 * time.Second
-	dialTimeout     = 2 * time.Second
+	dialTimeout     = 5 * time.Second
 )
 
 var (

@@ -2,6 +2,7 @@ package host
 
 import (
 	"fmt"
+	"net"
 	"strconv"
 	"strings"
 
@@ -186,10 +187,43 @@ func Ping(c *gin.Context) {
 	taskReq.Timeout = testConnectionTimeout
 	output, err := client.Exec(hostModel.Name, hostModel.Port, taskReq)
 	if err != nil {
-		base.RespondError(c, i18n.T(c, "connection_failed")+"-"+err.Error()+" "+output, err)
-	} else {
-		base.RespondSuccess(c, i18n.T(c, "connection_success"), nil)
+		var loopbackErr error
+		if hostModel.Name != "127.0.0.1" && (shouldTryLoopback(hostModel.Name) || isSameAsRequestHost(c, hostModel.Name)) {
+			_, loopbackErr = client.Exec("127.0.0.1", hostModel.Port, taskReq)
+			if loopbackErr == nil {
+				oldName := hostModel.Name
+				hostModel.Name = "127.0.0.1"
+				_, _ = hostModel.UpdateBean(hostModel.Id)
+				grpcpool.Pool.Release(fmt.Sprintf("%s:%d", oldName, hostModel.Port))
+
+				if i18n.GetLocale(c) == i18n.EnUS {
+					base.RespondSuccess(c, "Connection successful (auto-fixed host to 127.0.0.1)", nil)
+				} else {
+					base.RespondSuccess(c, "连接成功（已自动将主机名修正为 127.0.0.1）", nil)
+				}
+				return
+			}
+		}
+		msg := i18n.T(c, "connection_failed") + "-" + err.Error() + " " + output
+		if isConnRefused(err) {
+			if i18n.GetLocale(c) == i18n.EnUS {
+				msg += " (Port refused: gocron-node is not listening on this address/port. Try starting gocron-node with -s 0.0.0.0:5921 and allow firewall inbound 5921.)"
+			} else {
+				msg += "（端口被拒绝：通常是 gocron-node 未启动，或仅监听 127.0.0.1。建议用 -s 0.0.0.0:5921 启动，并放行防火墙 5921 入站）"
+			}
+		}
+		if loopbackErr != nil {
+			if i18n.GetLocale(c) == i18n.EnUS {
+				msg += " (Loopback check failed: 127.0.0.1:" + strconv.Itoa(hostModel.Port) + " -> " + loopbackErr.Error() + ")"
+			} else {
+				msg += "（同时检测 127.0.0.1:" + strconv.Itoa(hostModel.Port) + " 也失败：" + loopbackErr.Error() + "）"
+			}
+		}
+		logger.Error(msg)
+		base.RespondError(c, msg, err)
+		return
 	}
+	base.RespondSuccess(c, i18n.T(c, "connection_success"), nil)
 }
 
 // 解析查询参数
@@ -201,4 +235,56 @@ func parseQueryParams(c *gin.Context) models.CommonMap {
 	base.ParsePageAndPageSize(c, params)
 
 	return params
+}
+
+func shouldTryLoopback(host string) bool {
+	if host == "" {
+		return false
+	}
+	if host == "localhost" {
+		return true
+	}
+	ip := net.ParseIP(host)
+	if ip == nil {
+		return false
+	}
+	addrs, err := net.InterfaceAddrs()
+	if err != nil {
+		return false
+	}
+	for _, addr := range addrs {
+		ipNet, ok := addr.(*net.IPNet)
+		if !ok || ipNet.IP == nil {
+			continue
+		}
+		if ipNet.IP.Equal(ip) {
+			return true
+		}
+	}
+	if ip.IsLoopback() {
+		return true
+	}
+	return false
+}
+
+func isSameAsRequestHost(c *gin.Context, host string) bool {
+	if c == nil || c.Request == nil {
+		return false
+	}
+	reqHost := strings.TrimSpace(c.Request.Host)
+	if reqHost == "" {
+		return false
+	}
+	if h, _, err := net.SplitHostPort(reqHost); err == nil && h != "" {
+		reqHost = h
+	}
+	return strings.EqualFold(strings.TrimSpace(host), reqHost)
+}
+
+func isConnRefused(err error) bool {
+	if err == nil {
+		return false
+	}
+	s := strings.ToLower(err.Error())
+	return strings.Contains(s, "actively refused") || strings.Contains(s, "connection refused")
 }

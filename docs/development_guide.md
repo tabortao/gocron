@@ -45,10 +45,31 @@
     $env:GOCRON_DB_ENGINE="sqlite"
     $env:GOCRON_DB_DATABASE="gocron.db"
 
+    # Go 模块代理（建议中国大陆网络环境设置）
+    $env:GOPROXY="https://goproxy.cn,direct"
+
     # Linux/macOS
     export GOCRON_DB_ENGINE=sqlite
     export GOCRON_DB_DATABASE=gocron.db
+    export GOPROXY=https://goproxy.cn,direct
     ```
+
+    如果希望在 Windows 上“永久”生效（不必每次打开终端都设置），可以使用以下任一方式：
+    - **PowerShell（当前用户）**：
+
+      ```powershell
+      [Environment]::SetEnvironmentVariable("GOPROXY","https://goproxy.cn,direct","User")
+      ```
+
+      设置后需要重新打开终端窗口。
+
+    - **PowerShell（系统级，需要管理员）**：
+
+      ```powershell
+      [Environment]::SetEnvironmentVariable("GOPROXY","https://goproxy.cn,direct","Machine")
+      ```
+
+    - **图形界面**：系统属性 → 高级 → 环境变量 → 新建/编辑 `GOPROXY`。
 
 3.  **启动服务**:
     ```bash

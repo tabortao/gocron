@@ -1,6 +1,6 @@
 <template>
   <el-main>
-    <el-form ref="form" :model="form" :rules="formRules" label-width="auto" style="width: 500px;">
+    <el-form ref="form" :model="form" :rules="formRules" label-width="auto" style="width: 500px">
       <el-form-item>
         <el-input v-model="form.id" type="hidden"></el-input>
       </el-form-item>
@@ -9,16 +9,18 @@
       </el-form-item>
       <el-form-item :label="t('host.name')" prop="name">
         <el-input v-model="form.name"></el-input>
+        <div style="color: #909399; font-size: 12px; margin-top: 5px">
+          {{ t('host.nameTip') }}
+        </div>
       </el-form-item>
       <el-form-item :label="t('host.port')" prop="port">
         <el-input v-model.number="form.port"></el-input>
+        <div style="color: #909399; font-size: 12px; margin-top: 5px">
+          {{ t('host.portTip') }}
+        </div>
       </el-form-item>
       <el-form-item :label="t('host.remark')">
-        <el-input
-          type="textarea"
-          :rows="5"
-          v-model="form.remark">
-        </el-input>
+        <el-input type="textarea" :rows="5" v-model="form.remark"> </el-input>
       </el-form-item>
       <el-form-item>
         <el-button type="primary" @click="submit()">{{ t('common.save') }}</el-button>
@@ -52,16 +54,12 @@ export default {
   computed: {
     computedFormRules() {
       return {
-        name: [
-          {required: true, message: this.t('host.nameRequired'), trigger: 'blur'}
-        ],
+        name: [{ required: true, message: this.t('host.nameRequired'), trigger: 'blur' }],
         port: [
-          {required: true, message: this.t('host.portRequired'), trigger: 'blur'},
-          {type: 'number', message: this.t('host.portInvalid')}
+          { required: true, message: this.t('host.portRequired'), trigger: 'blur' },
+          { type: 'number', message: this.t('host.portInvalid') }
         ],
-        alias: [
-          {required: true, message: this.t('host.aliasRequired'), trigger: 'blur'}
-        ]
+        alias: [{ required: true, message: this.t('host.aliasRequired'), trigger: 'blur' }]
       }
     }
   },
@@ -72,14 +70,14 @@ export default {
       },
       immediate: true
     },
-    '$route': {
+    $route: {
       handler() {
         this.loadForm()
       },
       deep: true
     }
   },
-  created () {
+  created() {
     this.loadForm()
   },
   methods: {
@@ -89,18 +87,18 @@ export default {
       if (!id) {
         return
       }
-      hostService.detail(id, (data) => {
-      if (!data) {
-        this.$message.error(this.t('message.dataNotFound'))
-        this.cancel()
-        return
-      }
-      this.form.id = data.id
-      this.form.name = data.name
-      this.form.port = data.port
-      this.form.alias = data.alias
-      this.form.remark = data.remark
-    })
+      hostService.detail(id, data => {
+        if (!data) {
+          this.$message.error(this.t('message.dataNotFound'))
+          this.cancel()
+          return
+        }
+        this.form.id = data.id
+        this.form.name = data.name
+        this.form.port = data.port
+        this.form.alias = data.alias
+        this.form.remark = data.remark
+      })
     },
     resetForm() {
       this.form = {
@@ -114,20 +112,20 @@ export default {
         this.$refs.form.clearValidate()
       }
     },
-    submit () {
-      this.$refs['form'].validate((valid) => {
+    submit() {
+      this.$refs['form'].validate(valid => {
         if (!valid) {
           return false
         }
         this.save()
       })
     },
-    save () {
+    save() {
       hostService.update(this.form, () => {
         this.$router.push('/host')
       })
     },
-    cancel () {
+    cancel() {
       this.$router.push('/host')
     }
   }

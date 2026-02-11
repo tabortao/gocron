@@ -123,6 +123,11 @@ const routes = [
     component: () => import('../pages/system/logRetention.vue')
   },
   {
+    path: '/system/help',
+    name: 'system-help',
+    component: () => import('../pages/system/help.vue')
+  },
+  {
     path: '/statistics',
     name: 'statistics',
     component: () => import('../pages/statistics/index.vue'),
@@ -144,14 +149,14 @@ router.beforeEach((to, from, next) => {
       return
     }
   }
-  
+
   if (to.meta.noLogin) {
     next()
     return
   }
-  
+
   const userStore = useUserStore()
-  
+
   if (userStore.token) {
     if (userStore.isAdmin || to.meta.noNeedAdmin) {
       next()

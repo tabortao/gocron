@@ -3,7 +3,7 @@
     <div class="sidebar-header">
       <h2 class="app-title">gocron</h2>
     </div>
-    
+
     <el-menu
       :default-active="currentRoute"
       mode="vertical"
@@ -11,8 +11,8 @@
       text-color="#bfcbd9"
       active-text-color="#409EFF"
       :unique-opened="true"
-      router>
-      
+      router
+    >
       <!-- 任务管理 -->
       <el-sub-menu index="task">
         <template #title>
@@ -32,19 +32,19 @@
           <span>{{ t('nav.statistics') }}</span>
         </el-menu-item>
       </el-sub-menu>
-      
+
       <!-- 任务节点 -->
       <el-menu-item index="/host">
         <el-icon><Monitor /></el-icon>
         <span>{{ t('nav.taskNode') }}</span>
       </el-menu-item>
-      
+
       <!-- 用户管理 -->
       <el-menu-item v-if="userStore.isAdmin" index="/user">
         <el-icon><User /></el-icon>
         <span>{{ t('nav.userManage') }}</span>
       </el-menu-item>
-      
+
       <!-- 系统管理 -->
       <el-sub-menu v-if="userStore.isAdmin" index="system">
         <template #title>
@@ -63,9 +63,13 @@
           <el-icon><Delete /></el-icon>
           <span>{{ t('system.logCleanup') }}</span>
         </el-menu-item>
+        <el-menu-item index="/system/help">
+          <el-icon><QuestionFilled /></el-icon>
+          <span>{{ t('system.help') }}</span>
+        </el-menu-item>
       </el-sub-menu>
     </el-menu>
-    
+
     <!-- 底部语言切换 -->
     <div class="sidebar-footer">
       <LanguageSwitcher />
@@ -79,16 +83,17 @@ import { useRoute } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import { useUserStore } from '../../stores/user'
 import LanguageSwitcher from './LanguageSwitcher.vue'
-import { 
-  Calendar, 
-  List, 
-  Document, 
-  TrendCharts, 
-  Monitor, 
-  User, 
+import {
+  Calendar,
+  List,
+  Document,
+  TrendCharts,
+  Monitor,
+  User,
   Setting,
   Bell,
-  Delete
+  Delete,
+  QuestionFilled
 } from '@element-plus/icons-vue'
 
 const { t } = useI18n()
@@ -106,6 +111,7 @@ const currentRoute = computed(() => {
   if (path.startsWith('/system')) {
     if (path === '/system/login-log') return '/system/login-log'
     if (path === '/system/log-retention') return '/system/log-retention'
+    if (path === '/system/help') return '/system/help'
     return '/system'
   }
   return '/task'
@@ -129,7 +135,7 @@ const currentRoute = computed(() => {
 
 .app-title {
   margin: 0;
-  color: #409EFF;
+  color: #409eff;
   font-size: 24px;
   font-weight: bold;
   letter-spacing: 1px;
@@ -167,7 +173,7 @@ const currentRoute = computed(() => {
 
 .sidebar-footer :deep(.language-switcher:hover) {
   background-color: rgba(64, 158, 255, 0.1);
-  color: #409EFF;
+  color: #409eff;
 }
 
 /* 子菜单样式 */
