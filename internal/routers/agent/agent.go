@@ -7,6 +7,8 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
+	"regexp"
+	"strings"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -17,6 +19,8 @@ import (
 )
 
 const tokenExpiration = 3 * time.Hour
+
+var githubRepoPattern = regexp.MustCompile(`^[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+$`)
 
 // GenerateToken 生成注册token
 func GenerateToken(c *gin.Context) {
@@ -65,6 +69,26 @@ func InstallScript(c *gin.Context) {
 		return
 	}
 
+	repo := strings.TrimSpace(c.Query("repo"))
+	if repo == "" {
+		repo = strings.TrimSpace(os.Getenv("GOCRON_AGENT_GITHUB_REPO"))
+	}
+	if repo == "" {
+		repo = "gocronx-team/gocron"
+	}
+	if !githubRepoPattern.MatchString(repo) {
+		c.String(http.StatusBadRequest, "Invalid repo")
+		return
+	}
+
+	tag := strings.TrimSpace(c.Query("tag"))
+	if tag == "" {
+		tag = strings.TrimSpace(os.Getenv("GOCRON_AGENT_GITHUB_TAG"))
+	}
+	if tag != "" && !strings.HasPrefix(tag, "v") {
+		tag = "v" + tag
+	}
+
 	script := `#!/bin/bash
 set -e
 
@@ -84,6 +108,8 @@ if [ -z "$TOKEN" ]; then
 fi
 
 GOCRON_SERVER="` + getServerURL(c) + `"
+GITHUB_REPO="` + repo + `"
+GITHUB_TAG="` + tag + `"
 INSTALL_DIR="/opt/gocron-node"
 SERVICE_NAME="gocron-node"
 
@@ -105,7 +131,10 @@ fi
 echo "Installing gocron-node for $OS-$ARCH..."
 
 # 检测本地服务器是否有安装包
-LOCAL_DOWNLOAD_URL="${GOCRON_SERVER}/api/agent/download?os=${OS}&arch=${ARCH}"
+LOCAL_DOWNLOAD_URL="${GOCRON_SERVER}/api/agent/download?os=${OS}&arch=${ARCH}&repo=${GITHUB_REPO}"
+if [ -n "$GITHUB_TAG" ]; then
+    LOCAL_DOWNLOAD_URL="${LOCAL_DOWNLOAD_URL}&tag=${GITHUB_TAG}"
+fi
 echo "Checking local server for installation package..."
 
 # 使用 HEAD 请求检测，-w %{http_code} 获取状态码，-o /dev/null 不输出内容
@@ -122,20 +151,34 @@ elif [ "$HTTP_CODE" = "302" ]; then
     # 本地没有，需要从 GitHub 下载
     echo "✗ Local package not found on server"
     echo "→ Downloading from GitHub (this may take a while or require network access)..."
-    GITHUB_REPO="gocronx-team/gocron"
     if [ "$OS" = "windows" ]; then
-        DOWNLOAD_URL="https://github.com/${GITHUB_REPO}/releases/latest/download/gocron-node-${OS}-${ARCH}.zip"
+        if [ -n "$GITHUB_TAG" ]; then
+            DOWNLOAD_URL="https://github.com/${GITHUB_REPO}/releases/download/${GITHUB_TAG}/gocron-node-${OS}-${ARCH}.zip"
+        else
+            DOWNLOAD_URL="https://github.com/${GITHUB_REPO}/releases/latest/download/gocron-node-${OS}-${ARCH}.zip"
+        fi
     else
-        DOWNLOAD_URL="https://github.com/${GITHUB_REPO}/releases/latest/download/gocron-node-${OS}-${ARCH}.tar.gz"
+        if [ -n "$GITHUB_TAG" ]; then
+            DOWNLOAD_URL="https://github.com/${GITHUB_REPO}/releases/download/${GITHUB_TAG}/gocron-node-${OS}-${ARCH}.tar.gz"
+        else
+            DOWNLOAD_URL="https://github.com/${GITHUB_REPO}/releases/latest/download/gocron-node-${OS}-${ARCH}.tar.gz"
+        fi
     fi
 else
     echo "✗ Failed to check server status (HTTP $HTTP_CODE)"
     echo "→ Trying GitHub as fallback..."
-    GITHUB_REPO="gocronx-team/gocron"
     if [ "$OS" = "windows" ]; then
-        DOWNLOAD_URL="https://github.com/${GITHUB_REPO}/releases/latest/download/gocron-node-${OS}-${ARCH}.zip"
+        if [ -n "$GITHUB_TAG" ]; then
+            DOWNLOAD_URL="https://github.com/${GITHUB_REPO}/releases/download/${GITHUB_TAG}/gocron-node-${OS}-${ARCH}.zip"
+        else
+            DOWNLOAD_URL="https://github.com/${GITHUB_REPO}/releases/latest/download/gocron-node-${OS}-${ARCH}.zip"
+        fi
     else
-        DOWNLOAD_URL="https://github.com/${GITHUB_REPO}/releases/latest/download/gocron-node-${OS}-${ARCH}.tar.gz"
+        if [ -n "$GITHUB_TAG" ]; then
+            DOWNLOAD_URL="https://github.com/${GITHUB_REPO}/releases/download/${GITHUB_TAG}/gocron-node-${OS}-${ARCH}.tar.gz"
+        else
+            DOWNLOAD_URL="https://github.com/${GITHUB_REPO}/releases/latest/download/gocron-node-${OS}-${ARCH}.tar.gz"
+        fi
     fi
 fi
 
@@ -342,12 +385,32 @@ func Download(c *gin.Context) {
 
 	filename := fmt.Sprintf("gocron-node-%s-%s%s", osName, arch, ext)
 
+	repo := strings.TrimSpace(c.Query("repo"))
+	if repo == "" {
+		repo = strings.TrimSpace(os.Getenv("GOCRON_AGENT_GITHUB_REPO"))
+	}
+	if repo == "" {
+		repo = "gocronx-team/gocron"
+	}
+	if !githubRepoPattern.MatchString(repo) {
+		c.String(http.StatusBadRequest, "invalid repo parameter")
+		return
+	}
+
+	tag := strings.TrimSpace(c.Query("tag"))
+	if tag == "" {
+		tag = strings.TrimSpace(os.Getenv("GOCRON_AGENT_GITHUB_TAG"))
+	}
+	if tag != "" && !strings.HasPrefix(tag, "v") {
+		tag = "v" + tag
+	}
+
 	// 获取可执行文件所在目录
 	execPath, err := os.Executable()
 	if err != nil {
 		logger.Errorf("获取可执行文件路径失败: %v", err)
 		// 降级到 GitHub
-		githubURL := fmt.Sprintf("https://github.com/gocronx-team/gocron/releases/latest/download/%s", filename)
+		githubURL := buildGithubDownloadURL(repo, tag, filename)
 		logger.Warnf("✗ 无法获取可执行文件路径，重定向到 GitHub: %s", githubURL)
 		c.Redirect(http.StatusFound, githubURL)
 		return
@@ -381,9 +444,16 @@ func Download(c *gin.Context) {
 	}
 
 	// 本地文件不存在，重定向到 GitHub Release
-	githubURL := fmt.Sprintf("https://github.com/gocronx-team/gocron/releases/latest/download/%s", filename)
+	githubURL := buildGithubDownloadURL(repo, tag, filename)
 	logger.Warnf("✗ 本地安装包不存在 (%s)，重定向到 GitHub: %s", localPath, githubURL)
 	c.Redirect(http.StatusFound, githubURL)
+}
+
+func buildGithubDownloadURL(repo, tag, filename string) string {
+	if tag != "" {
+		return fmt.Sprintf("https://github.com/%s/releases/download/%s/%s", repo, tag, filename)
+	}
+	return fmt.Sprintf("https://github.com/%s/releases/latest/download/%s", repo, filename)
 }
 
 func generateRandomToken() string {

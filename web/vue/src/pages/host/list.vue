@@ -1,6 +1,6 @@
 <template>
   <el-main>
-    <el-form :inline="true" >
+    <el-form :inline="true">
       <el-row>
         <el-form-item label="ID">
           <el-input v-model.trim="searchParams.id"></el-input>
@@ -13,9 +13,13 @@
         </el-form-item>
       </el-row>
     </el-form>
-    <el-row type="flex" justify="end" style="gap: 10px; margin-bottom: 15px;">
-      <el-button type="success" v-if="isAdmin" @click="showAgentInstall" icon="Download">{{ t('host.autoRegister') }}</el-button>
-      <el-button type="primary" v-if="isAdmin" @click="toEdit(null)">{{ t('common.add') }}</el-button>
+    <el-row type="flex" justify="end" style="gap: 10px; margin-bottom: 15px">
+      <el-button type="success" v-if="isAdmin" @click="showAgentInstall" icon="Download">{{
+        t('host.autoRegister')
+      }}</el-button>
+      <el-button type="primary" v-if="isAdmin" @click="toEdit(null)">{{
+        t('common.add')
+      }}</el-button>
       <el-button type="info" @click="refresh" icon="Refresh">{{ t('common.refresh') }}</el-button>
     </el-row>
     <el-pagination
@@ -25,56 +29,54 @@
       v-model:current-page="searchParams.page"
       v-model:page-size="searchParams.page_size"
       @size-change="changePageSize"
-      @current-change="changePage">
+      @current-change="changePage"
+    >
     </el-pagination>
-    <el-table
-      :data="hosts"
-      tooltip-effect="dark"
-      border
-      style="width: 100%">
-      <el-table-column
-        prop="id"
-        label="ID">
-      </el-table-column>
-      <el-table-column
-        prop="alias"
-        :label="t('host.alias')">
-      </el-table-column>
-      <el-table-column
-        prop="name"
-        :label="t('host.name')">
-      </el-table-column>
-      <el-table-column
-        prop="port"
-        :label="t('host.port')">
-      </el-table-column>
+    <el-table :data="hosts" tooltip-effect="dark" border style="width: 100%">
+      <el-table-column prop="id" label="ID"> </el-table-column>
+      <el-table-column prop="alias" :label="t('host.alias')"> </el-table-column>
+      <el-table-column prop="name" :label="t('host.name')"> </el-table-column>
+      <el-table-column prop="port" :label="t('host.port')"> </el-table-column>
       <el-table-column :label="t('task.viewLog')">
         <template #default="scope">
           <el-button type="success" @click="toTasks(scope.row)">{{ t('task.list') }}</el-button>
         </template>
       </el-table-column>
+      <el-table-column prop="remark" :label="t('host.remark')"> </el-table-column>
       <el-table-column
-        prop="remark"
-        :label="t('host.remark')">
-      </el-table-column>
-      <el-table-column :label="t('common.operation')" :width="locale === 'zh-CN' ? 260 : 300" v-if="this.isAdmin">
+        :label="t('common.operation')"
+        :width="locale === 'zh-CN' ? 260 : 300"
+        v-if="this.isAdmin"
+      >
         <template #default="scope">
-          <el-button type="primary" size="small" @click="toEdit(scope.row)">{{ t('common.edit') }}</el-button>
-          <el-button type="info" size="small" @click="ping(scope.row)">{{ t('system.testSend') }}</el-button>
-          <el-button type="danger" size="small" @click="remove(scope.row)">{{ t('common.delete') }}</el-button>
+          <el-button type="primary" size="small" @click="toEdit(scope.row)">{{
+            t('common.edit')
+          }}</el-button>
+          <el-button type="info" size="small" @click="ping(scope.row)">{{
+            t('system.testSend')
+          }}</el-button>
+          <el-button type="danger" size="small" @click="remove(scope.row)">{{
+            t('common.delete')
+          }}</el-button>
         </template>
       </el-table-column>
     </el-table>
 
     <el-dialog v-model="agentDialogVisible" :title="t('host.agentInstall')" width="750px">
       <div v-if="installCommand">
-        <el-alert :title="t('host.installTip')" type="info" :closable="false" style="margin-bottom: 20px" show-icon />
-        
+        <el-alert
+          :title="t('host.installTip')"
+          type="info"
+          :closable="false"
+          style="margin-bottom: 20px"
+          show-icon
+        />
+
         <el-tabs v-model="activeTab" type="card">
           <el-tab-pane label="Linux / macOS" name="linux">
-            <div style="padding: 15px; background: #f5f7fa; border-radius: 4px;">
-              <div style="margin-bottom: 10px; color: #606266; font-size: 14px;">
-                <el-icon style="vertical-align: middle;"><Monitor /></el-icon>
+            <div style="padding: 15px; background: #f5f7fa; border-radius: 4px">
+              <div style="margin-bottom: 10px; color: #606266; font-size: 14px">
+                <el-icon style="vertical-align: middle"><Monitor /></el-icon>
                 {{ t('host.bashCommand') }}
               </div>
               <el-input
@@ -82,41 +84,52 @@
                 type="textarea"
                 :rows="3"
                 readonly
-                style="font-family: monospace; font-size: 13px;"
+                style="font-family: monospace; font-size: 13px"
               />
-              <div style="margin-top: 10px; text-align: right;">
-                <el-button type="primary" @click="copyCommand('linux')" icon="DocumentCopy">Copy</el-button>
+              <div style="margin-top: 10px; text-align: right">
+                <el-button type="primary" @click="copyCommand('linux')" icon="DocumentCopy"
+                  >Copy</el-button
+                >
               </div>
             </div>
           </el-tab-pane>
-          
+
           <el-tab-pane label="Windows" name="windows">
-            <div style="padding: 15px;">
-              <el-alert type="warning" :closable="false" style="margin-bottom: 15px;">
+            <div style="padding: 15px">
+              <el-alert type="warning" :closable="false" style="margin-bottom: 15px">
                 <template #title>
                   <strong>{{ t('host.windowsManualInstall') }}</strong>
                 </template>
                 {{ t('host.windowsManualInstallTip') }}
               </el-alert>
-              
+
               <el-steps direction="vertical" :active="3">
-                <el-step :title="t('host.windowsStep1')" :description="t('host.windowsStep1Desc')" />
-                <el-step :title="t('host.windowsStep2')" :description="t('host.windowsStep2Desc')" />
-                <el-step :title="t('host.windowsStep3')" :description="t('host.windowsStep3Desc')" />
+                <el-step
+                  :title="t('host.windowsStep1')"
+                  :description="t('host.windowsStep1Desc')"
+                />
+                <el-step
+                  :title="t('host.windowsStep2')"
+                  :description="t('host.windowsStep2Desc')"
+                />
+                <el-step
+                  :title="t('host.windowsStep3')"
+                  :description="t('host.windowsStep3Desc')"
+                />
               </el-steps>
             </div>
           </el-tab-pane>
         </el-tabs>
-        
+
         <el-divider />
-        
-        <div style="padding: 10px 0;">
+
+        <div style="padding: 10px 0">
           <el-descriptions :column="1" border>
             <el-descriptions-item :label="t('host.tokenExpires')">
               <el-tag type="warning" effect="plain">{{ expiresAt }}</el-tag>
             </el-descriptions-item>
             <el-descriptions-item :label="t('host.tokenUsage')">
-              <span style="color: #67c23a;">{{ t('host.tokenReusable') }}</span>
+              <span style="color: #67c23a">{{ t('host.tokenReusable') }}</span>
             </el-descriptions-item>
           </el-descriptions>
         </div>
@@ -136,6 +149,7 @@ import { Loading } from '@element-plus/icons-vue'
 import hostService from '../../api/host'
 import agentService from '../../api/agent'
 import { useUserStore } from '../../stores/user'
+import { copyText } from '../../utils/clipboard'
 
 export default {
   name: 'host-list',
@@ -143,7 +157,7 @@ export default {
     const { t, locale } = useI18n()
     return { t, locale }
   },
-  data () {
+  data() {
     const userStore = useUserStore()
     return {
       hosts: [],
@@ -167,27 +181,30 @@ export default {
   components: {
     Loading
   },
-  created () {
+  created() {
     this.search()
   },
   watch: {
-    '$route'(to, from) {
-      if (to.path === '/host' && (from.path === '/host/create' || from.path.startsWith('/host/edit/'))) {
+    $route(to, from) {
+      if (
+        to.path === '/host' &&
+        (from.path === '/host/create' || from.path.startsWith('/host/edit/'))
+      ) {
         this.search()
       }
     }
   },
   methods: {
-    changePage (page) {
+    changePage(page) {
       this.searchParams.page = page
       this.search()
     },
-    changePageSize (pageSize) {
+    changePageSize(pageSize) {
       this.searchParams.page_size = pageSize
       this.search()
     },
-    search (callback = null) {
-      hostService.list(this.searchParams, (data) => {
+    search(callback = null) {
+      hostService.list(this.searchParams, data => {
         this.hosts = data.data
         this.hostTotal = data.total
         if (callback) {
@@ -195,17 +212,19 @@ export default {
         }
       })
     },
-    remove (item) {
+    remove(item) {
       ElMessageBox.confirm(this.t('message.confirmDeleteNode'), this.t('common.tip'), {
         confirmButtonText: this.t('common.confirm'),
         cancelButtonText: this.t('common.cancel'),
         type: 'warning',
         center: true
-      }).then(() => {
-        hostService.remove(item.id, () => this.refresh())
-      }).catch(() => {})
+      })
+        .then(() => {
+          hostService.remove(item.id, () => this.refresh())
+        })
+        .catch(() => {})
     },
-    ping (item) {
+    ping(item) {
       if (!item.id || item.id <= 0) {
         this.$message.error(this.t('message.dataNotFound'))
         return
@@ -214,7 +233,7 @@ export default {
         this.$message.success(this.t('message.connectionSuccess'))
       })
     },
-    toEdit (item) {
+    toEdit(item) {
       let path = ''
       if (item === null) {
         path = '/host/create'
@@ -223,23 +242,22 @@ export default {
       }
       this.$router.push(path)
     },
-    refresh () {
+    refresh() {
       this.search(() => {
         this.$message.success(this.t('message.refreshSuccess'))
       })
     },
-    toTasks (item) {
-      this.$router.push(
-        {
-          path: '/task',
-          query: {
-            host_id: item.id
-          }
-        })
+    toTasks(item) {
+      this.$router.push({
+        path: '/task',
+        query: {
+          host_id: item.id
+        }
+      })
     },
-    showAgentInstall () {
+    showAgentInstall() {
       this.agentDialogVisible = true
-      
+
       // 检查是否有缓存的token且未过期
       const now = new Date()
       if (this.cachedToken && this.cachedTokenExpires && now < this.cachedTokenExpires) {
@@ -248,27 +266,29 @@ export default {
         this.expiresAt = this.cachedTokenExpires.toLocaleString()
         return
       }
-      
+
       // 生成新token
       this.installCommand = ''
       this.expiresAt = ''
-      agentService.generateToken((data) => {
+      agentService.generateToken(data => {
         this.installCommand = data.install_cmd
         const expiresDate = new Date(data.expires_at)
         this.expiresAt = expiresDate.toLocaleString()
-        
+
         // 缓存token信息
         this.cachedToken = data
         this.cachedTokenExpires = expiresDate
       })
     },
-    copyCommand (type) {
+    copyCommand(type) {
       const cmd = type === 'windows' ? this.installCommandWindows : this.installCommand
-      navigator.clipboard.writeText(cmd).then(() => {
-        this.$message.success(this.t('message.copySuccess'))
-      }).catch(() => {
-        this.$message.error(this.t('message.copyFailed'))
-      })
+      copyText(cmd)
+        .then(() => {
+          this.$message.success(this.t('message.copySuccess'))
+        })
+        .catch(() => {
+          this.$message.error(this.t('message.copyFailed'))
+        })
     }
   }
 }
