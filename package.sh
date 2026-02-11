@@ -125,7 +125,7 @@ build() {
     for OS in "${INPUT_OS[@]}";do
         for ARCH in "${INPUT_ARCH[@]}";do
             # gocron-node 不需要数据库，强制禁用 CGO
-            # gocron 需要 SQLite，根据平台决定是否启用 CGO
+            # gocron 的 SQLite 使用 pure-go 驱动，通常不依赖 CGO；但保留 CGO 分支以兼容静态编译/交叉工具链场景
             local CGO_ENABLED_VALUE='1'
             local CC_COMPILER=''
             
@@ -152,7 +152,7 @@ build() {
                 else
                     # 没有交叉编译工具链或不支持的架构，禁用 CGO
                     CGO_ENABLED_VALUE='0'
-                    print_message "警告: 跨平台编译 ${OS}-${ARCH} 未找到交叉编译工具链，禁用 CGO（不支持 SQLite）"
+                    print_message "警告: 跨平台编译 ${OS}-${ARCH} 未找到交叉编译工具链，禁用 CGO"
                 fi
             fi
             

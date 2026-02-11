@@ -77,6 +77,12 @@ git push origin v1.4.10
 - 可选执行基础检查（go test、前端 build）
 - 创建 annotated tag 并 push 到 origin
 
+优先推荐：使用 Python 一键完成（commit/push + tag/push）：
+
+```bash
+python ./scripts/release.py --version v1.5.4 --message "chore: release v1.5.4"
+```
+
 Windows PowerShell：
 
 ```powershell
@@ -93,12 +99,6 @@ Linux/macOS（bash）：
 
 ```bash
 bash ./scripts/release.sh -Version v1.4.10
-```
-
-也可以用 Python 一键完成（commit/push + tag/push）：
-
-```bash
-python ./scripts/release.py --version v1.4.10 --message "chore: release v1.4.10"
 ```
 
 ## 4. 常见问题
