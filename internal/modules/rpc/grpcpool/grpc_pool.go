@@ -6,9 +6,9 @@ import (
 	"sync"
 	"time"
 
-	"github.com/gocronx-team/gocron/internal/modules/app"
-	"github.com/gocronx-team/gocron/internal/modules/rpc/auth"
-	pb "github.com/gocronx-team/gocron/internal/modules/rpc/proto"
+	"github.com/tabortao/gocron/internal/modules/app"
+	"github.com/tabortao/gocron/internal/modules/rpc/auth"
+	pb "github.com/tabortao/gocron/internal/modules/rpc/proto"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/backoff"
 	"google.golang.org/grpc/credentials/insecure"

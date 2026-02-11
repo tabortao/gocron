@@ -7,10 +7,10 @@ import (
 	"runtime"
 	"strings"
 
-	"github.com/gocronx-team/gocron/internal/modules/rpc/auth"
-	"github.com/gocronx-team/gocron/internal/modules/rpc/server"
-	"github.com/gocronx-team/gocron/internal/modules/utils"
 	log "github.com/sirupsen/logrus"
+	"github.com/tabortao/gocron/internal/modules/rpc/auth"
+	"github.com/tabortao/gocron/internal/modules/rpc/server"
+	"github.com/tabortao/gocron/internal/modules/utils"
 )
 
 var (

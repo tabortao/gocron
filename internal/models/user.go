@@ -3,7 +3,7 @@ package models
 import (
 	"time"
 
-	"github.com/gocronx-team/gocron/internal/modules/utils"
+	"github.com/tabortao/gocron/internal/modules/utils"
 )
 
 const PasswordSaltLength = 6

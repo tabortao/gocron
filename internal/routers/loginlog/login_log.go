@@ -2,10 +2,10 @@ package loginlog
 
 import (
 	"github.com/gin-gonic/gin"
-	"github.com/gocronx-team/gocron/internal/models"
-	"github.com/gocronx-team/gocron/internal/modules/logger"
-	"github.com/gocronx-team/gocron/internal/modules/utils"
-	"github.com/gocronx-team/gocron/internal/routers/base"
+	"github.com/tabortao/gocron/internal/models"
+	"github.com/tabortao/gocron/internal/modules/logger"
+	"github.com/tabortao/gocron/internal/modules/utils"
+	"github.com/tabortao/gocron/internal/routers/base"
 )
 
 func Index(c *gin.Context) {

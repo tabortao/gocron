@@ -15,9 +15,9 @@ import (
 	"gorm.io/gorm/logger"
 	"gorm.io/gorm/schema"
 
-	"github.com/gocronx-team/gocron/internal/modules/app"
-	glogger "github.com/gocronx-team/gocron/internal/modules/logger"
-	"github.com/gocronx-team/gocron/internal/modules/setting"
+	"github.com/tabortao/gocron/internal/modules/app"
+	glogger "github.com/tabortao/gocron/internal/modules/logger"
+	"github.com/tabortao/gocron/internal/modules/setting"
 )
 
 type Status int8

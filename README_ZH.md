@@ -1,6 +1,6 @@
 # gocron - 分布式任务调度系统
 
-[![Release](https://img.shields.io/github/release/gocronx-team/gocron.svg?label=Release)](https://github.com/gocronx-team/gocron/releases) [![Downloads](https://img.shields.io/github/downloads/gocronx-team/gocron/total.svg)](https://github.com/gocronx-team/gocron/releases) [![License](https://img.shields.io/github/license/gocronx-team/gocron.svg)](https://github.com/gocronx-team/gocron/blob/master/LICENSE)
+[![Release](https://img.shields.io/github/release/gocronx-team/gocron.svg?label=Release)](https://github.com/tabortao/gocron/releases) [![Downloads](https://img.shields.io/github/downloads/gocronx-team/gocron/total.svg)](https://github.com/tabortao/gocron/releases) [![License](https://img.shields.io/github/license/gocronx-team/gocron.svg)](https://github.com/tabortao/gocron/blob/master/LICENSE)
 
 [English](README.md) | 简体中文
 
@@ -35,7 +35,7 @@
 
 ```bash
 # 1. 克隆项目
-git clone https://github.com/gocronx-team/gocron.git
+git clone https://github.com/tabortao/gocron.git
 cd gocron
 
 # 2. 启动服务

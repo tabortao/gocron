@@ -1,4 +1,4 @@
-module github.com/gocronx-team/gocron
+module github.com/tabortao/gocron
 
 go 1.24.0
 
@@ -17,7 +17,7 @@ require (
 	golang.org/x/crypto v0.45.0
 	golang.org/x/text v0.31.0
 	google.golang.org/grpc v1.64.1
-	google.golang.org/protobuf v1.36.9
+	google.golang.org/protobuf v1.36.11
 	gopkg.in/ini.v1 v1.67.0
 	gorm.io/driver/mysql v1.5.7
 	gorm.io/driver/postgres v1.5.11

@@ -5,7 +5,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/gocronx-team/gocron/internal/models"
+	"github.com/tabortao/gocron/internal/models"
 )
 
 // TestSingleInstanceControl 测试单实例运行控制

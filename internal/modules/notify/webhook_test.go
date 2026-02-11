@@ -3,7 +3,7 @@ package notify
 import (
 	"testing"
 
-	"github.com/gocronx-team/gocron/internal/models"
+	"github.com/tabortao/gocron/internal/models"
 )
 
 // TestWebHook_getActiveWebhookUrls 测试根据任务接收者ID筛选webhook地址

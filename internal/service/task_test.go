@@ -7,10 +7,10 @@ import (
 	"testing"
 	"time"
 
-	"github.com/gocronx-team/gocron/internal/models"
-	"github.com/gocronx-team/gocron/internal/modules/httpclient"
-	"github.com/gocronx-team/gocron/internal/modules/logger"
-	"github.com/gocronx-team/gocron/internal/modules/notify"
+	"github.com/tabortao/gocron/internal/models"
+	"github.com/tabortao/gocron/internal/modules/httpclient"
+	"github.com/tabortao/gocron/internal/modules/logger"
+	"github.com/tabortao/gocron/internal/modules/notify"
 )
 
 func TestMain(m *testing.M) {

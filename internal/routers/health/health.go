@@ -7,11 +7,11 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
-	"github.com/gocronx-team/gocron/internal/models"
-	"github.com/gocronx-team/gocron/internal/modules/app"
-	"github.com/gocronx-team/gocron/internal/modules/rpc/grpcpool"
-	"github.com/gocronx-team/gocron/internal/modules/utils"
-	"github.com/gocronx-team/gocron/internal/service"
+	"github.com/tabortao/gocron/internal/models"
+	"github.com/tabortao/gocron/internal/modules/app"
+	"github.com/tabortao/gocron/internal/modules/rpc/grpcpool"
+	"github.com/tabortao/gocron/internal/modules/utils"
+	"github.com/tabortao/gocron/internal/service"
 )
 
 func Healthz(c *gin.Context) {

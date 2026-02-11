@@ -1,13 +1,13 @@
 package service
 
-// https://github.com/gocronx-team/gocron/issues/66
+// https://github.com/tabortao/gocron/issues/66
 
 import (
 	"sync"
 	"testing"
 	"time"
 
-	"github.com/gocronx-team/gocron/internal/models"
+	"github.com/tabortao/gocron/internal/models"
 )
 
 // TestIssue66RaceCondition 重现 Issue #66: 任务无法单实例运行

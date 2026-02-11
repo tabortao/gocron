@@ -5,8 +5,8 @@ import (
 	"os"
 	"strconv"
 
-	"github.com/gocronx-team/gocron/internal/modules/logger"
-	"github.com/gocronx-team/gocron/internal/modules/utils"
+	"github.com/tabortao/gocron/internal/modules/logger"
+	"github.com/tabortao/gocron/internal/modules/utils"
 	"gopkg.in/ini.v1"
 )
 

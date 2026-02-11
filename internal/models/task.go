@@ -6,7 +6,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/gocronx-team/gocron/internal/modules/logger"
+	"github.com/tabortao/gocron/internal/modules/logger"
 	"gorm.io/gorm"
 )
 

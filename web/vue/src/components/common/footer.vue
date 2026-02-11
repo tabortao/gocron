@@ -1,7 +1,7 @@
 <template>
   <div class="footer-bar">
-    © {{ currentYear }} 
-    <a href="https://github.com/gocronx-team/gocron" target="_blank" rel="noopener noreferrer">
+    © {{ currentYear }}
+    <a href="https://github.com/tabortao/gocron" target="_blank" rel="noopener noreferrer">
       gocronx-team/gocron
     </a>
   </div>

@@ -12,10 +12,10 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
-	"github.com/gocronx-team/gocron/internal/models"
-	"github.com/gocronx-team/gocron/internal/modules/i18n"
-	"github.com/gocronx-team/gocron/internal/modules/logger"
-	"github.com/gocronx-team/gocron/internal/routers/base"
+	"github.com/tabortao/gocron/internal/models"
+	"github.com/tabortao/gocron/internal/modules/i18n"
+	"github.com/tabortao/gocron/internal/modules/logger"
+	"github.com/tabortao/gocron/internal/routers/base"
 )
 
 const tokenExpiration = 3 * time.Hour
@@ -74,7 +74,7 @@ func InstallScript(c *gin.Context) {
 		repo = strings.TrimSpace(os.Getenv("GOCRON_AGENT_GITHUB_REPO"))
 	}
 	if repo == "" {
-		repo = "gocronx-team/gocron"
+		repo = "tabortao/gocron"
 	}
 	if !githubRepoPattern.MatchString(repo) {
 		c.String(http.StatusBadRequest, "Invalid repo")
@@ -390,7 +390,7 @@ func Download(c *gin.Context) {
 		repo = strings.TrimSpace(os.Getenv("GOCRON_AGENT_GITHUB_REPO"))
 	}
 	if repo == "" {
-		repo = "gocronx-team/gocron"
+		repo = "tabortao/gocron"
 	}
 	if !githubRepoPattern.MatchString(repo) {
 		c.String(http.StatusBadRequest, "invalid repo parameter")

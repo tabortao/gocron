@@ -6,11 +6,11 @@ import (
 	"image/png"
 
 	"github.com/gin-gonic/gin"
-	"github.com/gocronx-team/gocron/internal/models"
-	"github.com/gocronx-team/gocron/internal/modules/i18n"
-	"github.com/gocronx-team/gocron/internal/modules/logger"
-	"github.com/gocronx-team/gocron/internal/routers/base"
 	"github.com/pquerna/otp/totp"
+	"github.com/tabortao/gocron/internal/models"
+	"github.com/tabortao/gocron/internal/modules/i18n"
+	"github.com/tabortao/gocron/internal/modules/logger"
+	"github.com/tabortao/gocron/internal/routers/base"
 )
 
 // Setup2FA 设置2FA

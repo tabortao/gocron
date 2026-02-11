@@ -4,7 +4,7 @@ import (
 	"strconv"
 
 	"github.com/gin-gonic/gin"
-	"github.com/gocronx-team/gocron/internal/models"
+	"github.com/tabortao/gocron/internal/models"
 )
 
 // ParsePageAndPageSize 解析查询参数中的页数和每页数量

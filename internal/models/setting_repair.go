@@ -1,6 +1,6 @@
 package models
 
-import "github.com/gocronx-team/gocron/internal/modules/logger"
+import "github.com/tabortao/gocron/internal/modules/logger"
 
 // RepairSettings 修复缺失的 Setting 配置记录
 // 用于解决数据库迁移或升级过程中可能出现的配置缺失问题

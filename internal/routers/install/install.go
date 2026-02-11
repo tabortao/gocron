@@ -7,13 +7,13 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/go-sql-driver/mysql"
-	"github.com/gocronx-team/gocron/internal/models"
-	"github.com/gocronx-team/gocron/internal/modules/app"
-	"github.com/gocronx-team/gocron/internal/modules/setting"
-	"github.com/gocronx-team/gocron/internal/modules/utils"
-	"github.com/gocronx-team/gocron/internal/routers/base"
-	"github.com/gocronx-team/gocron/internal/service"
 	"github.com/lib/pq"
+	"github.com/tabortao/gocron/internal/models"
+	"github.com/tabortao/gocron/internal/modules/app"
+	"github.com/tabortao/gocron/internal/modules/setting"
+	"github.com/tabortao/gocron/internal/modules/utils"
+	"github.com/tabortao/gocron/internal/routers/base"
+	"github.com/tabortao/gocron/internal/service"
 )
 
 // 系统安装

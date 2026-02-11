@@ -9,10 +9,10 @@ import (
 
 	"google.golang.org/grpc/status"
 
-	"github.com/gocronx-team/gocron/internal/modules/i18n"
-	"github.com/gocronx-team/gocron/internal/modules/logger"
-	"github.com/gocronx-team/gocron/internal/modules/rpc/grpcpool"
-	pb "github.com/gocronx-team/gocron/internal/modules/rpc/proto"
+	"github.com/tabortao/gocron/internal/modules/i18n"
+	"github.com/tabortao/gocron/internal/modules/logger"
+	"github.com/tabortao/gocron/internal/modules/rpc/grpcpool"
+	pb "github.com/tabortao/gocron/internal/modules/rpc/proto"
 	"google.golang.org/grpc/codes"
 )
 

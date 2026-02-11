@@ -11,14 +11,14 @@ import (
 	"time"
 
 	"github.com/gocronx-team/cron"
-	"github.com/gocronx-team/gocron/internal/models"
-	"github.com/gocronx-team/gocron/internal/modules/app"
-	"github.com/gocronx-team/gocron/internal/modules/httpclient"
-	"github.com/gocronx-team/gocron/internal/modules/logger"
-	"github.com/gocronx-team/gocron/internal/modules/notify"
-	rpcClient "github.com/gocronx-team/gocron/internal/modules/rpc/client"
-	pb "github.com/gocronx-team/gocron/internal/modules/rpc/proto"
-	"github.com/gocronx-team/gocron/internal/modules/utils"
+	"github.com/tabortao/gocron/internal/models"
+	"github.com/tabortao/gocron/internal/modules/app"
+	"github.com/tabortao/gocron/internal/modules/httpclient"
+	"github.com/tabortao/gocron/internal/modules/logger"
+	"github.com/tabortao/gocron/internal/modules/notify"
+	rpcClient "github.com/tabortao/gocron/internal/modules/rpc/client"
+	pb "github.com/tabortao/gocron/internal/modules/rpc/proto"
+	"github.com/tabortao/gocron/internal/modules/utils"
 )
 
 var (
