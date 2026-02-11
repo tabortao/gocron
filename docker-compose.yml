@@ -1,8 +1,5 @@
 services:
   gocron:
-    # build:
-    #   context: .
-    #   dockerfile: Dockerfile.gocron
     image: tabortoa/gocron:latest
     container_name: gocron
     ports:
@@ -12,8 +9,6 @@ services:
     environment:
       - TZ=Asia/Shanghai
       # Database configuration (sqlite by default)
-      - GOCRON_DB_ENGINE=sqlite
-      - GOCRON_DB_DATABASE=/.gocron/data/gocron.db
       # It is recommended to set a fixed AuthSecret
       # - GOCRON_AUTH_SECRET=my_secret_token
       # For MySQL, uncomment and configure:
@@ -24,7 +19,3 @@ services:
       # - GOCRON_DB_PASSWORD=password
       # - GOCRON_DB_DATABASE=gocron
     restart: unless-stopped
-
-# volumes:
-#   gocron-data:
-#     driver: local

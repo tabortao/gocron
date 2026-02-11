@@ -44,6 +44,9 @@ func Stop(ip string, port int, id int64) {
 			Id:      id,
 		})
 		if err != nil {
+			if status.Code(err) == codes.Unavailable {
+				grpcpool.Pool.Release(addr)
+			}
 			logger.Errorf("发送停止信号失败#%v", err)
 		}
 	}()
@@ -73,6 +76,11 @@ func Exec(ip string, port int, taskReq *pb.TaskRequest) (string, error) {
 	defer taskCtxMap.Delete(taskUniqueKey)
 
 	resp, err := c.Run(ctx, taskReq)
+	if err != nil {
+		if status.Code(err) == codes.Unavailable {
+			grpcpool.Pool.Release(addr)
+		}
+	}
 
 	// 处理响应：即使有错误，也要返回已产生的输出
 	if err != nil {

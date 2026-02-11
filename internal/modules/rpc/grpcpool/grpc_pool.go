@@ -43,6 +43,12 @@ type GRPCPool struct {
 	mu    sync.RWMutex
 }
 
+func (p *GRPCPool) Size() int {
+	p.mu.RLock()
+	defer p.mu.RUnlock()
+	return len(p.conns)
+}
+
 func (p *GRPCPool) Get(addr string) (pb.TaskClient, error) {
 	p.mu.RLock()
 	client, ok := p.conns[addr]

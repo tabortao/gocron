@@ -10,6 +10,7 @@
 1.  **避免使用 `cd`**：不要在脚本中使用 `cd dir && command`。
 2.  **使用配置文件**：优先使用 JS/MJS 配置文件 (`.lintstagedrc.mjs`) 以便处理路径转换。
 3.  **处理 ESLint 兼容性**：如果项目使用了 ESLint v9 但仍保留旧版配置 (`.eslintrc.*`)，需在配置中设置 `process.env.ESLINT_USE_FLAT_CONFIG = 'false'`，或者暂时禁用 ESLint 检查，优先保证 Prettier 格式化。
+4.  如需要使用账号进行调试，可以使用测试账号：testuser，测试账号密码：Testuser123
 
 **Example (.lintstagedrc.mjs):**
 

@@ -15,6 +15,7 @@ import (
 	"github.com/gocronx-team/gocron/internal/modules/logger"
 	"github.com/gocronx-team/gocron/internal/modules/utils"
 	"github.com/gocronx-team/gocron/internal/routers/agent"
+	"github.com/gocronx-team/gocron/internal/routers/health"
 	"github.com/gocronx-team/gocron/internal/routers/host"
 	"github.com/gocronx-team/gocron/internal/routers/install"
 	"github.com/gocronx-team/gocron/internal/routers/loginlog"
@@ -42,6 +43,8 @@ func init() {
 // Register 路由泣册
 func Register(r *gin.Engine) {
 	api := r.Group(urlPrefix)
+
+	api.GET("/healthz", health.Healthz)
 
 	// 系统安装
 	installGroup := api.Group("/install")
@@ -224,7 +227,7 @@ func checkAppInstall(c *gin.Context) {
 		return
 	}
 	path := c.Request.URL.Path
-	if strings.HasPrefix(path, "/api/install") || path == "/" || strings.HasPrefix(path, "/static") || strings.HasSuffix(path, ".js") || strings.HasSuffix(path, ".css") {
+	if strings.HasPrefix(path, "/api/install") || path == "/api/healthz" || path == "/" || strings.HasPrefix(path, "/static") || strings.HasSuffix(path, ".js") || strings.HasSuffix(path, ".css") {
 		c.Next()
 		return
 	}
@@ -274,7 +277,7 @@ func userAuth(c *gin.Context) {
 
 	uri := strings.TrimRight(path, "/")
 	// 登录接口和安装状态接口不需要认证
-	excludePaths := []string{"", "/api/user/login", "/api/install/status", "/api/agent/install.sh", "/api/agent/register", "/api/agent/download"}
+	excludePaths := []string{"", "/api/healthz", "/api/user/login", "/api/install/status", "/api/agent/install.sh", "/api/agent/register", "/api/agent/download"}
 	for _, p := range excludePaths {
 		if uri == p {
 			c.Next()
@@ -340,6 +343,7 @@ func urlAuth(c *gin.Context) {
 	// 普通用户允许访问的URL地址
 	allowPaths := []string{
 		"",
+		"/api/healthz",
 		"/api/install/status",
 		"/api/task",
 		"/api/task/log",
