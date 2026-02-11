@@ -10,7 +10,7 @@ SEMVER_TAG_RE = re.compile(r"^v\d+\.\d+\.\d+$")
 
 
 def run(cmd: list[str], *, check: bool = True) -> subprocess.CompletedProcess:
-    return subprocess.run(cmd, check=check, text=True, capture_output=True)
+    return subprocess.run(cmd, check=check, text=True, capture_output=True, encoding="utf-8")
 
 
 def run_print(cmd: list[str]) -> None:
