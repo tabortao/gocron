@@ -126,7 +126,7 @@ build() {
         for ARCH in "${INPUT_ARCH[@]}";do
             # gocron-node 不需要数据库，强制禁用 CGO
             # gocron 的 SQLite 使用 pure-go 驱动，通常不依赖 CGO；但保留 CGO 分支以兼容静态编译/交叉工具链场景
-            local CGO_ENABLED_VALUE='1'
+            local CGO_ENABLED_VALUE='0'
             local CC_COMPILER=''
             
             if [[ "${BINARY_NAME}" = "gocron-node" ]]; then

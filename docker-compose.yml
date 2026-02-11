@@ -11,6 +11,8 @@ services:
       # Database configuration (sqlite by default)
       # It is recommended to set a fixed AuthSecret
       # - GOCRON_AUTH_SECRET=my_secret_token
+      # Explicitly persist SQLite file under the mounted directory
+      - GOCRON_DB_DATABASE=/.gocron/data/gocron.db
       # For MySQL, uncomment and configure:
       # - GOCRON_DB_ENGINE=mysql
       # - GOCRON_DB_HOST=mysql_host

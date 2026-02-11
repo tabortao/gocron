@@ -258,7 +258,7 @@ Configuration is managed through:
 ### Prerequisites
 
 - Go 1.24.0+
-- Node.js/Yarn for frontend development
+- Node.js/pnpm for frontend development
 - Database (MySQL/PostgreSQL/SQLite)
 - Docker (optional, for containerized deployment)
 
@@ -269,7 +269,7 @@ Configuration is managed through:
 make dev-deps
 
 # Install frontend dependencies
-cd web/vue && yarn install
+pnpm install
 ```
 
 ### Configuration Files

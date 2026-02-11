@@ -8,6 +8,9 @@
   "scripts": {
     "prepare": "husky",
     "commit": "git-cz",
+    "web:install": "pnpm -C web/vue install",
+    "web:build": "pnpm -C web/vue run build",
+    "web:dev": "pnpm -C web/vue run dev",
     "lint:lint-staged": "lint-staged"
   },
   "config": {

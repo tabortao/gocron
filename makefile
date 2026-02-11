@@ -94,20 +94,20 @@ package-all: build-web
 .PHONY: build-vue
 build-vue:
 	@echo "Installing Vue dependencies..."
-	cd web/vue && yarn install
+	pnpm -C web/vue install
 	@echo "Building Vue frontend..."
-	cd web/vue && yarn run build
+	pnpm -C web/vue run build
 	@echo "✅ Vue build complete! Files will be embedded during Go build."
 
 .PHONY: install-vue
 install-vue:
 	@echo "Installing Vue dependencies..."
-	cd web/vue && yarn install
+	pnpm -C web/vue install
 
 .PHONY: run-vue
 run-vue:
 	@echo "Starting Vue dev server..."
-	cd web/vue && yarn run dev
+	pnpm -C web/vue run dev
 
 .PHONY: build-web
 build-web: build-vue

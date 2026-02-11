@@ -9,24 +9,24 @@ echo ""
 
 # 1. 依赖检查
 echo "1. 检查依赖..."
-yarn install --frozen-lockfile
+pnpm install --frozen-lockfile
 echo "✅ 依赖检查完成"
 echo ""
 
 # 2. 运行测试
 echo "2. 运行单元测试..."
-yarn test --run
+pnpm test -- --run
 echo "✅ 测试通过"
 echo ""
 
 # 3. Lint 检查
 echo "3. 运行 Lint 检查..."
-yarn lint || echo "⚠️  Lint 有警告（非阻塞）"
+pnpm lint || echo "⚠️  Lint 有警告（非阻塞）"
 echo ""
 
 # 4. 构建验证
 echo "4. 构建生产版本..."
-yarn build
+pnpm build
 echo "✅ 构建成功"
 echo ""
 
@@ -46,6 +46,6 @@ echo "✅ 所有验证通过！"
 echo "=========================================="
 echo ""
 echo "下一步:"
-echo "  1. 启动开发服务器: yarn dev"
+echo "  1. 启动开发服务器: pnpm dev"
 echo "  2. 手动测试功能"
 echo ""

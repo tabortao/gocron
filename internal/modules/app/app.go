@@ -67,10 +67,42 @@ func IsInstalled() bool {
 		return true
 	}
 
+	setSqliteEnv := func(dbPath string) {
+		if os.Getenv("GOCRON_DB_ENGINE") == "" {
+			os.Setenv("GOCRON_DB_ENGINE", "sqlite")
+		}
+		if dbPath != "" {
+			os.Setenv("GOCRON_DB_DATABASE", dbPath)
+		}
+	}
+
+	if dbEnv := os.Getenv("GOCRON_DB_DATABASE"); dbEnv != "" {
+		if utils.FileExist(dbEnv) && (strings.HasSuffix(dbEnv, ".db") || strings.HasSuffix(dbEnv, ".sqlite") || strings.HasSuffix(dbEnv, ".sqlite3")) {
+			setSqliteEnv(dbEnv)
+			return true
+		}
+	}
+
 	// 检查 install.lock
 	_, err := os.Stat(filepath.Join(ConfDir, "install.lock"))
 	if !os.IsNotExist(err) {
 		return true
+	}
+
+	detectExistingSqliteDB := func() (string, bool) {
+		possibleDbPaths := []string{
+			filepath.Join(AppDir, "data", "gocron.db"),
+			filepath.Join(AppDir, "gocron.db"),
+			"data/gocron.db",
+			"gocron.db",
+		}
+
+		for _, path := range possibleDbPaths {
+			if utils.FileExist(path) {
+				return path, true
+			}
+		}
+		return "", false
 	}
 
 	// 增强检查：如果 app.ini 存在，尝试读取其中的 DB 配置
@@ -102,6 +134,11 @@ func IsInstalled() bool {
 						return true
 					}
 				}
+
+				if detected, ok := detectExistingSqliteDB(); ok {
+					setSqliteEnv(detected)
+					return true
+				}
 			} else {
 				// 对于 MySQL/Postgres，如果配置文件存在，我们假设它是配置好的
 				// 因为我们很难在不连接的情况下验证。
@@ -110,52 +147,9 @@ func IsInstalled() bool {
 		}
 	}
 
-	// 最后的兜底：如果默认的 sqlite 文件存在（./data/gocron.db 或 ./gocron.db），
-	// 且用户没有明确配置 app.ini，我们是否应该视为已安装？
-	// 用户的需求是 "已经存在 ./data/gocron.db ... 却进入初始化界面"
-	// 这说明用户可能期望自动发现。
-	possibleDbPaths := []string{
-		"gocron.db",
-		"data/gocron.db",
-		filepath.Join(AppDir, "gocron.db"),
-		filepath.Join(AppDir, "data/gocron.db"),
-	}
-
-	for _, path := range possibleDbPaths {
-		if utils.FileExist(path) {
-			// 只有当没有 app.ini 时，我们才敢假设这个 DB 是用户想要的
-			if !utils.FileExist(AppConfig) {
-				// 我们需要一种方式告诉系统使用这个 DB。
-				// 但 IsInstalled 只是返回 bool。
-				// 如果我们返回 true，后续 setting.Read 会读取默认值 (sqlite, gocron.db)。
-				// 如果实际 DB 在 data/gocron.db，而默认是 gocron.db，那还是连不上（会创建新的空 DB）。
-				// 所以这里不能简单返回 true，除非我们能修改配置。
-				// 但 app 包不应该修改 setting。
-
-				// 这种情况下，最好的办法是告诉用户：请配置环境变量或 app.ini 指向你的 DB。
-				// 或者，我们修改 setting.go 的默认逻辑来寻找 DB？不，那太隐晦了。
-
-				// 回到用户的场景：用户说 "已经存在 ./data/gocron.db"。
-				// 如果用户是通过 docker 挂载进来的，或者手动放的。
-				// 如果没有 install.lock，系统认为未安装。
-				// 如果我们在这里返回 true，系统会用默认配置 (gocron.db) 启动，
-				// 结果是：系统启动了，但看不到原来的数据（因为连的是新创建的 gocron.db），
-				// 或者如果默认就是 gocron.db 且文件就在那，那就完美了。
-
-				// 但如果文件在 ./data/gocron.db，而默认配置是 ./gocron.db，
-				// 返回 true 会导致连接错误位置。
-
-				// 除非我们能检测到 ./data/gocron.db 并通过某种方式传递给 setting。
-				// 比如设置环境变量？
-				if path == "data/gocron.db" || strings.HasSuffix(path, "data/gocron.db") {
-					os.Setenv("GOCRON_DB_DATABASE", path)
-					return true
-				}
-				if path == "gocron.db" || strings.HasSuffix(path, "gocron.db") {
-					return true
-				}
-			}
-		}
+	if detected, ok := detectExistingSqliteDB(); ok {
+		setSqliteEnv(detected)
+		return true
 	}
 
 	return false
