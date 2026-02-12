@@ -99,13 +99,6 @@ gocron 的 Webhook 是：
         "tag": "div",
         "text": {
           "tag": "lark_md",
-          "content": "{{ if .Host }}**节点**：{{.Host}}{{ end }}"
-        }
-      },
-      {
-        "tag": "div",
-        "text": {
-          "tag": "lark_md",
           "content": "**摘要**：{{.ResultSummary}}"
         }
       },

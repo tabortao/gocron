@@ -237,7 +237,6 @@ export default {
     },
     "elements": [
       { "tag": "div", "text": { "tag": "lark_md", "content": "**任务**：{{.TaskName}}（ID: {{.TaskId}}）\\n**状态**：{{.StatusZh}}" } },
-      { "tag": "div", "text": { "tag": "lark_md", "content": "**节点**：{{.Host}}" } },
       { "tag": "div", "text": { "tag": "lark_md", "content": "**摘要**：{{.ResultSummary}}" } },
       { "tag": "hr" },
       { "tag": "div", "text": { "tag": "lark_md", "content": "**备注**：{{.Remark}}" } }
