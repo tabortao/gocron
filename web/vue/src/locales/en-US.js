@@ -78,6 +78,8 @@ export default {
     notification: 'Task Notification',
     notifyType: 'Notification Type',
     notifyReceiver: 'Receiver',
+    notifyWebhookReceiver: 'Webhook URL',
+    notifyServerChan3Receiver: 'Server Chan URL',
     notifyReceiverPlaceholder: 'Please select',
     notifyChannel: 'Channel',
     notifyKeyword: 'Task Output Keyword',

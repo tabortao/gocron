@@ -1,14 +1,26 @@
 <template>
   <el-main>
-    <el-form :inline="true">
+    <div class="page-header">
+      <div class="page-title">{{ t('taskLog.list') }}</div>
+      <div class="toolbar">
+        <el-button type="danger" v-if="isAdmin" @click="clearLog">{{
+          t('message.clearLog')
+        }}</el-button>
+        <el-button type="info" @click="refresh">{{ t('common.refresh') }}</el-button>
+      </div>
+    </div>
+
+    <el-card class="card-section filter-card" shadow="never">
+      <el-form :inline="true" size="small">
         <el-form-item :label="t('task.id')">
-          <el-input v-model.trim="searchParams.task_id"></el-input>
+          <el-input v-model.trim="searchParams.task_id" style="width: 200px" clearable></el-input>
         </el-form-item>
         <el-form-item :label="t('task.protocol')">
           <el-select
             v-model.trim="searchParams.protocol"
             :placeholder="t('task.protocol')"
-            style="width: 180px"
+            style="width: 200px"
+            clearable
           >
             <el-option :label="t('message.all')" value=""></el-option>
             <el-option
@@ -21,7 +33,7 @@
           </el-select>
         </el-form-item>
         <el-form-item :label="t('common.status')">
-          <el-select v-model.trim="searchParams.status" style="width: 180px">
+          <el-select v-model.trim="searchParams.status" style="width: 200px" clearable>
             <el-option :label="t('message.all')" value=""></el-option>
             <el-option
               v-for="item in statusList"
@@ -36,16 +48,9 @@
           <el-button type="primary" @click="search()">{{ t('common.search') }}</el-button>
         </el-form-item>
       </el-form>
-      <el-row type="flex" justify="end">
-        <el-col :span="3">
-          <el-button type="danger" v-if="isAdmin" @click="clearLog">{{
-            t('message.clearLog')
-          }}</el-button>
-        </el-col>
-        <el-col :span="2">
-          <el-button type="info" @click="refresh">{{ t('common.refresh') }}</el-button>
-        </el-col>
-      </el-row>
+    </el-card>
+
+    <el-card class="card-section table-card" shadow="never">
       <el-pagination
         background
         layout="prev, pager, next, sizes, total"
@@ -166,21 +171,22 @@
           </template>
         </el-table-column>
       </el-table>
-      <el-dialog :title="t('message.taskExecutionResult')" v-model="dialogVisible" width="60%">
-        <div v-if="currentTaskResult.hostname">
-          <strong>{{ t('taskLog.host') }}:</strong>
-          <pre v-html="currentTaskResult.hostname"></pre>
-        </div>
-        <div>
-          <strong>{{ t('task.command') }}:</strong>
-          <pre>{{ currentTaskResult.command }}</pre>
-        </div>
-        <div>
-          <strong>{{ t('taskLog.output') }}:</strong>
-          <pre>{{ currentTaskResult.result }}</pre>
-        </div>
-      </el-dialog>
-    </el-main>
+    </el-card>
+    <el-dialog :title="t('message.taskExecutionResult')" v-model="dialogVisible" width="60%">
+      <div v-if="currentTaskResult.hostname">
+        <strong>{{ t('taskLog.host') }}:</strong>
+        <pre v-html="currentTaskResult.hostname"></pre>
+      </div>
+      <div>
+        <strong>{{ t('task.command') }}:</strong>
+        <pre>{{ currentTaskResult.command }}</pre>
+      </div>
+      <div>
+        <strong>{{ t('taskLog.output') }}:</strong>
+        <pre>{{ currentTaskResult.result }}</pre>
+      </div>
+    </el-dialog>
+  </el-main>
 </template>
 
 <script>

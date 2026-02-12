@@ -16,6 +16,7 @@ import (
 type ServerChan3 struct{}
 
 const serverChan3AllReceiverId = "-3"
+const serverChan3TypedPrefix = "c"
 
 func (serverChan3 *ServerChan3) Send(msg Message) {
 	model := new(models.Setting)
@@ -47,14 +48,29 @@ func (serverChan3 *ServerChan3) Send(msg Message) {
 }
 
 func (serverChan3 *ServerChan3) getActiveUrls(setting models.ServerChan3, msg Message) []models.ServerChan3Url {
-	taskReceiverId, _ := msg["task_receiver_id"].(string)
-	taskReceiverId = strings.TrimSpace(taskReceiverId)
-	if taskReceiverId == "" {
+	raw, _ := msg["task_receiver_id"].(string)
+	raw = strings.TrimSpace(raw)
+	if raw == "" {
 		return setting.Urls
 	}
-	taskReceiverIdsRaw := strings.Split(taskReceiverId, ",")
-	taskReceiverIds := make([]string, 0, len(taskReceiverIdsRaw))
-	for _, id := range taskReceiverIdsRaw {
+
+	typed, legacy := parseReceiverTokens(raw)
+	if values, ok := typed[serverChan3TypedPrefix]; ok && len(values) > 0 {
+		if containsWildcard(values) || utils.InStringSlice(values, serverChan3AllReceiverId) {
+			return setting.Urls
+		}
+		idSet := toIntSet(values)
+		urls := make([]models.ServerChan3Url, 0, len(setting.Urls))
+		for _, v := range setting.Urls {
+			if _, ok := idSet[v.Id]; ok {
+				urls = append(urls, v)
+			}
+		}
+		return urls
+	}
+
+	taskReceiverIds := make([]string, 0, len(legacy))
+	for _, id := range legacy {
 		id = strings.TrimSpace(id)
 		if id == "" {
 			continue

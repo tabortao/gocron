@@ -80,7 +80,7 @@ body {
 .el-main {
   padding: 20px;
   margin: 0;
-  background-color: #f5f7fa;
+  background-color: #f6f7fb;
 }
 #main-container {
   height: 100%;
@@ -106,5 +106,51 @@ body {
 .el-message-box__title {
   font-size: 18px;
   font-weight: 600;
+}
+
+.page-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.page-title {
+  font-size: 18px;
+  font-weight: 600;
+  line-height: 1.2;
+  color: #111827;
+}
+
+.page-subtitle {
+  margin-top: 4px;
+  font-size: 12px;
+  color: #6b7280;
+}
+
+.toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.card-section {
+  border-radius: 12px;
+  margin-bottom: 16px;
+}
+
+.filter-card :deep(.el-card__body) {
+  padding-bottom: 6px;
+}
+
+.table-card :deep(.el-card__body) {
+  padding-top: 10px;
+}
+
+.el-card {
+  border-radius: 12px;
 }
 </style>

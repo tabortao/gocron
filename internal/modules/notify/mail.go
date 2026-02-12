@@ -75,7 +75,13 @@ func (mail *Mail) send(mailSetting models.Mail, toUsers []string, msg Message) {
 }
 
 func (mail *Mail) getActiveMailUsers(mailSetting models.Mail, msg Message) []string {
-	taskReceiverIds := strings.Split(msg["task_receiver_id"].(string), ",")
+	raw, _ := msg["task_receiver_id"].(string)
+	typed, legacy := parseReceiverTokens(raw)
+	rawIds := legacy
+	if ids, ok := typed["m"]; ok && len(ids) > 0 {
+		rawIds = ids
+	}
+	taskReceiverIds := strings.Split(strings.Join(rawIds, ","), ",")
 	users := []string{}
 	for _, v := range mailSetting.MailUsers {
 		if utils.InStringSlice(taskReceiverIds, strconv.Itoa(v.Id)) {

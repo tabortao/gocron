@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <el-card class="card-section" shadow="never">
     <el-tabs v-model="activeName">
       <el-tab-pane :label="t('system.email')" name="email"></el-tab-pane>
       <el-tab-pane label="Slack" name="slack"></el-tab-pane>
@@ -8,7 +8,7 @@
     </el-tabs>
     <el-alert type="info" :closable="false" style="margin-bottom: 15px">
       <template #title>
-        <div style="font-weight: bold; margin-bottom: 8px">{{ t('system.templateVariables') }}</div>
+        <div style="font-weight: 600; margin-bottom: 8px">{{ t('system.templateVariables') }}</div>
         <div style="font-size: 13px; line-height: 1.8">
           <div>
             <code v-pre>{{.TaskId}}</code> - {{ t('system.taskIdVar') }}
@@ -43,7 +43,7 @@
         </div>
       </template>
     </el-alert>
-  </div>
+  </el-card>
 </template>
 
 <script>

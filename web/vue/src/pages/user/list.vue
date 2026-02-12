@@ -1,60 +1,62 @@
 <template>
   <el-main>
-    <el-row type="flex" justify="end">
-      <el-col :span="2">
+    <div class="page-header">
+      <div class="page-title">{{ t('user.list') }}</div>
+      <div class="toolbar">
         <el-button type="primary" @click="toEdit(null)">{{ t('common.add') }}</el-button>
-      </el-col>
-      <el-col :span="2">
         <el-button type="info" @click="refresh">{{ t('common.refresh') }}</el-button>
-      </el-col>
-    </el-row>
-    <el-pagination
-      background
-      layout="prev, pager, next, sizes, total"
-      :total="userTotal"
-      v-model:current-page="searchParams.page"
-      v-model:page-size="searchParams.page_size"
-      @size-change="changePageSize"
-      @current-change="changePage"
-    >
-    </el-pagination>
-    <el-table :data="users" tooltip-effect="dark" border style="width: 100%">
-      <el-table-column prop="id" label="ID"> </el-table-column>
-      <el-table-column prop="name" :label="t('user.username')"> </el-table-column>
-      <el-table-column prop="email" :label="t('user.email')"> </el-table-column>
-      <el-table-column prop="is_admin" :formatter="formatRole" :label="t('user.role')">
-      </el-table-column>
-      <el-table-column :label="t('common.status')">
-        <template #default="scope">
-          <el-switch
-            v-model="scope.row.status"
-            :active-value="1"
-            :inactive-value="0"
-            active-color="#13ce66"
-            @change="changeStatus(scope.row)"
-            inactive-color="#ff4949"
-          >
-          </el-switch>
-        </template>
-      </el-table-column>
-      <el-table-column
-        :label="t('common.operation')"
-        :width="locale === availableLanguages.zhCN.value ? 280 : 340"
-        v-if="isAdmin"
+      </div>
+    </div>
+
+    <el-card class="card-section table-card" shadow="never">
+      <el-pagination
+        background
+        layout="prev, pager, next, sizes, total"
+        :total="userTotal"
+        v-model:current-page="searchParams.page"
+        v-model:page-size="searchParams.page_size"
+        @size-change="changePageSize"
+        @current-change="changePage"
       >
-        <template #default="scope">
-          <el-button type="primary" size="small" @click="toEdit(scope.row)">{{
-            t('common.edit')
-          }}</el-button>
-          <el-button type="success" size="small" @click="editPassword(scope.row)">{{
-            t('user.changePassword')
-          }}</el-button>
-          <el-button type="danger" size="small" @click="remove(scope.row)">{{
-            t('common.delete')
-          }}</el-button>
-        </template>
-      </el-table-column>
-    </el-table>
+      </el-pagination>
+      <el-table :data="users" tooltip-effect="dark" border style="width: 100%">
+        <el-table-column prop="id" label="ID"> </el-table-column>
+        <el-table-column prop="name" :label="t('user.username')"> </el-table-column>
+        <el-table-column prop="email" :label="t('user.email')"> </el-table-column>
+        <el-table-column prop="is_admin" :formatter="formatRole" :label="t('user.role')">
+        </el-table-column>
+        <el-table-column :label="t('common.status')">
+          <template #default="scope">
+            <el-switch
+              v-model="scope.row.status"
+              :active-value="1"
+              :inactive-value="0"
+              active-color="#13ce66"
+              @change="changeStatus(scope.row)"
+              inactive-color="#ff4949"
+            >
+            </el-switch>
+          </template>
+        </el-table-column>
+        <el-table-column
+          :label="t('common.operation')"
+          :width="locale === availableLanguages.zhCN.value ? 280 : 340"
+          v-if="isAdmin"
+        >
+          <template #default="scope">
+            <el-button type="primary" size="small" @click="toEdit(scope.row)">{{
+              t('common.edit')
+            }}</el-button>
+            <el-button type="success" size="small" @click="editPassword(scope.row)">{{
+              t('user.changePassword')
+            }}</el-button>
+            <el-button type="danger" size="small" @click="remove(scope.row)">{{
+              t('common.delete')
+            }}</el-button>
+          </template>
+        </el-table-column>
+      </el-table>
+    </el-card>
   </el-main>
 </template>
 

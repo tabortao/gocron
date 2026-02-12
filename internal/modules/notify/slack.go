@@ -61,7 +61,13 @@ func (slack *Slack) send(msg Message, slackUrl string, channel string) {
 }
 
 func (slack *Slack) getActiveSlackChannels(slackSetting models.Slack, msg Message) []string {
-	taskReceiverIds := strings.Split(msg["task_receiver_id"].(string), ",")
+	raw, _ := msg["task_receiver_id"].(string)
+	typed, legacy := parseReceiverTokens(raw)
+	rawIds := legacy
+	if ids, ok := typed["s"]; ok && len(ids) > 0 {
+		rawIds = ids
+	}
+	taskReceiverIds := strings.Split(strings.Join(rawIds, ","), ",")
 	channels := []string{}
 	for _, v := range slackSetting.Channels {
 		if utils.InStringSlice(taskReceiverIds, strconv.Itoa(v.Id)) {

@@ -274,7 +274,7 @@
         </el-col>
 
         <el-col :span="8" v-if="form.notify_status !== 0 && form.notify_type.includes(2)">
-          <el-form-item :label="t('task.notifyReceiver')">
+          <el-form-item :label="t('task.notifyWebhookReceiver')">
             <el-select
               key="notify-webhook"
               v-model="selectedWebhookNotifyIds"
@@ -295,7 +295,7 @@
         </el-col>
 
         <el-col :span="8" v-if="form.notify_status !== 0 && form.notify_type.includes(3)">
-          <el-form-item :label="t('task.notifyReceiver')">
+          <el-form-item :label="t('task.notifyServerChan3Receiver')">
             <el-select
               key="notify-serverchan3"
               v-model="selectedServerChan3NotifyIds"
@@ -673,30 +673,40 @@ export default {
       }
     },
     buildNotifyReceiverId(types) {
-      const receiverIds = new Set()
+      const tokens = new Set()
       if (types.includes(0)) {
-        this.selectedMailNotifyIds.forEach(v => receiverIds.add(Number(v)))
+        this.selectedMailNotifyIds.forEach(v => {
+          const id = Number(v)
+          if (Number.isFinite(id)) tokens.add(`m:${id}`)
+        })
       }
       if (types.includes(1)) {
-        this.selectedSlackNotifyIds.forEach(v => receiverIds.add(Number(v)))
+        this.selectedSlackNotifyIds.forEach(v => {
+          const id = Number(v)
+          if (Number.isFinite(id)) tokens.add(`s:${id}`)
+        })
       }
       if (types.includes(2)) {
         if (this.selectedWebhookNotifyIds.includes(-2)) {
-          receiverIds.add(-2)
+          tokens.add('w:*')
         } else {
-          this.selectedWebhookNotifyIds.forEach(v => receiverIds.add(Number(v)))
+          this.selectedWebhookNotifyIds.forEach(v => {
+            const id = Number(v)
+            if (Number.isFinite(id)) tokens.add(`w:${id}`)
+          })
         }
       }
       if (types.includes(3)) {
         if (this.selectedServerChan3NotifyIds.includes(-3)) {
-          receiverIds.add(-3)
+          tokens.add('c:*')
         } else {
-          this.selectedServerChan3NotifyIds.forEach(v => receiverIds.add(Number(v)))
+          this.selectedServerChan3NotifyIds.forEach(v => {
+            const id = Number(v)
+            if (Number.isFinite(id)) tokens.add(`c:${id}`)
+          })
         }
       }
-      return Array.from(receiverIds)
-        .filter(v => Number.isFinite(v))
-        .join(',')
+      return Array.from(tokens).join(',')
     },
     tryInitNotifyReceiverSelections() {
       if (this.notifyReceiverInitialized) {
@@ -713,43 +723,88 @@ export default {
         return
       }
 
-      const ids = raw.map(v => Number(v)).filter(v => Number.isFinite(v))
-
-      const mailSet = new Set((this.mailUsers || []).map(v => v.id))
-      const slackSet = new Set((this.slackChannels || []).map(v => v.id))
       const webhookSet = new Set((this.webhookUrls || []).map(v => v.id))
       const serverChan3Set = new Set((this.serverChan3Urls || []).map(v => v.id))
+
+      this.selectedMailNotifyIds = []
 
       this.selectedMailNotifyIds = []
       this.selectedSlackNotifyIds = []
       this.selectedWebhookNotifyIds = []
       this.selectedServerChan3NotifyIds = []
 
-      ids.forEach(id => {
-        if (id === -2) {
-          this.selectedWebhookNotifyIds = [-2]
+      let hasTyped = false
+      const legacyIds = []
+      raw.forEach(token => {
+        if (token.includes(':')) {
+          const [k, v] = token.split(':')
+          const key = String(k || '').trim()
+          const val = String(v || '').trim()
+          if (!key || !val) return
+          hasTyped = true
+          if (key === 'm') {
+            const id = Number(val)
+            if (Number.isFinite(id)) this.selectedMailNotifyIds.push(id)
+          } else if (key === 's') {
+            const id = Number(val)
+            if (Number.isFinite(id)) this.selectedSlackNotifyIds.push(id)
+          } else if (key === 'w') {
+            if (val === '*' || val === 'all') {
+              this.selectedWebhookNotifyIds = [-2]
+              return
+            }
+            const id = Number(val)
+            if (Number.isFinite(id)) this.selectedWebhookNotifyIds.push(id)
+          } else if (key === 'c') {
+            if (val === '*' || val === 'all') {
+              this.selectedServerChan3NotifyIds = [-3]
+              return
+            }
+            const id = Number(val)
+            if (Number.isFinite(id)) this.selectedServerChan3NotifyIds.push(id)
+          }
           return
         }
-        if (id === -3) {
-          this.selectedServerChan3NotifyIds = [-3]
-          return
-        }
-        if (mailSet.has(id)) {
-          this.selectedMailNotifyIds.push(id)
-          return
-        }
-        if (slackSet.has(id)) {
-          this.selectedSlackNotifyIds.push(id)
-          return
-        }
-        if (webhookSet.has(id)) {
-          this.selectedWebhookNotifyIds.push(id)
-          return
-        }
-        if (serverChan3Set.has(id)) {
-          this.selectedServerChan3NotifyIds.push(id)
-        }
+        const id = Number(token)
+        if (Number.isFinite(id)) legacyIds.push(id)
       })
+
+      if (!hasTyped && legacyIds.length > 0) {
+        const notifyTypes = Array.isArray(this.form.notify_type) ? this.form.notify_type : []
+        if (notifyTypes.length === 1) {
+          const t = Number(notifyTypes[0])
+          if (t === 0) this.selectedMailNotifyIds = legacyIds
+          if (t === 1) this.selectedSlackNotifyIds = legacyIds
+          if (t === 2) this.selectedWebhookNotifyIds = legacyIds.includes(-2) ? [-2] : legacyIds
+          if (t === 3) this.selectedServerChan3NotifyIds = legacyIds.includes(-3) ? [-3] : legacyIds
+        } else {
+          legacyIds.forEach(id => {
+            if (id === -2) {
+              this.selectedWebhookNotifyIds = [-2]
+              return
+            }
+            if (id === -3) {
+              this.selectedServerChan3NotifyIds = [-3]
+              return
+            }
+            if (mailSet.has(id)) {
+              this.selectedMailNotifyIds.push(id)
+              return
+            }
+            if (slackSet.has(id)) {
+              this.selectedSlackNotifyIds.push(id)
+              return
+            }
+            if (webhookSet.has(id)) {
+              this.selectedWebhookNotifyIds.push(id)
+              return
+            }
+            if (serverChan3Set.has(id)) {
+              this.selectedServerChan3NotifyIds.push(id)
+            }
+          })
+        }
+      }
 
       this.notifyReceiverInitialized = true
     },

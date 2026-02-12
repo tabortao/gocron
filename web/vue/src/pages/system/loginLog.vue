@@ -1,40 +1,33 @@
 <template>
   <el-main>
-    <el-pagination
+    <div class="page-header">
+      <div class="page-title">{{ t('system.loginLog') }}</div>
+      <div class="toolbar"></div>
+    </div>
+
+    <el-card class="card-section table-card" shadow="never">
+      <el-pagination
         background
         layout="prev, pager, next, sizes, total"
         :total="logTotal"
         v-model:current-page="searchParams.page"
         v-model:page-size="searchParams.page_size"
         @size-change="changePageSize"
-        @current-change="changePage">
+        @current-change="changePage"
+      >
       </el-pagination>
-      <el-table
-        :data="logs"
-        border
-        ref="table"
-        style="width: 100%">
-        <el-table-column
-          prop="id"
-          label="ID">
-        </el-table-column>
-        <el-table-column
-          prop="username"
-          :label="t('user.username')">
-        </el-table-column>
-        <el-table-column
-          prop="ip"
-          :label="t('system.loginIp')">
-        </el-table-column>
-        <el-table-column
-          :label="t('system.loginTime')"
-          width="">
+      <el-table :data="logs" border ref="table" style="width: 100%">
+        <el-table-column prop="id" label="ID"> </el-table-column>
+        <el-table-column prop="username" :label="t('user.username')"> </el-table-column>
+        <el-table-column prop="ip" :label="t('system.loginIp')"> </el-table-column>
+        <el-table-column :label="t('system.loginTime')" width="">
           <template #default="scope">
             {{ $filters.formatTime(scope.row.created) }}
           </template>
         </el-table-column>
       </el-table>
-    </el-main>
+    </el-card>
+  </el-main>
 </template>
 
 <script>
@@ -46,7 +39,7 @@ export default {
     const { t } = useI18n()
     return { t }
   },
-  data () {
+  data() {
     return {
       logs: [],
       logTotal: 0,
@@ -56,20 +49,20 @@ export default {
       }
     }
   },
-  created () {
+  created() {
     this.search()
   },
   methods: {
-    changePage (page) {
+    changePage(page) {
       this.searchParams.page = page
       this.search()
     },
-    changePageSize (pageSize) {
+    changePageSize(pageSize) {
       this.searchParams.page_size = pageSize
       this.search()
     },
-    search () {
-      systemService.loginLogList(this.searchParams, (data) => {
+    search() {
+      systemService.loginLogList(this.searchParams, data => {
         this.logs = data.data
         this.logTotal = data.total
       })

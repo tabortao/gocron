@@ -1,10 +1,20 @@
 <template>
   <el-main>
-    <h3>{{ t('system.logRetentionSettings') }}</h3>
-      <el-form :model="form" label-width="auto" style="width: 600px;">
+    <div class="page-header">
+      <div class="page-title">{{ t('system.logRetentionSettings') }}</div>
+      <div class="toolbar"></div>
+    </div>
+
+    <el-card class="card-section" shadow="never">
+      <el-form :model="form" label-width="auto" style="max-width: 600px">
         <el-form-item :label="t('system.dbLogRetentionDays')">
-          <el-input-number v-model="form.days" :min="0" :max="3650" style="width: 200px;"></el-input-number>
-          <div style="color: #909399; font-size: 12px; margin-top: 5px;">
+          <el-input-number
+            v-model="form.days"
+            :min="0"
+            :max="3650"
+            style="width: 200px"
+          ></el-input-number>
+          <div style="color: #909399; font-size: 12px; margin-top: 5px">
             {{ t('system.dbLogRetentionTip') }}
           </div>
         </el-form-item>
@@ -14,16 +24,22 @@
             format="HH:mm"
             value-format="HH:mm"
             :placeholder="t('system.selectTime')"
-            style="width: 200px;">
+            style="width: 200px"
+          >
           </el-time-picker>
-          <div style="color: #909399; font-size: 12px; margin-top: 5px;">
+          <div style="color: #909399; font-size: 12px; margin-top: 5px">
             {{ t('system.cleanupTimeTip') }}
           </div>
         </el-form-item>
         <el-form-item :label="t('system.logFileSizeLimit')">
-          <el-input-number v-model="form.fileSizeLimit" :min="0" :max="10240" style="width: 200px;"></el-input-number>
-          <span style="margin-left: 10px;">MB</span>
-          <div style="color: #909399; font-size: 12px; margin-top: 5px;">
+          <el-input-number
+            v-model="form.fileSizeLimit"
+            :min="0"
+            :max="10240"
+            style="width: 200px"
+          ></el-input-number>
+          <span style="margin-left: 10px">MB</span>
+          <div style="color: #909399; font-size: 12px; margin-top: 5px">
             {{ t('system.logFileSizeLimitTip') }}
           </div>
         </el-form-item>
@@ -31,7 +47,8 @@
           <el-button type="primary" @click="submit">{{ t('common.save') }}</el-button>
         </el-form-item>
       </el-form>
-    </el-main>
+    </el-card>
+  </el-main>
 </template>
 
 <script>
@@ -58,20 +75,24 @@ export default {
   },
   methods: {
     loadData() {
-      httpClient.get('/system/log-retention', {}, (data) => {
+      httpClient.get('/system/log-retention', {}, data => {
         this.form.days = data.days
         this.form.fileSizeLimit = data.file_size_limit || 0
         this.cleanupTime = data.cleanup_time || '03:00'
       })
     },
     submit() {
-      httpClient.postJson('/system/log-retention', { 
-        days: this.form.days,
-        cleanup_time: this.cleanupTime,
-        file_size_limit: this.form.fileSizeLimit
-      }, () => {
-        this.$message.success(this.t('system.logRetentionSaveSuccess'))
-      })
+      httpClient.postJson(
+        '/system/log-retention',
+        {
+          days: this.form.days,
+          cleanup_time: this.cleanupTime,
+          file_size_limit: this.form.fileSizeLimit
+        },
+        () => {
+          this.$message.success(this.t('system.logRetentionSaveSuccess'))
+        }
+      )
     }
   }
 }

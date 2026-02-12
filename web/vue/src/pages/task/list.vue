@@ -1,147 +1,175 @@
 <template>
-<el-main>
-  <el-form :inline="true" label-width="auto">
-      <el-form-item :label="t('task.id')">
-        <el-input v-model.trim="searchParams.id" style="width: 180px;"></el-input>
-      </el-form-item>
-      <el-form-item :label="t('task.name')">
-        <el-input v-model.trim="searchParams.name" style="width: 180px;"></el-input>
-      </el-form-item>
-      <el-form-item :label="t('task.tag')">
-        <el-input v-model.trim="searchParams.tag" style="width: 180px;"></el-input>
-      </el-form-item>
-      <el-form-item>
-        <el-button type="primary" @click="search()">{{ t('common.search') }}</el-button>
-      </el-form-item>
-      <br>
-      <el-form-item :label="t('task.protocol')">
-        <el-select v-model.trim="searchParams.protocol" style="width: 180px;">
-          <el-option :label="t('select')" value=""></el-option>
-          <el-option
-            v-for="item in protocolList"
-            :key="item.value"
-            :label="item.label"
-            :value="item.value">
-          </el-option>
-        </el-select>
-      </el-form-item>
-      <el-form-item :label="t('task.taskNode')">
-        <el-select v-model.trim="searchParams.host_id" style="width: 180px;">
-          <el-option :label="t('select')" value=""></el-option>
-          <el-option
-            v-for="item in hosts"
-            :key="item.id"
-            :label="item.alias + ' - ' + item.name + ':' + item.port "
-            :value="item.id">
-          </el-option>
-        </el-select>
-      </el-form-item>
-      <el-form-item :label="t('common.status')">
-        <el-select v-model.trim="searchParams.status" style="width: 180px;">
-          <el-option :label="t('select')" value=""></el-option>
-          <el-option
-            v-for="item in statusList"
-            :key="item.value"
-            :label="item.label"
-            :value="item.value">
-          </el-option>
-        </el-select>
-      </el-form-item>
-    </el-form>
-    <el-row type="flex" justify="end" style="margin-bottom: 10px;">
-      <el-col :span="24" style="text-align: right;">
-        <span v-if="isAdmin && selectedTasks.length > 0" style="margin-right: 10px; color: #909399;">{{ t('message.selected') }} {{ selectedTasks.length }} {{ t('message.tasks') }}</span>
-        <el-button v-if="isAdmin" type="success" size="default" @click="batchEnable" :disabled="selectedTasks.length === 0">{{ t('message.batchEnable') }}</el-button>
-        <el-button v-if="isAdmin" type="warning" size="default" @click="batchDisable" :disabled="selectedTasks.length === 0">{{ t('message.batchDisable') }}</el-button>
-        <el-button v-if="isAdmin" type="danger" size="default" @click="batchRemove" :disabled="selectedTasks.length === 0">{{ t('message.batchDelete') }}</el-button>
-        <el-button type="primary" @click="toEdit(null)" v-if="isAdmin">{{ t('common.add') }}</el-button>
+  <el-main>
+    <div class="page-header">
+      <div>
+        <div class="page-title">{{ t('task.list') }}</div>
+        <div class="page-subtitle" v-if="isAdmin && selectedTasks.length > 0">
+          {{ t('message.selected') }} {{ selectedTasks.length }} {{ t('message.tasks') }}
+        </div>
+      </div>
+      <div class="toolbar">
+        <el-button
+          v-if="isAdmin"
+          type="success"
+          @click="batchEnable"
+          :disabled="selectedTasks.length === 0"
+          >{{ t('message.batchEnable') }}</el-button
+        >
+        <el-button
+          v-if="isAdmin"
+          type="warning"
+          @click="batchDisable"
+          :disabled="selectedTasks.length === 0"
+          >{{ t('message.batchDisable') }}</el-button
+        >
+        <el-button
+          v-if="isAdmin"
+          type="danger"
+          @click="batchRemove"
+          :disabled="selectedTasks.length === 0"
+          >{{ t('message.batchDelete') }}</el-button
+        >
+        <el-button type="primary" @click="toEdit(null)" v-if="isAdmin">{{
+          t('common.add')
+        }}</el-button>
         <el-button type="info" @click="refresh">{{ t('common.refresh') }}</el-button>
-      </el-col>
-    </el-row>
-    <el-pagination
-      background
-      layout="prev, pager, next, sizes, total"
-      :total="taskTotal"
-      v-model:current-page="searchParams.page"
-      v-model:page-size="searchParams.page_size"
-      @size-change="changePageSize"
-      @current-change="changePage">
-    </el-pagination>
-    <el-table
-      :data="tasks"
-      tooltip-effect="dark"
-      border
-      @selection-change="handleSelectionChange"
-      style="width: 100%">
-      <el-table-column type="selection" width="55" v-if="isAdmin"></el-table-column>
-      <el-table-column type="expand">
-        <template #default="scope">
-          <el-form label-position="left" inline class="demo-table-expand" label-width="auto">
-            <el-form-item :label="t('message.taskCreatedTime') + ':'">
-              {{ $filters.formatTime(scope.row.created) }} <br>
-            </el-form-item>
-            <el-form-item :label="t('message.taskType') + ':'">
-              {{ formatLevel(scope.row.level) }} <br>
-            </el-form-item>
-            <el-form-item :label="t('message.singleInstanceRun') + ':'">
-               {{ formatMulti(scope.row.multi) }} <br>
-            </el-form-item>
-            <el-form-item :label="t('message.timeoutTime') + ':'">
-              {{ formatTimeout(scope.row.timeout) }} <br>
-            </el-form-item>
-            <el-form-item :label="t('message.retryCount') + ':'">
-              {{scope.row.retry_times}} <br>
-            </el-form-item>
-            <el-form-item :label="t('message.retryIntervalTime') + ':'">
-              {{ formatRetryTimesInterval(scope.row.retry_interval) }}
-            </el-form-item> <br>
-            <el-form-item :label="t('message.taskNodeLabel')">
-              <div v-for="item in scope.row.hosts" :key="item.host_id">
-                {{item.alias}} - {{item.name}}:{{item.port}} <br>
-              </div>
-            </el-form-item> <br>
-            <el-form-item :label="t('message.commandLabel') + ':'" style="width: 100%">
-              {{scope.row.command}}
-            </el-form-item> <br>
-            <el-form-item :label="t('message.remarkLabel')" style="width: 100%">
-              {{scope.row.remark}}
-            </el-form-item>
-          </el-form>
-        </template>
-      </el-table-column>
-      <el-table-column
-        prop="id"
-        :label="t('task.id')">
-      </el-table-column>
-      <el-table-column
-        prop="name"
-        :label="t('task.name')"
-      width="150">
-      </el-table-column>
-      <el-table-column
-        prop="tag"
-        :label="t('task.tag')">
-      </el-table-column>
-      <el-table-column
-        prop="spec"
-        :label="t('task.cronExpression')"
-        width="150"
-        class-name="no-wrap-header">
-      </el-table-column>
-      <el-table-column :label="t('task.nextRunTime')" width="180" class-name="no-wrap-header">
-        <template #default="scope">
-          {{ $filters.formatTime(scope.row.next_run_time) }}
-        </template>
-      </el-table-column>
-      <el-table-column
-        prop="protocol"
-        :formatter="formatProtocol"
-        :label="t('task.protocol')"
-        width="140"
-        class-name="no-wrap-header">
-      </el-table-column>
-      <el-table-column
-        :label="t('common.status')" v-if="isAdmin">
+      </div>
+    </div>
+
+    <el-card class="card-section filter-card" shadow="never">
+      <el-form :inline="true" label-width="auto" size="small">
+        <el-form-item :label="t('task.id')">
+          <el-input v-model.trim="searchParams.id" style="width: 200px" clearable></el-input>
+        </el-form-item>
+        <el-form-item :label="t('task.name')">
+          <el-input v-model.trim="searchParams.name" style="width: 200px" clearable></el-input>
+        </el-form-item>
+        <el-form-item :label="t('task.tag')">
+          <el-input v-model.trim="searchParams.tag" style="width: 200px" clearable></el-input>
+        </el-form-item>
+        <el-form-item>
+          <el-button type="primary" @click="search()">{{ t('common.search') }}</el-button>
+        </el-form-item>
+        <el-form-item :label="t('task.protocol')">
+          <el-select v-model.trim="searchParams.protocol" style="width: 200px" clearable>
+            <el-option :label="t('select')" value=""></el-option>
+            <el-option
+              v-for="item in protocolList"
+              :key="item.value"
+              :label="item.label"
+              :value="item.value"
+            >
+            </el-option>
+          </el-select>
+        </el-form-item>
+        <el-form-item :label="t('task.taskNode')">
+          <el-select v-model.trim="searchParams.host_id" style="width: 200px" clearable filterable>
+            <el-option :label="t('select')" value=""></el-option>
+            <el-option
+              v-for="item in hosts"
+              :key="item.id"
+              :label="item.alias + ' - ' + item.name + ':' + item.port"
+              :value="item.id"
+            >
+            </el-option>
+          </el-select>
+        </el-form-item>
+        <el-form-item :label="t('common.status')">
+          <el-select v-model.trim="searchParams.status" style="width: 200px" clearable>
+            <el-option :label="t('select')" value=""></el-option>
+            <el-option
+              v-for="item in statusList"
+              :key="item.value"
+              :label="item.label"
+              :value="item.value"
+            >
+            </el-option>
+          </el-select>
+        </el-form-item>
+      </el-form>
+    </el-card>
+
+    <el-card class="card-section table-card" shadow="never">
+      <el-pagination
+        background
+        layout="prev, pager, next, sizes, total"
+        :total="taskTotal"
+        v-model:current-page="searchParams.page"
+        v-model:page-size="searchParams.page_size"
+        @size-change="changePageSize"
+        @current-change="changePage"
+      >
+      </el-pagination>
+      <el-table
+        :data="tasks"
+        tooltip-effect="dark"
+        border
+        @selection-change="handleSelectionChange"
+        style="width: 100%"
+      >
+        <el-table-column type="selection" width="55" v-if="isAdmin"></el-table-column>
+        <el-table-column type="expand">
+          <template #default="scope">
+            <el-form label-position="left" inline class="demo-table-expand" label-width="auto">
+              <el-form-item :label="t('message.taskCreatedTime') + ':'">
+                {{ $filters.formatTime(scope.row.created) }} <br />
+              </el-form-item>
+              <el-form-item :label="t('message.taskType') + ':'">
+                {{ formatLevel(scope.row.level) }} <br />
+              </el-form-item>
+              <el-form-item :label="t('message.singleInstanceRun') + ':'">
+                {{ formatMulti(scope.row.multi) }} <br />
+              </el-form-item>
+              <el-form-item :label="t('message.timeoutTime') + ':'">
+                {{ formatTimeout(scope.row.timeout) }} <br />
+              </el-form-item>
+              <el-form-item :label="t('message.retryCount') + ':'">
+                {{ scope.row.retry_times }} <br />
+              </el-form-item>
+              <el-form-item :label="t('message.retryIntervalTime') + ':'">
+                {{ formatRetryTimesInterval(scope.row.retry_interval) }}
+              </el-form-item>
+              <br />
+              <el-form-item :label="t('message.taskNodeLabel')">
+                <div v-for="item in scope.row.hosts" :key="item.host_id">
+                  {{ item.alias }} - {{ item.name }}:{{ item.port }} <br />
+                </div>
+              </el-form-item>
+              <br />
+              <el-form-item :label="t('message.commandLabel') + ':'" style="width: 100%">
+                {{ scope.row.command }}
+              </el-form-item>
+              <br />
+              <el-form-item :label="t('message.remarkLabel')" style="width: 100%">
+                {{ scope.row.remark }}
+              </el-form-item>
+            </el-form>
+          </template>
+        </el-table-column>
+        <el-table-column prop="id" :label="t('task.id')"> </el-table-column>
+        <el-table-column prop="name" :label="t('task.name')" width="150"> </el-table-column>
+        <el-table-column prop="tag" :label="t('task.tag')"> </el-table-column>
+        <el-table-column
+          prop="spec"
+          :label="t('task.cronExpression')"
+          width="150"
+          class-name="no-wrap-header"
+        >
+        </el-table-column>
+        <el-table-column :label="t('task.nextRunTime')" width="180" class-name="no-wrap-header">
+          <template #default="scope">
+            {{ $filters.formatTime(scope.row.next_run_time) }}
+          </template>
+        </el-table-column>
+        <el-table-column
+          prop="protocol"
+          :formatter="formatProtocol"
+          :label="t('task.protocol')"
+          width="140"
+          class-name="no-wrap-header"
+        >
+        </el-table-column>
+        <el-table-column :label="t('common.status')" v-if="isAdmin">
           <template #default="scope">
             <el-switch
               v-if="scope.row.level === 1"
@@ -150,38 +178,57 @@
               :inactive-value="0"
               active-color="#13ce66"
               @change="changeStatus(scope.row)"
-              inactive-color="#ff4949">
+              inactive-color="#ff4949"
+            >
             </el-switch>
           </template>
-      </el-table-column>
-      <el-table-column :label="t('common.status')" v-else>
-        <template #default="scope">
-          <el-switch
-            v-if="scope.row.level === 1"
-            v-model="scope.row.status"
-            :active-value="1"
-            :inactive-value="0"
-            active-color="#13ce66"
-            :disabled="true"
-            inactive-color="#ff4949">
-          </el-switch>
-        </template>
-      </el-table-column>
-      <el-table-column :label="t('common.operation')" :width="locale === 'zh-CN' ? 240 : 280" v-if="isAdmin">
-        <template #default="scope">
-          <div style="display: flex; flex-direction: column; gap: 4px;">
-            <div style="display: flex; gap: 4px;">
-              <el-button type="primary" size="small" @click="toEdit(scope.row)" style="flex: 1;">{{ t('common.edit') }}</el-button>
-              <el-button type="success" size="small" @click="runTask(scope.row)" style="flex: 1;">{{ t('task.manualRun') }}</el-button>
+        </el-table-column>
+        <el-table-column :label="t('common.status')" v-else>
+          <template #default="scope">
+            <el-switch
+              v-if="scope.row.level === 1"
+              v-model="scope.row.status"
+              :active-value="1"
+              :inactive-value="0"
+              active-color="#13ce66"
+              :disabled="true"
+              inactive-color="#ff4949"
+            >
+            </el-switch>
+          </template>
+        </el-table-column>
+        <el-table-column
+          :label="t('common.operation')"
+          :width="locale === 'zh-CN' ? 240 : 280"
+          v-if="isAdmin"
+        >
+          <template #default="scope">
+            <div style="display: flex; flex-direction: column; gap: 4px">
+              <div style="display: flex; gap: 4px">
+                <el-button type="primary" size="small" @click="toEdit(scope.row)" style="flex: 1">{{
+                  t('common.edit')
+                }}</el-button>
+                <el-button
+                  type="success"
+                  size="small"
+                  @click="runTask(scope.row)"
+                  style="flex: 1"
+                  >{{ t('task.manualRun') }}</el-button
+                >
+              </div>
+              <div style="display: flex; gap: 4px">
+                <el-button type="info" size="small" @click="jumpToLog(scope.row)" style="flex: 1">{{
+                  t('task.viewLog')
+                }}</el-button>
+                <el-button type="danger" size="small" @click="remove(scope.row)" style="flex: 1">{{
+                  t('common.delete')
+                }}</el-button>
+              </div>
             </div>
-            <div style="display: flex; gap: 4px;">
-              <el-button type="info" size="small" @click="jumpToLog(scope.row)" style="flex: 1;">{{ t('task.viewLog') }}</el-button>
-              <el-button type="danger" size="small" @click="remove(scope.row)" style="flex: 1;">{{ t('common.delete') }}</el-button>
-            </div>
-          </div>
-        </template>
-      </el-table-column>
-    </el-table>
+          </template>
+        </el-table-column>
+      </el-table>
+    </el-card>
   </el-main>
 </template>
 
@@ -197,7 +244,7 @@ export default {
     const { t, locale } = useI18n()
     return { t, locale }
   },
-  data () {
+  data() {
     const userStore = useUserStore()
     return {
       tasks: [],
@@ -251,7 +298,7 @@ export default {
       immediate: true
     }
   },
-  created () {
+  created() {
     const hostId = this.$route.query.host_id
     if (hostId) {
       this.searchParams.host_id = hostId
@@ -259,7 +306,7 @@ export default {
 
     this.search()
   },
-  activated () {
+  activated() {
     if (this.isFirstActivate) {
       this.isFirstActivate = false
       return
@@ -267,19 +314,19 @@ export default {
     this.search()
   },
   methods: {
-    formatLevel (value) {
+    formatLevel(value) {
       return value === 1 ? this.t('task.mainTask') : this.t('task.childTask')
     },
-    formatTimeout (value) {
+    formatTimeout(value) {
       return value > 0 ? value + this.t('message.seconds') : this.t('message.noLimit')
     },
-    formatRetryTimesInterval (value) {
+    formatRetryTimesInterval(value) {
       return value > 0 ? value + this.t('message.seconds') : this.t('message.systemDefault')
     },
-    formatMulti (value) {
+    formatMulti(value) {
       return value > 0 ? this.t('common.no') : this.t('common.yes')
     },
-    changeStatus (item) {
+    changeStatus(item) {
       if (item.status) {
         taskService.enable(item.id, () => {
           this.search()
@@ -290,7 +337,7 @@ export default {
         })
       }
     },
-    formatProtocol (row, col) {
+    formatProtocol(row, col) {
       if (row[col.property] === 2) {
         return 'shell'
       }
@@ -299,15 +346,15 @@ export default {
       }
       return 'http-post'
     },
-    changePage (page) {
+    changePage(page) {
       this.searchParams.page = page
       this.search()
     },
-    changePageSize (pageSize) {
+    changePageSize(pageSize) {
       this.searchParams.page_size = pageSize
       this.search()
     },
-    search (callback = null) {
+    search(callback = null) {
       taskService.list(this.searchParams, (tasks, hosts) => {
         this.tasks = tasks.data
         this.taskTotal = tasks.total
@@ -317,7 +364,7 @@ export default {
         }
       })
     },
-    runTask (item) {
+    runTask(item) {
       ElMessageBox.confirm(
         this.t('message.confirmRunTask', { name: item.name }),
         this.t('message.manualRunTask'),
@@ -327,13 +374,15 @@ export default {
           type: 'warning',
           center: true
         }
-      ).then(() => {
-        taskService.run(item.id, () => {
-          this.$message.success(this.t('message.taskStarted'))
+      )
+        .then(() => {
+          taskService.run(item.id, () => {
+            this.$message.success(this.t('message.taskStarted'))
+          })
         })
-      }).catch(() => {})
+        .catch(() => {})
     },
-    remove (item) {
+    remove(item) {
       ElMessageBox.confirm(
         this.t('message.confirmDeleteTask', { name: item.name }),
         this.t('message.confirmDeleteTitle'),
@@ -342,21 +391,23 @@ export default {
           cancelButtonText: this.t('common.cancel'),
           type: 'warning'
         }
-      ).then(() => {
-        taskService.remove(item.id, () => {
-          this.refresh()
+      )
+        .then(() => {
+          taskService.remove(item.id, () => {
+            this.refresh()
+          })
         })
-      }).catch(() => {})
+        .catch(() => {})
     },
-    jumpToLog (item) {
+    jumpToLog(item) {
       this.$router.push(`/task/log?task_id=${item.id}`)
     },
-    refresh () {
+    refresh() {
       this.search(() => {
         this.$message.success(this.t('message.refreshSuccess'))
       })
     },
-    toEdit (item) {
+    toEdit(item) {
       let path = ''
       if (item === null) {
         path = '/task/create'
@@ -365,10 +416,10 @@ export default {
       }
       this.$router.push(path)
     },
-    handleSelectionChange (selection) {
+    handleSelectionChange(selection) {
       this.selectedTasks = selection.filter(task => task.level === 1)
     },
-    batchEnable () {
+    batchEnable() {
       if (this.selectedTasks.length === 0) {
         this.$message.warning(this.t('message.pleaseSelectTask', { action: this.t('task.enable') }))
         return
@@ -381,18 +432,22 @@ export default {
           cancelButtonText: this.t('common.cancel'),
           type: 'warning'
         }
-      ).then(() => {
-        const ids = this.selectedTasks.map(task => task.id)
-        taskService.batchEnable(ids, () => {
-          this.$message.success(this.t('message.batchEnableSuccess'))
-          this.selectedTasks = []
-          this.search()
+      )
+        .then(() => {
+          const ids = this.selectedTasks.map(task => task.id)
+          taskService.batchEnable(ids, () => {
+            this.$message.success(this.t('message.batchEnableSuccess'))
+            this.selectedTasks = []
+            this.search()
+          })
         })
-      }).catch(() => {})
+        .catch(() => {})
     },
-    batchDisable () {
+    batchDisable() {
       if (this.selectedTasks.length === 0) {
-        this.$message.warning(this.t('message.pleaseSelectTask', { action: this.t('task.disable') }))
+        this.$message.warning(
+          this.t('message.pleaseSelectTask', { action: this.t('task.disable') })
+        )
         return
       }
       ElMessageBox.confirm(
@@ -403,18 +458,22 @@ export default {
           cancelButtonText: this.t('common.cancel'),
           type: 'warning'
         }
-      ).then(() => {
-        const ids = this.selectedTasks.map(task => task.id)
-        taskService.batchDisable(ids, () => {
-          this.$message.success(this.t('message.batchDisableSuccess'))
-          this.selectedTasks = []
-          this.search()
+      )
+        .then(() => {
+          const ids = this.selectedTasks.map(task => task.id)
+          taskService.batchDisable(ids, () => {
+            this.$message.success(this.t('message.batchDisableSuccess'))
+            this.selectedTasks = []
+            this.search()
+          })
         })
-      }).catch(() => {})
+        .catch(() => {})
     },
-    batchRemove () {
+    batchRemove() {
       if (this.selectedTasks.length === 0) {
-        this.$message.warning(this.t('message.pleaseSelectTask', { action: this.t('common.delete') }))
+        this.$message.warning(
+          this.t('message.pleaseSelectTask', { action: this.t('common.delete') })
+        )
         return
       }
       ElMessageBox.confirm(
@@ -425,45 +484,47 @@ export default {
           cancelButtonText: this.t('common.cancel'),
           type: 'error'
         }
-      ).then(() => {
-        const ids = this.selectedTasks.map(task => task.id)
-        taskService.batchRemove(ids, () => {
-          this.$message.success(this.t('message.batchDeleteSuccess'))
-          this.selectedTasks = []
-          this.search()
+      )
+        .then(() => {
+          const ids = this.selectedTasks.map(task => task.id)
+          taskService.batchRemove(ids, () => {
+            this.$message.success(this.t('message.batchDeleteSuccess'))
+            this.selectedTasks = []
+            this.search()
+          })
         })
-      }).catch(() => {})
+        .catch(() => {})
     }
   }
 }
 </script>
 <style scoped>
-  .demo-table-expand {
-    font-size: 0;
-  }
-  .demo-table-expand label {
-    color: #99a9bf;
-  }
-  .demo-table-expand .el-form-item {
-    margin-right: 0;
-    margin-bottom: 0;
-    width: 50%;
-  }
+.demo-table-expand {
+  font-size: 0;
+}
+.demo-table-expand label {
+  color: #99a9bf;
+}
+.demo-table-expand .el-form-item {
+  margin-right: 0;
+  margin-bottom: 0;
+  width: 50%;
+}
 
-  /* 防止表头文字换行 */
-  :deep(.no-wrap-header .cell) {
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-  }
+/* 防止表头文字换行 */
+:deep(.no-wrap-header .cell) {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
 
-  /* 表头文字居中对齐 */
-  :deep(.el-table th .cell) {
-    text-align: center;
-  }
+/* 表头文字居中对齐 */
+:deep(.el-table th .cell) {
+  text-align: center;
+}
 
-  /* 表格内容居中对齐 */
-  :deep(.el-table td .cell) {
-    text-align: center;
-  }
+/* 表格内容居中对齐 */
+:deep(.el-table td .cell) {
+  text-align: center;
+}
 </style>

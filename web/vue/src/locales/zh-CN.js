@@ -78,6 +78,8 @@ export default {
     notification: '任务通知',
     notifyType: '通知类型',
     notifyReceiver: '接收用户',
+    notifyWebhookReceiver: 'Webhook 地址',
+    notifyServerChan3Receiver: 'Server 酱³地址',
     notifyReceiverPlaceholder: '请选择',
     notifyChannel: '发送Channel',
     notifyKeyword: '任务执行输出关键字',

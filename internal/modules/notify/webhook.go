@@ -16,6 +16,7 @@ import (
 type WebHook struct{}
 
 const webHookAllReceiverId = "-2"
+const webHookTypedPrefix = "w"
 
 func (webHook *WebHook) Send(msg Message) {
 	model := new(models.Setting)
@@ -60,14 +61,29 @@ func (webHook *WebHook) Send(msg Message) {
 }
 
 func (webHook *WebHook) getActiveWebhookUrls(webHookSetting models.WebHook, msg Message) []models.WebhookUrl {
-	taskReceiverId, _ := msg["task_receiver_id"].(string)
-	taskReceiverId = strings.TrimSpace(taskReceiverId)
-	if taskReceiverId == "" {
+	raw, _ := msg["task_receiver_id"].(string)
+	raw = strings.TrimSpace(raw)
+	if raw == "" {
 		return webHookSetting.WebhookUrls
 	}
-	taskReceiverIdsRaw := strings.Split(taskReceiverId, ",")
-	taskReceiverIds := make([]string, 0, len(taskReceiverIdsRaw))
-	for _, id := range taskReceiverIdsRaw {
+
+	typed, legacy := parseReceiverTokens(raw)
+	if values, ok := typed[webHookTypedPrefix]; ok && len(values) > 0 {
+		if containsWildcard(values) || utils.InStringSlice(values, webHookAllReceiverId) {
+			return webHookSetting.WebhookUrls
+		}
+		idSet := toIntSet(values)
+		urls := []models.WebhookUrl{}
+		for _, v := range webHookSetting.WebhookUrls {
+			if _, ok := idSet[v.Id]; ok {
+				urls = append(urls, v)
+			}
+		}
+		return urls
+	}
+
+	taskReceiverIds := make([]string, 0, len(legacy))
+	for _, id := range legacy {
 		id = strings.TrimSpace(id)
 		if id == "" {
 			continue
