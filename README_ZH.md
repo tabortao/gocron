@@ -25,13 +25,12 @@
 - **多用户权限**：完善的用户和权限控制
 - **双因素认证**：支持 2FA，提升系统安全性
 - **Agent 自动注册**：支持 Linux/macOS 一键安装注册
-- **多数据库支持**：MySQL / PostgreSQL / SQLite
-- **日志管理**：完整的任务执行日志，支持自动清理
-- **消息通知**：支持邮件、Slack、Webhook 等多种通知方式
+- **多数据库支持**：MySQL / PostgreSQL / SQLite (使用纯 Go 驱动，无 CGO 依赖)
+- **消息通知**：支持邮件、Slack、Webhook、Server 酱等多种通知方式
 
 ## 🚀 快速开始 (Docker)
 
-最简单的部署方式是使用 Docker Compose：
+最简单的部署方式是使用 Docker Compose (默认使用 SQLite 数据库)：
 
 ```bash
 # 1. 克隆项目
@@ -140,6 +139,10 @@ pnpm run commit
 ## 📄 许可证
 
 本项目遵循 MIT 许可证。详情请见 [LICENSE](LICENSE) 文件。
+
+## 💖 鸣谢
+
+本项目基于 [gocronx-team/gocron](https://github.com/gocronx-team/gocron) 进行魔改开发，感谢原作者及团队的开源贡献。
 
 ## Star History
 

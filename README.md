@@ -25,13 +25,13 @@ Full documentation is available at: **[document](https://gocron-docs.pages.dev/e
 - **Access Control**: Comprehensive user and permission management
 - **2FA Security**: Two-Factor Authentication support
 - **Agent Auto-Registration**: One-click installation for Linux/macOS
-- **Multi-Database**: MySQL / PostgreSQL / SQLite support
+- **Multi-Database**: MySQL / PostgreSQL / SQLite support (Pure Go driver, no CGO dependency)
 - **Log Management**: Complete execution logs with auto-cleanup
-- **Notifications**: Email, Slack, Webhook support
+- **Notifications**: Email, Slack, Webhook, and ServerChan support
 
 ## 🚀 Quick Start (Docker)
 
-The easiest way to deploy is using Docker Compose:
+The easiest way to deploy is using Docker Compose (SQLite is used by default):
 
 ```bash
 # 1. Clone the project
@@ -140,6 +140,10 @@ This will guide you through an interactive prompt to create properly formatted c
 ## 📄 License
 
 This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.
+
+## 💖 Acknowledgements
+
+This project is a modified version based on [gocronx-team/gocron](https://github.com/gocronx-team/gocron). Special thanks to the original authors and team for their open-source contributions.
 
 ## Star History
 
