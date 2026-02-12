@@ -38,6 +38,7 @@ export default {
     password: '密码',
     verifyCode: '验证码',
     login: '登录',
+    rememberMe: '记住我（保持登录）',
     usernamePlaceholder: '请输入用户名或邮箱',
     passwordPlaceholder: '请输入密码',
     verifyCodePlaceholder: '请输入6位验证码',

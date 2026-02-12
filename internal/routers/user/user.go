@@ -8,17 +8,20 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
+	"github.com/golang-jwt/jwt/v5"
+	"github.com/pquerna/otp/totp"
 	"github.com/tabortao/gocron/internal/models"
 	"github.com/tabortao/gocron/internal/modules/app"
 	"github.com/tabortao/gocron/internal/modules/i18n"
 	"github.com/tabortao/gocron/internal/modules/logger"
 	"github.com/tabortao/gocron/internal/modules/utils"
 	"github.com/tabortao/gocron/internal/routers/base"
-	"github.com/golang-jwt/jwt/v5"
-	"github.com/pquerna/otp/totp"
 )
 
-const tokenDuration = 4 * time.Hour
+const (
+	tokenDuration         = 4 * time.Hour
+	rememberTokenDuration = 30 * 24 * time.Hour
+)
 
 // UserForm 用户表单
 type UserForm struct {
@@ -269,6 +272,8 @@ func ValidateLogin(c *gin.Context) {
 	username := strings.TrimSpace(c.PostForm("username"))
 	password := strings.TrimSpace(c.PostForm("password"))
 	twoFactorCode := strings.TrimSpace(c.PostForm("two_factor_code"))
+	rememberMeStr := strings.TrimSpace(c.PostForm("remember_me"))
+	rememberMe, _ := strconv.ParseBool(rememberMeStr)
 
 	if username == "" || password == "" {
 		base.RespondError(c, i18n.T(c, "username_password_empty"))
@@ -335,7 +340,7 @@ func ValidateLogin(c *gin.Context) {
 		logger.Error("记录用户登录日志失败", err)
 	}
 
-	token, err := generateToken(userModel)
+	token, err := generateToken(userModel, rememberMe)
 	if err != nil {
 		logger.Errorf("生成jwt失败: %s", err)
 		base.RespondAuthError(c, i18n.T(c, "auth_failed"))
@@ -395,14 +400,19 @@ func IsAdmin(c *gin.Context) bool {
 }
 
 // 生成jwt
-func generateToken(user *models.User) (string, error) {
+func generateToken(user *models.User, rememberMe bool) (string, error) {
+	duration := tokenDuration
+	if rememberMe {
+		duration = rememberTokenDuration
+	}
 	claims := jwt.MapClaims{
-		"exp":      time.Now().Add(tokenDuration).Unix(),
+		"exp":      time.Now().Add(duration).Unix(),
 		"uid":      user.Id,
 		"iat":      time.Now().Unix(),
 		"issuer":   "gocron",
 		"username": user.Name,
 		"is_admin": user.IsAdmin,
+		"remember": rememberMe,
 	}
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
 
@@ -436,6 +446,17 @@ func RestoreToken(c *gin.Context) (string, error) {
 	c.Set("uid", int(claims["uid"].(float64)))
 	c.Set("username", claims["username"])
 	c.Set("is_admin", int(claims["is_admin"].(float64)))
+	rememberMe := false
+	if rememberValue, ok := claims["remember"]; ok {
+		switch v := rememberValue.(type) {
+		case bool:
+			rememberMe = v
+		case string:
+			rememberMe, _ = strconv.ParseBool(v)
+		case float64:
+			rememberMe = v != 0
+		}
+	}
 
 	// 检查 token 是否即将过期（小于 1 小时）
 	exp := int64(claims["exp"].(float64))
@@ -446,7 +467,7 @@ func RestoreToken(c *gin.Context) (string, error) {
 			Name:    claims["username"].(string),
 			IsAdmin: int8(claims["is_admin"].(float64)),
 		}
-		newToken, err := generateToken(userModel)
+		newToken, err := generateToken(userModel, rememberMe)
 		if err != nil {
 			logger.Warnf("刷新token失败: %v", err)
 			return "", nil

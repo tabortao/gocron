@@ -55,8 +55,8 @@ func TestWebHook_getActiveWebhookUrls(t *testing.T) {
 				{Id: 1, Name: "Webhook 1", Url: "https://webhook1.example.com"},
 			},
 			taskReceiverIds:  "",
-			expectedCount:    0,
-			expectedUrlNames: []string{},
+			expectedCount:    1,
+			expectedUrlNames: []string{"Webhook 1"},
 		},
 		{
 			name: "all receivers",

@@ -10,20 +10,46 @@
         :title="errorMessage"
         type="error"
         :closable="false"
-        style="margin-bottom: 20px;"
+        style="margin-bottom: 20px"
       />
       <el-form ref="formRef" :model="form" label-width="100px" :rules="formRules">
         <el-form-item :label="t('login.username')" prop="username">
-          <el-input v-model.trim="form.username" :placeholder="t('login.usernamePlaceholder')" size="large" />
+          <el-input
+            v-model.trim="form.username"
+            :placeholder="t('login.usernamePlaceholder')"
+            size="large"
+          />
         </el-form-item>
         <el-form-item :label="t('login.password')" prop="password">
-          <el-input v-model.trim="form.password" type="password" :placeholder="t('login.passwordPlaceholder')" @keyup.enter="submit" size="large" />
+          <el-input
+            v-model.trim="form.password"
+            type="password"
+            :placeholder="t('login.passwordPlaceholder')"
+            @keyup.enter="submit"
+            size="large"
+          />
         </el-form-item>
         <el-form-item :label="t('login.verifyCode')" prop="twoFactorCode" v-if="require2FA">
-          <el-input v-model.trim="form.twoFactorCode" :placeholder="t('login.verifyCodePlaceholder')" maxlength="6" @keyup.enter="submit" size="large" />
+          <el-input
+            v-model.trim="form.twoFactorCode"
+            :placeholder="t('login.verifyCodePlaceholder')"
+            maxlength="6"
+            @keyup.enter="submit"
+            size="large"
+          />
         </el-form-item>
         <el-form-item>
-          <el-button type="primary" @click="submit" :loading="loading" class="login-button" size="large">{{ t('login.login') }}</el-button>
+          <el-checkbox v-model="form.rememberMe">{{ t('login.rememberMe') }}</el-checkbox>
+        </el-form-item>
+        <el-form-item>
+          <el-button
+            type="primary"
+            @click="submit"
+            :loading="loading"
+            class="login-button"
+            size="large"
+            >{{ t('login.login') }}</el-button
+          >
         </el-form-item>
       </el-form>
     </div>
@@ -53,7 +79,8 @@ const errorMessage = ref('')
 const form = reactive({
   username: '',
   password: '',
-  twoFactorCode: ''
+  twoFactorCode: '',
+  rememberMe: true
 })
 
 const formRules = computed(() => ({
@@ -64,42 +91,43 @@ const formRules = computed(() => ({
 
 const submit = async () => {
   if (!formRef.value) return
-  
+
   errorMessage.value = ''
-  
-  await formRef.value.validate(async (valid) => {
+
+  await formRef.value.validate(async valid => {
     if (!valid) return
-    
+
     if (require2FA.value && !form.twoFactorCode) {
       errorMessage.value = t('login.verifyCodeRequired')
       return
     }
-    
+
     await withLoading(async () => {
       const params = {
         username: form.username,
         password: form.password,
         two_factor_code: form.twoFactorCode || undefined
       }
-      
+
       userService.login(
-        params.username, 
-        params.password, 
-        params.two_factor_code, 
-        (data) => {
+        params.username,
+        params.password,
+        params.two_factor_code,
+        form.rememberMe,
+        data => {
           if (data.require_2fa) {
             require2FA.value = true
             errorMessage.value = ''
             return
           }
-          
+
           userStore.setUser({
             token: data.token,
             uid: data.uid,
             username: data.username,
             isAdmin: data.is_admin
           })
-          
+
           router.push(route.query.redirect || '/')
         },
         (code, message) => {
@@ -110,7 +138,6 @@ const submit = async () => {
   })
 }
 </script>
-
 
 <style scoped>
 .login-container {

@@ -38,6 +38,7 @@ export default {
     password: 'Password',
     verifyCode: '2FA Code',
     login: 'Login',
+    rememberMe: 'Remember me',
     usernamePlaceholder: 'Please enter username or email',
     passwordPlaceholder: 'At least 8 characters, letters and digits',
     verifyCodePlaceholder: 'Please enter 6-digit code',
