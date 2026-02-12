@@ -17,6 +17,9 @@
           <el-input
             v-model.trim="form.username"
             :placeholder="t('login.usernamePlaceholder')"
+            autocomplete="username"
+            name="username"
+            autofocus
             size="large"
           />
         </el-form-item>
@@ -25,6 +28,9 @@
             v-model.trim="form.password"
             type="password"
             :placeholder="t('login.passwordPlaceholder')"
+            autocomplete="current-password"
+            name="password"
+            show-password
             @keyup.enter="submit"
             size="large"
           />
@@ -34,6 +40,7 @@
             v-model.trim="form.twoFactorCode"
             :placeholder="t('login.verifyCodePlaceholder')"
             maxlength="6"
+            autocomplete="one-time-code"
             @keyup.enter="submit"
             size="large"
           />
@@ -57,7 +64,7 @@
 </template>
 
 <script setup>
-import { ref, reactive, computed } from 'vue'
+import { ref, reactive, computed, onMounted } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import { useUserStore } from '../../stores/user'
@@ -75,12 +82,87 @@ const { loading, withLoading } = useLoading()
 const require2FA = ref(false)
 const formRef = ref()
 const errorMessage = ref('')
+const loginPreferenceKey = 'gocron-login-preference'
 
 const form = reactive({
   username: '',
   password: '',
   twoFactorCode: '',
-  rememberMe: true
+  rememberMe: false
+})
+
+onMounted(() => {
+  try {
+    const raw = localStorage.getItem(loginPreferenceKey)
+    if (!raw) return
+    const saved = JSON.parse(raw)
+    if (saved && typeof saved.username === 'string') {
+      form.username = saved.username
+    }
+    if (saved && typeof saved.rememberMe === 'boolean') {
+      form.rememberMe = saved.rememberMe
+    }
+  } catch (e) {}
+})
+
+const syncAutofillValues = () => {
+  const usernameInput = document.querySelector('input[name="username"]')
+  const passwordInput = document.querySelector('input[name="password"]')
+  if (usernameInput && (!form.username || form.username.trim() === '')) {
+    form.username = usernameInput.value
+  }
+  if (passwordInput && (!form.password || form.password.trim() === '')) {
+    form.password = passwordInput.value
+  }
+}
+
+const persistLoginPreference = () => {
+  try {
+    if (form.rememberMe) {
+      localStorage.setItem(
+        loginPreferenceKey,
+        JSON.stringify({
+          username: form.username || '',
+          rememberMe: true
+        })
+      )
+    } else {
+      localStorage.removeItem(loginPreferenceKey)
+    }
+  } catch (e) {}
+}
+
+const maybeLoadCredential = async () => {
+  try {
+    if (!navigator.credentials || !window.PasswordCredential) return
+    const credential = await navigator.credentials.get({ password: true, mediation: 'optional' })
+    if (!credential) return
+    if (!form.username) {
+      form.username = credential.id || ''
+    }
+    if (!form.password && credential.password) {
+      form.password = credential.password
+    }
+  } catch (e) {}
+}
+
+const maybeStoreCredential = async () => {
+  try {
+    if (!form.rememberMe) return
+    if (!navigator.credentials || !window.PasswordCredential) return
+    syncAutofillValues()
+    if (!form.username || !form.password) return
+    const cred = new window.PasswordCredential({
+      id: form.username,
+      password: form.password,
+      name: form.username
+    })
+    await navigator.credentials.store(cred)
+  } catch (e) {}
+}
+
+onMounted(() => {
+  maybeLoadCredential()
 })
 
 const formRules = computed(() => ({
@@ -93,6 +175,7 @@ const submit = async () => {
   if (!formRef.value) return
 
   errorMessage.value = ''
+  syncAutofillValues()
 
   await formRef.value.validate(async valid => {
     if (!valid) return
@@ -127,6 +210,8 @@ const submit = async () => {
             username: data.username,
             isAdmin: data.is_admin
           })
+          persistLoginPreference()
+          maybeStoreCredential()
 
           router.push(route.query.redirect || '/')
         },

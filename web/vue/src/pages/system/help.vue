@@ -68,6 +68,18 @@
                 docs/飞书机器人Webhook通知教程.md
               </el-link>
             </div>
+            <div class="help-link-row">
+              <div class="help-link-row__label">{{ isZh ? 'Server 酱³ 通知' : 'Server Chan' }}</div>
+              <el-link
+                :href="serverChan3DocUrl"
+                target="_blank"
+                rel="noopener noreferrer"
+                type="primary"
+                :underline="false"
+              >
+                docs/Server酱³通知教程.md
+              </el-link>
+            </div>
           </div>
         </el-card>
       </el-col>
@@ -102,6 +114,58 @@
             <div class="help-feishu__actions">
               <el-link
                 :href="feishuDocUrl"
+                target="_blank"
+                rel="noopener noreferrer"
+                type="primary"
+                :underline="false"
+              >
+                {{ isZh ? '查看完整教程' : 'Open full guide' }}
+              </el-link>
+            </div>
+          </div>
+        </el-card>
+      </el-col>
+    </el-row>
+
+    <el-row :gutter="16" class="help-grid">
+      <el-col :xs="24" :md="24">
+        <el-card class="help-card" shadow="never">
+          <template #header>
+            <div class="help-card__header">
+              <span>{{ isZh ? 'Server 酱³ 通知（推荐模板）' : 'Server Chan (Recommended)' }}</span>
+            </div>
+          </template>
+          <div class="help-feishu">
+            <div class="help-feishu__desc">
+              {{
+                isZh
+                  ? '系统管理 → 通知设置 → Server 酱³：配置 API URL 后，使用 title + desp 模板（application/x-www-form-urlencoded）。desp 支持 Markdown，适合做任务日程提醒。'
+                  : 'System → Notification → Server Chan: configure API URL and use title + desp templates (application/x-www-form-urlencoded).'
+              }}
+            </div>
+            <div class="help-feishu__codeTitle">
+              {{ isZh ? '标题模板（title）' : 'Title template' }}
+            </div>
+            <el-input
+              class="help-code"
+              type="textarea"
+              :rows="2"
+              :model-value="serverChan3TitleTemplate"
+              readonly
+            />
+            <div class="help-feishu__codeTitle" style="margin-top: 12px">
+              {{ isZh ? '内容模板（desp，可复制）' : 'Desp template' }}
+            </div>
+            <el-input
+              class="help-code"
+              type="textarea"
+              :rows="9"
+              :model-value="serverChan3DespTemplate"
+              readonly
+            />
+            <div class="help-feishu__actions">
+              <el-link
+                :href="serverChan3DocUrl"
                 target="_blank"
                 rel="noopener noreferrer"
                 type="primary"
@@ -226,6 +290,9 @@ export default {
     feishuDocUrl() {
       return 'https://github.com/tabortao/gocron/blob/master/docs/%E9%A3%9E%E4%B9%A6%E6%9C%BA%E5%99%A8%E4%BA%BAWebhook%E9%80%9A%E7%9F%A5%E6%95%99%E7%A8%8B.md'
     },
+    serverChan3DocUrl() {
+      return 'https://github.com/tabortao/gocron/blob/master/docs/Server%E9%85%B1%C2%B3%E9%80%9A%E7%9F%A5%E6%95%99%E7%A8%8B.md'
+    },
     feishuInteractiveTemplate() {
       return `{
   "msg_type": "interactive",
@@ -243,6 +310,20 @@ export default {
     ]
   }
 }`
+    },
+    serverChan3TitleTemplate() {
+      return '{{.TaskName}} - {{.StatusZh}}'
+    },
+    serverChan3DespTemplate() {
+      return `**任务**：{{.TaskName}}（ID: {{.TaskId}}）
+
+**状态**：{{.StatusZh}}
+
+{{ if .Host }}**节点**：{{.Host}}
+
+{{ end }}**摘要**：{{.ResultSummary}}
+
+{{ if .Remark }}**备注**：{{.Remark}}{{ end }}`
     }
   }
 }

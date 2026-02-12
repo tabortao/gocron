@@ -38,7 +38,7 @@ export default {
     password: '密码',
     verifyCode: '验证码',
     login: '登录',
-    rememberMe: '记住我（保持登录）',
+    rememberMe: '记住我',
     usernamePlaceholder: '请输入用户名或邮箱',
     passwordPlaceholder: '请输入密码',
     verifyCodePlaceholder: '请输入6位验证码',
@@ -106,6 +106,7 @@ export default {
     notifyEmail: '邮件',
     notifySlack: 'Slack',
     notifyWebhook: 'WebHook',
+    notifyServerChan3: 'Server 酱³',
     createNew: '新增任务'
   },
   host: {
@@ -341,6 +342,7 @@ export default {
     selectMailReceiver: '请选择邮件接收用户',
     selectSlackChannel: '请选择Slack Channel',
     selectWebhookUrl: '请选择Webhook地址',
+    selectServerChan3Url: '请选择Server 酱³地址',
     passwordMismatch: '两次密码输入不一致',
     oldPasswordError: '原密码输入错误',
     passwordSameAsOld: '原密码与新密码不能相同',

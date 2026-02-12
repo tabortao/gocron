@@ -33,6 +33,18 @@ const webhookTemplate = `
 }
 `
 
+const serverChan3TitleTemplate = `{{.TaskName}} - {{.StatusZh}}`
+
+const serverChan3DespTemplate = `**任务**：{{.TaskName}}（ID: {{.TaskId}}）
+
+**状态**：{{.StatusZh}}
+
+{{ if .Host }}**节点**：{{.Host}}
+
+{{ end }}**摘要**：{{.ResultSummary}}
+
+{{ if .Remark }}**备注**：{{.Remark}}{{ end }}`
+
 const (
 	SlackCode        = "slack"
 	SlackUrlKey      = "url"
@@ -51,6 +63,13 @@ const (
 	WebhookCode        = "webhook"
 	WebhookTemplateKey = "template"
 	WebhookUrlKey      = "url"
+)
+
+const (
+	ServerChan3Code             = "serverchan3"
+	ServerChan3TitleTemplateKey = "title_template"
+	ServerChan3DespTemplateKey  = "desp_template"
+	ServerChan3UrlKey           = "url"
 )
 
 const (
@@ -279,6 +298,80 @@ func (setting *Setting) RemoveWebhookUrl(id int) (int64, error) {
 }
 
 // endregion
+
+type ServerChan3 struct {
+	Urls          []ServerChan3Url `json:"urls"`
+	TitleTemplate string           `json:"title_template"`
+	DespTemplate  string           `json:"desp_template"`
+}
+
+type ServerChan3Url struct {
+	Id   int    `json:"id"`
+	Name string `json:"name"`
+	Url  string `json:"url"`
+}
+
+func (setting *Setting) ServerChan3() (ServerChan3, error) {
+	list := make([]Setting, 0)
+	err := Db.Where("code = ?", ServerChan3Code).Find(&list).Error
+	serverChan3 := ServerChan3{Urls: make([]ServerChan3Url, 0)}
+	if err != nil {
+		return serverChan3, err
+	}
+
+	setting.formatServerChan3(list, &serverChan3)
+	return serverChan3, nil
+}
+
+func (setting *Setting) formatServerChan3(list []Setting, serverChan3 *ServerChan3) {
+	urlItem := ServerChan3Url{}
+	for _, v := range list {
+		switch v.Key {
+		case ServerChan3UrlKey:
+			if v.Value != "" {
+				_ = json.Unmarshal([]byte(v.Value), &urlItem)
+				urlItem.Id = v.Id
+				serverChan3.Urls = append(serverChan3.Urls, urlItem)
+			}
+		case ServerChan3TitleTemplateKey:
+			serverChan3.TitleTemplate = v.Value
+		case ServerChan3DespTemplateKey:
+			serverChan3.DespTemplate = v.Value
+		}
+	}
+}
+
+func (setting *Setting) UpdateServerChan3(titleTemplate, despTemplate string) error {
+	Db.Model(&Setting{}).
+		Where("code = ? AND `key` = ?", ServerChan3Code, ServerChan3TitleTemplateKey).
+		Update("value", titleTemplate)
+	Db.Model(&Setting{}).
+		Where("code = ? AND `key` = ?", ServerChan3Code, ServerChan3DespTemplateKey).
+		Update("value", despTemplate)
+	return nil
+}
+
+func (setting *Setting) CreateServerChan3Url(name, url string) (int64, error) {
+	urlItem := ServerChan3Url{0, name, url}
+	jsonByte, err := json.Marshal(urlItem)
+	if err != nil {
+		return 0, err
+	}
+
+	newSetting := Setting{
+		Code:  ServerChan3Code,
+		Key:   ServerChan3UrlKey,
+		Value: string(jsonByte),
+	}
+
+	result := Db.Create(&newSetting)
+	return result.RowsAffected, result.Error
+}
+
+func (setting *Setting) RemoveServerChan3Url(id int) (int64, error) {
+	result := Db.Where("code = ? AND `key` = ? AND id = ?", ServerChan3Code, ServerChan3UrlKey, id).Delete(&Setting{})
+	return result.RowsAffected, result.Error
+}
 
 // region 通用配置辅助方法
 

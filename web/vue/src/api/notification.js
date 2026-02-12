@@ -36,5 +36,17 @@ export default {
   },
   removeWebhookUrl(urlId, callback) {
     httpClient.post(`/system/webhook/url/remove/${urlId}`, {}, callback)
+  },
+  serverchan3(callback) {
+    httpClient.get('/system/serverchan3', {}, callback)
+  },
+  updateServerchan3(data, callback) {
+    httpClient.post('/system/serverchan3/update', data, callback)
+  },
+  createServerchan3Url(data, callback) {
+    httpClient.post('/system/serverchan3/url', data, callback)
+  },
+  removeServerchan3Url(urlId, callback) {
+    httpClient.post(`/system/serverchan3/url/remove/${urlId}`, {}, callback)
   }
 }

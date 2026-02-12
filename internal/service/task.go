@@ -534,9 +534,9 @@ func SendNotification(taskModel models.Task, taskResult TaskResult) {
 			return
 		}
 	}
-	// NotifyType: 0=邮件, 1=Slack, 2=WebHook
-	// WebHook(type=2)不需要receiver_id，其他类型需要
-	if taskModel.NotifyType != 2 && taskModel.NotifyReceiverId == "" {
+	// NotifyType: 0=邮件, 1=Slack, 2=WebHook, 3=Server 酱³
+	// WebHook/Server 酱³ 不需要 receiver_id（为空时默认发给全部地址），其他类型需要
+	if taskModel.NotifyType != 2 && taskModel.NotifyType != 3 && taskModel.NotifyReceiverId == "" {
 		return
 	}
 	if taskResult.Err != nil {

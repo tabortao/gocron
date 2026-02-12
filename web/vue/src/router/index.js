@@ -113,6 +113,11 @@ const routes = [
     component: () => import('../pages/system/notification/webhook.vue')
   },
   {
+    path: '/system/notification/serverchan3',
+    name: 'system-notification-serverchan3',
+    component: () => import('../pages/system/notification/serverchan3.vue')
+  },
+  {
     path: '/system/login-log',
     name: 'login-log',
     component: () => import('../pages/system/loginLog.vue')

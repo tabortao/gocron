@@ -118,6 +118,16 @@ type CreateWebhookUrlForm struct {
 	Url  string `form:"url" json:"url" binding:"required,url,max=200"`
 }
 
+type UpdateServerChan3Form struct {
+	TitleTemplate string `form:"title_template" json:"title_template" binding:"required"`
+	DespTemplate  string `form:"desp_template" json:"desp_template" binding:"required"`
+}
+
+type CreateServerChan3UrlForm struct {
+	Name string `form:"name" json:"name" binding:"required,max=50"`
+	Url  string `form:"url" json:"url" binding:"required,url,max=200"`
+}
+
 // CreateSlackChannelForm 创建Slack频道表单
 type CreateSlackChannelForm struct {
 	Channel string `form:"channel" json:"channel" binding:"required,max=50"`
@@ -247,6 +257,62 @@ func RemoveWebhookUrl(c *gin.Context) {
 	id, _ := strconv.Atoi(c.Param("id"))
 	settingModel := new(models.Setting)
 	_, err := settingModel.RemoveWebhookUrl(id)
+	if err != nil {
+		base.RespondErrorWithDefaultMsg(c, err)
+	} else {
+		base.RespondSuccessWithDefaultMsg(c, nil)
+	}
+}
+
+func ServerChan3(c *gin.Context) {
+	settingModel := new(models.Setting)
+	serverChan3, err := settingModel.ServerChan3()
+	if err != nil {
+		logger.Error(err)
+		base.RespondSuccess(c, utils.SuccessContent, nil)
+		return
+	}
+	base.RespondSuccess(c, "", serverChan3)
+}
+
+func UpdateServerChan3(c *gin.Context) {
+	var form UpdateServerChan3Form
+	if err := c.ShouldBind(&form); err != nil {
+		logger.Errorf("Server酱配置表单验证失败: %v", err)
+		base.RespondError(c, "表单验证失败, 请检测输入")
+		return
+	}
+
+	settingModel := new(models.Setting)
+	err := settingModel.UpdateServerChan3(form.TitleTemplate, form.DespTemplate)
+	if err != nil {
+		base.RespondErrorWithDefaultMsg(c, err)
+	} else {
+		base.RespondSuccessWithDefaultMsg(c, nil)
+	}
+}
+
+func CreateServerChan3Url(c *gin.Context) {
+	var form CreateServerChan3UrlForm
+	if err := c.ShouldBind(&form); err != nil {
+		logger.Errorf("创建Server酱地址表单验证失败: %v", err)
+		base.RespondError(c, "表单验证失败, 请检测输入")
+		return
+	}
+
+	settingModel := new(models.Setting)
+	_, err := settingModel.CreateServerChan3Url(form.Name, form.Url)
+	if err != nil {
+		base.RespondErrorWithDefaultMsg(c, err)
+	} else {
+		base.RespondSuccessWithDefaultMsg(c, nil)
+	}
+}
+
+func RemoveServerChan3Url(c *gin.Context) {
+	id, _ := strconv.Atoi(c.Param("id"))
+	settingModel := new(models.Setting)
+	_, err := settingModel.RemoveServerChan3Url(id)
 	if err != nil {
 		base.RespondErrorWithDefaultMsg(c, err)
 	} else {

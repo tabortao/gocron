@@ -25,6 +25,11 @@ func RepairSettings() error {
 		{WebhookCode, WebhookUrlKey, ""},
 		{WebhookCode, WebhookTemplateKey, webhookTemplate},
 
+		// Server 酱³ 配置
+		{ServerChan3Code, ServerChan3UrlKey, ""},
+		{ServerChan3Code, ServerChan3TitleTemplateKey, serverChan3TitleTemplate},
+		{ServerChan3Code, ServerChan3DespTemplateKey, serverChan3DespTemplate},
+
 		// 系统配置
 		{SystemCode, LogRetentionDaysKey, "0"},
 		{SystemCode, LogCleanupTimeKey, "03:00"},

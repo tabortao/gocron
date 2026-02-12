@@ -107,6 +107,7 @@ export default {
     notifyEmail: 'Email',
     notifySlack: 'Slack',
     notifyWebhook: 'WebHook',
+    notifyServerChan3: 'Server Chan',
     createNew: 'Create Task'
   },
   host: {
@@ -346,6 +347,7 @@ export default {
     selectMailReceiver: 'Please select email receiver',
     selectSlackChannel: 'Please select Slack channel',
     selectWebhookUrl: 'Please select Webhook URL',
+    selectServerChan3Url: 'Please select Server Chan URL',
     passwordMismatch: 'Passwords do not match',
     oldPasswordError: 'Old password is incorrect',
     passwordSameAsOld: 'New password cannot be the same as old password',

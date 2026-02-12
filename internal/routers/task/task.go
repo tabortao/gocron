@@ -33,7 +33,7 @@ type TaskForm struct {
 	Tag              string                      `form:"tag" json:"tag"`
 	Remark           string                      `form:"remark" json:"remark"`
 	NotifyStatus     int8                        `form:"notify_status" json:"notify_status" binding:"oneof=0 1 2 3"`
-	NotifyType       int8                        `form:"notify_type" json:"notify_type" binding:"oneof=0 1 2"`
+	NotifyType       int8                        `form:"notify_type" json:"notify_type" binding:"oneof=0 1 2 3"`
 	NotifyReceiverId string                      `form:"notify_receiver_id" json:"notify_receiver_id"`
 	NotifyKeyword    string                      `form:"notify_keyword" json:"notify_keyword"`
 }
@@ -125,7 +125,7 @@ func Store(c *gin.Context) {
 	taskModel.Level = form.Level
 	taskModel.DependencyStatus = form.DependencyStatus
 	taskModel.DependencyTaskId = strings.TrimSpace(form.DependencyTaskId)
-	if taskModel.NotifyStatus > 0 && taskModel.NotifyType != 2 && taskModel.NotifyReceiverId == "" {
+	if taskModel.NotifyStatus > 0 && taskModel.NotifyType != 2 && taskModel.NotifyType != 3 && taskModel.NotifyReceiverId == "" {
 		base.RespondError(c, i18n.T(c, "select_at_least_one_receiver"))
 		return
 	}

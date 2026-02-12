@@ -56,6 +56,10 @@ func run() {
 			// WebHook
 			webHook := WebHook{}
 			go webHook.Send(msg)
+		case 3:
+			// Server 酱³
+			serverChan3 := ServerChan3{}
+			go serverChan3.Send(msg)
 		}
 		time.Sleep(1 * time.Second)
 	}

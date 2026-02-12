@@ -137,6 +137,13 @@ func Register(r *gin.Engine) {
 			webhookGroup.POST("/url", manage.CreateWebhookUrl)
 			webhookGroup.POST("/url/remove/:id", manage.RemoveWebhookUrl)
 		}
+		serverChan3Group := systemGroup.Group("/serverchan3")
+		{
+			serverChan3Group.GET("", manage.ServerChan3)
+			serverChan3Group.POST("/update", manage.UpdateServerChan3)
+			serverChan3Group.POST("/url", manage.CreateServerChan3Url)
+			serverChan3Group.POST("/url/remove/:id", manage.RemoveServerChan3Url)
+		}
 		systemGroup.GET("/login-log", loginlog.Index)
 		systemGroup.GET("/log-retention", manage.GetLogRetentionDays)
 		systemGroup.POST("/log-retention", manage.UpdateLogRetentionDays)

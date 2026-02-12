@@ -1,303 +1,342 @@
 <template>
   <el-main>
     <el-form ref="form" :model="form" :rules="formRules" label-width="auto">
-        <el-input v-model="form.id" type="hidden"></el-input>
-        <el-row>
-          <el-col :span="12">
-            <el-form-item :label="t('task.name')" prop="name">
-              <el-input v-model.trim="form.name"></el-input>
-            </el-form-item>
-          </el-col>
-          <el-col :span="12">
-            <el-form-item :label="t('task.tag')">
-              <el-input v-model.trim="form.tag" :placeholder="t('task.tagPlaceholder')"></el-input>
-            </el-form-item>
-          </el-col>
-        </el-row>
-        <el-row v-if="form.level === 1">
-          <el-col>
-            <el-alert
-              :title="t('task.mainTaskTip')"
-              type="info"
-              :closable="false">
-            </el-alert>
-            <el-alert
-              :title="t('task.dependencyTip')"
-              type="info"
-              :closable="false">
-            </el-alert> <br>
-          </el-col>
-        </el-row>
-        <el-row>
-          <el-col :span="7">
-            <el-form-item :label="t('task.type')">
-              <el-select v-model.trim="form.level" :disabled="form.id !== '' ">
-                <el-option
-                  v-for="item in levelList"
-                  :key="item.value"
-                  :label="item.label"
-                  :value="item.value">
-                </el-option>
-              </el-select>
-            </el-form-item>
-          </el-col>
-          <el-col :span="7" v-if="form.level === 1">
-            <el-form-item :label="t('task.dependency')">
-              <el-select v-model.trim="form.dependency_status">
-                <el-option
-                  v-for="item in dependencyStatusList"
-                  :key="item.value"
-                  :label="item.label"
-                  :value="item.value">
-                </el-option>
-              </el-select>
-            </el-form-item>
-          </el-col>
-          <el-col :span="10">
-            <el-form-item :label="t('task.childTaskId')" v-if="form.level === 1">
-              <el-input v-model.trim="form.dependency_task_id" :placeholder="t('task.childTaskIdPlaceholder')"></el-input>
-            </el-form-item>
-          </el-col>
-        </el-row>
-        <el-row v-if="form.level === 1">
-          <el-col :span="12">
-            <el-form-item :label="t('task.cronExpression')" prop="spec">
-              <el-input v-model.trim="form.spec"
-                        :placeholder="t('task.cronPlaceholder')">
-                <template #append>
-                  <el-popover
-                    placement="bottom"
-                    :width="500"
-                    trigger="click">
-                    <template #reference>
-                      <el-button>{{ t('task.cronExample') }}</el-button>
-                    </template>
-                    <div>
-                      <h4>{{ t('task.cronStandard') }}</h4>
-                      <ul style="padding-left: 20px; margin: 10px 0;">
-                        <li>0 * * * * * - {{ t('message.everyMinute') }}</li>
-                        <li>*/20 * * * * * - {{ t('message.every20Seconds') }}</li>
-                        <li>0 30 21 * * * - {{ t('message.everyDay21_30') }}</li>
-                        <li>0 0 23 * * 6 - {{ t('message.everySaturday23') }}</li>
-                      </ul>
-                      <h4>{{ t('task.cronShortcut') }}</h4>
-                      <ul style="padding-left: 20px; margin: 10px 0;">
-                        <li>@reboot - {{ t('message.reboot') }}</li>
-                        <li>@yearly - {{ t('message.yearly') }}</li>
-                        <li>@monthly - {{ t('message.monthly') }}</li>
-                        <li>@weekly - {{ t('message.weekly') }}</li>
-                        <li>@daily - {{ t('message.daily') }}</li>
-                        <li>@hourly - {{ t('message.hourly') }}</li>
-                        <li>@every 30s - {{ t('message.every30s') }}</li>
-                        <li>@every 1m20s - {{ t('message.every1m20s') }}</li>
-                      </ul>
-                    </div>
-                  </el-popover>
-                </template>
-              </el-input>
-            </el-form-item>
-          </el-col>
-        </el-row>
-        <el-row>
-          <el-col :span="8">
-            <el-form-item :label="t('task.protocol')">
-              <el-select v-model.trim="form.protocol" @change="handleProtocolChange">
-                <el-option
-                  v-for="item in protocolList"
-                  :key="item.value"
-                  :label="item.label"
-                  :value="item.value">
-                </el-option>
-              </el-select>
-            </el-form-item>
-          </el-col>
-          <el-col :span="8" v-if="form.protocol === 1 ">
-            <el-form-item :label="t('task.httpMethod')">
-              <el-select key="http-method" v-model.trim="form.http_method">
-                <el-option
-                  v-for="item in httpMethods"
-                  :key="item.value"
-                  :label="item.label"
-                  :value="item.value">
-                </el-option>
-              </el-select>
-            </el-form-item>
-          </el-col>
-          <el-col :span="8" v-else>
-            <el-form-item :label="t('task.taskNode')" prop="host_ids">
-              <el-select
-                key="shell"
-                v-model="form.host_ids"
-                filterable
-                multiple
-                :placeholder="t('task.taskNodePlaceholder')">
-                <el-option
-                  v-for="item in hosts"
-                  :key="item.id"
-                  :label="item.alias + ' - ' + item.name"
-                  :value="item.id">
-                </el-option>
-              </el-select>
-            </el-form-item>
-          </el-col>
-        </el-row>
-        <el-row>
-          <el-col :span="16">
-            <el-form-item :label="t('task.command')" prop="command">
-              <el-input
-                type="textarea"
-                :rows="5"
-                :placeholder="commandPlaceholder"
-                v-model="form.command"
-                @blur="validateCommand">
-              </el-input>
-              <div v-if="commandWarning" class="command-warning" style="color: #E6A23C; font-size: 12px; margin-top: 4px;">
-                ⚠️ {{ commandWarning }}
-              </div>
-            </el-form-item>
-          </el-col>
-        </el-row>
-        <el-row>
-          <el-col>
-            <el-alert
-              :title="t('task.timeoutTip')"
-              type="info"
-              :closable="false">
-            </el-alert>
-            <el-alert
-              :title="t('task.singleInstanceTip')"
-              type="info"
-              :closable="false">
-            </el-alert> <br>
-          </el-col>
-        </el-row>
-        <el-row>
-          <el-col :span="12">
-            <el-form-item :label="t('task.timeout')" prop="timeout">
-              <el-input v-model.number.trim="form.timeout"></el-input>
-            </el-form-item>
-          </el-col>
-          <el-col :span="8">
-            <el-form-item :label="t('task.singleInstance')">
-              <el-select v-model.trim="form.multi">
-                <el-option
-                  v-for="item in runStatusList"
-                  :key="item.value"
-                  :label="item.label"
-                  :value="item.value">
-                </el-option>
-              </el-select>
-            </el-form-item>
-          </el-col>
-        </el-row>
-        <el-row>
+      <el-input v-model="form.id" type="hidden"></el-input>
+      <el-row>
+        <el-col :span="12">
+          <el-form-item :label="t('task.name')" prop="name">
+            <el-input v-model.trim="form.name"></el-input>
+          </el-form-item>
+        </el-col>
+        <el-col :span="12">
+          <el-form-item :label="t('task.tag')">
+            <el-input v-model.trim="form.tag" :placeholder="t('task.tagPlaceholder')"></el-input>
+          </el-form-item>
+        </el-col>
+      </el-row>
+      <el-row v-if="form.level === 1">
+        <el-col>
+          <el-alert :title="t('task.mainTaskTip')" type="info" :closable="false"> </el-alert>
+          <el-alert :title="t('task.dependencyTip')" type="info" :closable="false"> </el-alert>
+          <br />
+        </el-col>
+      </el-row>
+      <el-row>
+        <el-col :span="7">
+          <el-form-item :label="t('task.type')">
+            <el-select v-model.trim="form.level" :disabled="form.id !== ''">
+              <el-option
+                v-for="item in levelList"
+                :key="item.value"
+                :label="item.label"
+                :value="item.value"
+              >
+              </el-option>
+            </el-select>
+          </el-form-item>
+        </el-col>
+        <el-col :span="7" v-if="form.level === 1">
+          <el-form-item :label="t('task.dependency')">
+            <el-select v-model.trim="form.dependency_status">
+              <el-option
+                v-for="item in dependencyStatusList"
+                :key="item.value"
+                :label="item.label"
+                :value="item.value"
+              >
+              </el-option>
+            </el-select>
+          </el-form-item>
+        </el-col>
+        <el-col :span="10">
+          <el-form-item :label="t('task.childTaskId')" v-if="form.level === 1">
+            <el-input
+              v-model.trim="form.dependency_task_id"
+              :placeholder="t('task.childTaskIdPlaceholder')"
+            ></el-input>
+          </el-form-item>
+        </el-col>
+      </el-row>
+      <el-row v-if="form.level === 1">
+        <el-col :span="12">
+          <el-form-item :label="t('task.cronExpression')" prop="spec">
+            <el-input v-model.trim="form.spec" :placeholder="t('task.cronPlaceholder')">
+              <template #append>
+                <el-popover placement="bottom" :width="500" trigger="click">
+                  <template #reference>
+                    <el-button>{{ t('task.cronExample') }}</el-button>
+                  </template>
+                  <div>
+                    <h4>{{ t('task.cronStandard') }}</h4>
+                    <ul style="padding-left: 20px; margin: 10px 0">
+                      <li>0 * * * * * - {{ t('message.everyMinute') }}</li>
+                      <li>*/20 * * * * * - {{ t('message.every20Seconds') }}</li>
+                      <li>0 30 21 * * * - {{ t('message.everyDay21_30') }}</li>
+                      <li>0 0 23 * * 6 - {{ t('message.everySaturday23') }}</li>
+                    </ul>
+                    <h4>{{ t('task.cronShortcut') }}</h4>
+                    <ul style="padding-left: 20px; margin: 10px 0">
+                      <li>@reboot - {{ t('message.reboot') }}</li>
+                      <li>@yearly - {{ t('message.yearly') }}</li>
+                      <li>@monthly - {{ t('message.monthly') }}</li>
+                      <li>@weekly - {{ t('message.weekly') }}</li>
+                      <li>@daily - {{ t('message.daily') }}</li>
+                      <li>@hourly - {{ t('message.hourly') }}</li>
+                      <li>@every 30s - {{ t('message.every30s') }}</li>
+                      <li>@every 1m20s - {{ t('message.every1m20s') }}</li>
+                    </ul>
+                  </div>
+                </el-popover>
+              </template>
+            </el-input>
+          </el-form-item>
+        </el-col>
+      </el-row>
+      <el-row>
+        <el-col :span="8">
+          <el-form-item :label="t('task.protocol')">
+            <el-select v-model.trim="form.protocol" @change="handleProtocolChange">
+              <el-option
+                v-for="item in protocolList"
+                :key="item.value"
+                :label="item.label"
+                :value="item.value"
+              >
+              </el-option>
+            </el-select>
+          </el-form-item>
+        </el-col>
+        <el-col :span="8" v-if="form.protocol === 1">
+          <el-form-item :label="t('task.httpMethod')">
+            <el-select key="http-method" v-model.trim="form.http_method">
+              <el-option
+                v-for="item in httpMethods"
+                :key="item.value"
+                :label="item.label"
+                :value="item.value"
+              >
+              </el-option>
+            </el-select>
+          </el-form-item>
+        </el-col>
+        <el-col :span="8" v-else>
+          <el-form-item :label="t('task.taskNode')" prop="host_ids">
+            <el-select
+              key="shell"
+              v-model="form.host_ids"
+              filterable
+              multiple
+              :placeholder="t('task.taskNodePlaceholder')"
+            >
+              <el-option
+                v-for="item in hosts"
+                :key="item.id"
+                :label="item.alias + ' - ' + item.name"
+                :value="item.id"
+              >
+              </el-option>
+            </el-select>
+          </el-form-item>
+        </el-col>
+      </el-row>
+      <el-row>
+        <el-col :span="16">
+          <el-form-item :label="t('task.command')" prop="command">
+            <el-input
+              type="textarea"
+              :rows="5"
+              :placeholder="commandPlaceholder"
+              v-model="form.command"
+              @blur="validateCommand"
+            >
+            </el-input>
+            <div
+              v-if="commandWarning"
+              class="command-warning"
+              style="color: #e6a23c; font-size: 12px; margin-top: 4px"
+            >
+              ⚠️ {{ commandWarning }}
+            </div>
+          </el-form-item>
+        </el-col>
+      </el-row>
+      <el-row>
+        <el-col>
+          <el-alert :title="t('task.timeoutTip')" type="info" :closable="false"> </el-alert>
+          <el-alert :title="t('task.singleInstanceTip')" type="info" :closable="false"> </el-alert>
+          <br />
+        </el-col>
+      </el-row>
+      <el-row>
+        <el-col :span="12">
+          <el-form-item :label="t('task.timeout')" prop="timeout">
+            <el-input v-model.number.trim="form.timeout"></el-input>
+          </el-form-item>
+        </el-col>
+        <el-col :span="8">
+          <el-form-item :label="t('task.singleInstance')">
+            <el-select v-model.trim="form.multi">
+              <el-option
+                v-for="item in runStatusList"
+                :key="item.value"
+                :label="item.label"
+                :value="item.value"
+              >
+              </el-option>
+            </el-select>
+          </el-form-item>
+        </el-col>
+      </el-row>
+      <el-row>
         <el-col :span="12">
           <el-form-item :label="t('task.retryTimes')" prop="retry_times">
-            <el-input v-model.number.trim="form.retry_times"
-                      :placeholder="t('task.retryTimesPlaceholder')"></el-input>
+            <el-input
+              v-model.number.trim="form.retry_times"
+              :placeholder="t('task.retryTimesPlaceholder')"
+            ></el-input>
           </el-form-item>
         </el-col>
         <el-col :span="12">
           <el-form-item :label="t('task.retryInterval')" prop="retry_interval">
-            <el-input v-model.number.trim="form.retry_interval" :placeholder="t('task.retryIntervalPlaceholder')"></el-input>
+            <el-input
+              v-model.number.trim="form.retry_interval"
+              :placeholder="t('task.retryIntervalPlaceholder')"
+            ></el-input>
           </el-form-item>
         </el-col>
-        </el-row>
-        <el-row>
-          <el-col :span="8">
-            <el-form-item :label="t('task.notification')">
-              <el-select v-model.trim="form.notify_status">
-                <el-option
-                  v-for="item in notifyStatusList"
-                  :key="item.value"
-                  :label="item.label"
-                  :value="item.value">
-                </el-option>
-              </el-select>
-            </el-form-item>
-          </el-col>
-          <el-col :span="8" v-if="form.notify_status !== 0">
-            <el-form-item :label="t('task.notifyType')">
-              <el-select v-model.trim="form.notify_type">
-                <el-option
-                  v-for="item in notifyTypes"
-                  :key="item.value"
-                  :label="item.label"
-                  :value="item.value"
-                  >
-                </el-option>
-              </el-select>
-            </el-form-item>
-          </el-col>
-          <el-col :span="8"
-                  v-if="form.notify_status !== 0 && form.notify_type === 0">
-            <el-form-item :label="t('task.notifyReceiver')">
-              <el-select key="notify-mail" v-model="selectedMailNotifyIds" filterable multiple :placeholder="t('task.notifyReceiverPlaceholder')">
-                <el-option
-                  v-for="item in mailUsers"
-                  :key="item.id"
-                  :label="item.username"
-                  :value="item.id">
-                </el-option>
-              </el-select>
-            </el-form-item>
-          </el-col>
+      </el-row>
+      <el-row>
+        <el-col :span="8">
+          <el-form-item :label="t('task.notification')">
+            <el-select v-model.trim="form.notify_status">
+              <el-option
+                v-for="item in notifyStatusList"
+                :key="item.value"
+                :label="item.label"
+                :value="item.value"
+              >
+              </el-option>
+            </el-select>
+          </el-form-item>
+        </el-col>
+        <el-col :span="8" v-if="form.notify_status !== 0">
+          <el-form-item :label="t('task.notifyType')">
+            <el-select v-model.trim="form.notify_type">
+              <el-option
+                v-for="item in notifyTypes"
+                :key="item.value"
+                :label="item.label"
+                :value="item.value"
+              >
+              </el-option>
+            </el-select>
+          </el-form-item>
+        </el-col>
+        <el-col :span="8" v-if="form.notify_status !== 0 && form.notify_type === 0">
+          <el-form-item :label="t('task.notifyReceiver')">
+            <el-select
+              key="notify-mail"
+              v-model="selectedMailNotifyIds"
+              filterable
+              multiple
+              :placeholder="t('task.notifyReceiverPlaceholder')"
+            >
+              <el-option
+                v-for="item in mailUsers"
+                :key="item.id"
+                :label="item.username"
+                :value="item.id"
+              >
+              </el-option>
+            </el-select>
+          </el-form-item>
+        </el-col>
 
-          <el-col :span="8"
-                  v-if="form.notify_status !== 0 && form.notify_type === 1">
-            <el-form-item :label="t('task.notifyChannel')">
-              <el-select key="notify-slack" v-model="selectedSlackNotifyIds" filterable multiple :placeholder="t('task.notifyReceiverPlaceholder')">
-                <el-option
-                  v-for="item in slackChannels"
-                  :key="item.id"
-                  :label="item.name"
-                  selected="true"
-                  :value="item.id">
-                </el-option>
-              </el-select>
-            </el-form-item>
-          </el-col>
+        <el-col :span="8" v-if="form.notify_status !== 0 && form.notify_type === 1">
+          <el-form-item :label="t('task.notifyChannel')">
+            <el-select
+              key="notify-slack"
+              v-model="selectedSlackNotifyIds"
+              filterable
+              multiple
+              :placeholder="t('task.notifyReceiverPlaceholder')"
+            >
+              <el-option
+                v-for="item in slackChannels"
+                :key="item.id"
+                :label="item.name"
+                selected="true"
+                :value="item.id"
+              >
+              </el-option>
+            </el-select>
+          </el-form-item>
+        </el-col>
 
-          <el-col :span="8"
-                  v-if="form.notify_status !== 0 && form.notify_type === 2">
-            <el-form-item :label="t('task.notifyReceiver')">
-              <el-select key="notify-webhook" v-model="selectedWebhookNotifyIds" filterable multiple :placeholder="t('task.notifyReceiverPlaceholder')">
-                <el-option
-                  v-for="item in webhookUrls"
-                  :key="item.id"
-                  :label="item.name"
-                  :value="item.id">
-                </el-option>
-              </el-select>
-            </el-form-item>
-          </el-col>
-        </el-row>
-        <el-row v-if="form.notify_status === 3">
-          <el-col :span="12">
-            <el-form-item :label="t('task.notifyKeyword')" prop="notify_keyword">
-              <el-input v-model.trim="form.notify_keyword" :placeholder="t('task.notifyKeywordPlaceholder')"></el-input>
-            </el-form-item>
-          </el-col>
-        </el-row>
-        <el-row>
-          <el-col :span="16">
-            <el-form-item :label="t('task.remark')">
-              <el-input
-                type="textarea"
-                :rows="3"
-                v-model="form.remark">
-              </el-input>
-            </el-form-item>
-          </el-col>
-        </el-row>
-        <el-form-item>
-          <el-button type="primary" @click="submit">{{ t('common.save') }}</el-button>
-          <el-button @click="cancel">{{ t('common.cancel') }}</el-button>
-        </el-form-item>
-      </el-form>
-    </el-main>
+        <el-col :span="8" v-if="form.notify_status !== 0 && form.notify_type === 2">
+          <el-form-item :label="t('task.notifyReceiver')">
+            <el-select
+              key="notify-webhook"
+              v-model="selectedWebhookNotifyIds"
+              filterable
+              multiple
+              :placeholder="t('task.notifyReceiverPlaceholder')"
+            >
+              <el-option
+                v-for="item in webhookUrls"
+                :key="item.id"
+                :label="item.name"
+                :value="item.id"
+              >
+              </el-option>
+            </el-select>
+          </el-form-item>
+        </el-col>
+
+        <el-col :span="8" v-if="form.notify_status !== 0 && form.notify_type === 3">
+          <el-form-item :label="t('task.notifyReceiver')">
+            <el-select
+              key="notify-serverchan3"
+              v-model="selectedServerChan3NotifyIds"
+              filterable
+              multiple
+              :placeholder="t('task.notifyReceiverPlaceholder')"
+            >
+              <el-option
+                v-for="item in serverChan3Urls"
+                :key="item.id"
+                :label="item.name"
+                :value="item.id"
+              >
+              </el-option>
+            </el-select>
+          </el-form-item>
+        </el-col>
+      </el-row>
+      <el-row v-if="form.notify_status === 3">
+        <el-col :span="12">
+          <el-form-item :label="t('task.notifyKeyword')" prop="notify_keyword">
+            <el-input
+              v-model.trim="form.notify_keyword"
+              :placeholder="t('task.notifyKeywordPlaceholder')"
+            ></el-input>
+          </el-form-item>
+        </el-col>
+      </el-row>
+      <el-row>
+        <el-col :span="16">
+          <el-form-item :label="t('task.remark')">
+            <el-input type="textarea" :rows="3" v-model="form.remark"> </el-input>
+          </el-form-item>
+        </el-col>
+      </el-row>
+      <el-form-item>
+        <el-button type="primary" @click="submit">{{ t('common.save') }}</el-button>
+        <el-button @click="cancel">{{ t('common.cancel') }}</el-button>
+      </el-form-item>
+    </el-form>
+  </el-main>
 </template>
-
 
 <script>
 import { useI18n } from 'vue-i18n'
@@ -335,7 +374,7 @@ export default {
     const { t, locale } = useI18n()
     return { t, locale }
   },
-  data () {
+  data() {
     return {
       form: createDefaultForm(),
       formRules: {},
@@ -368,41 +407,45 @@ export default {
       mailUsers: [],
       slackChannels: [],
       webhookUrls: [],
+      serverChan3Urls: [],
       selectedMailNotifyIds: [],
       selectedSlackNotifyIds: [],
-      selectedWebhookNotifyIds: []
+      selectedWebhookNotifyIds: [],
+      selectedServerChan3NotifyIds: []
     }
   },
   computed: {
-    commandPlaceholder () {
+    commandPlaceholder() {
       if (this.form.protocol === 1) {
         return this.t('message.pleaseEnterUrl')
       }
       return this.t('message.pleaseEnterShellCommand')
     },
-    commandWarning () {
+    commandWarning() {
       if (!this.form.command) return ''
       if (this.form.command.includes('&quot;')) {
-        return this.t('message.htmlEntityDetected') || 'HTML 实体编码已检测到，将自动转换为正确的引号'
+        return (
+          this.t('message.htmlEntityDetected') || 'HTML 实体编码已检测到，将自动转换为正确的引号'
+        )
       }
       return ''
     }
   },
   watch: {
-    $route () {
+    $route() {
       this.initializeForm()
     },
-    'form.notify_status' () {
+    'form.notify_status'() {
       this.updateNotifyKeywordRule()
       if (this.form.notify_status === 0) {
         this.form.notify_type = 0
       }
     },
-    'form.level' () {
+    'form.level'() {
       this.updateSpecRule()
     }
   },
-  created () {
+  created() {
     this.initFormRules()
     this.initSelectOptions()
     this.loadNotificationOptions()
@@ -411,32 +454,54 @@ export default {
   methods: {
     initFormRules() {
       this.formRules = {
-        name: [
-          {required: true, message: this.t('message.pleaseEnterTaskName'), trigger: 'blur'}
-        ],
+        name: [{ required: true, message: this.t('message.pleaseEnterTaskName'), trigger: 'blur' }],
         spec: [
-          {required: true, message: this.t('message.pleaseEnterCronExpression'), trigger: 'blur'},
-          {validator: (rule, value, callback) => this.validateCronSpecField(rule, value, callback), trigger: 'blur'},
-          {validator: (rule, value, callback) => this.validateCronSpecField(rule, value, callback), trigger: 'change'}
+          { required: true, message: this.t('message.pleaseEnterCronExpression'), trigger: 'blur' },
+          {
+            validator: (rule, value, callback) => this.validateCronSpecField(rule, value, callback),
+            trigger: 'blur'
+          },
+          {
+            validator: (rule, value, callback) => this.validateCronSpecField(rule, value, callback),
+            trigger: 'change'
+          }
         ],
         command: [
-          {required: true, message: this.t('message.pleaseEnterCommand'), trigger: 'blur'}
+          { required: true, message: this.t('message.pleaseEnterCommand'), trigger: 'blur' }
         ],
         timeout: [
-          {type: 'number', required: true, message: this.t('message.pleaseEnterValidTimeout'), trigger: 'blur'}
+          {
+            type: 'number',
+            required: true,
+            message: this.t('message.pleaseEnterValidTimeout'),
+            trigger: 'blur'
+          }
         ],
         retry_times: [
-          {type: 'number', required: true, message: this.t('message.pleaseEnterValidRetryTimes'), trigger: 'blur'}
+          {
+            type: 'number',
+            required: true,
+            message: this.t('message.pleaseEnterValidRetryTimes'),
+            trigger: 'blur'
+          }
         ],
         retry_interval: [
-          {type: 'number', required: true, message: this.t('message.pleaseEnterValidRetryInterval'), trigger: 'blur'}
+          {
+            type: 'number',
+            required: true,
+            message: this.t('message.pleaseEnterValidRetryInterval'),
+            trigger: 'blur'
+          }
         ],
         notify_keyword: [
-          {required: true, message: this.t('message.pleaseEnterNotifyKeyword'), trigger: 'blur'}
+          { required: true, message: this.t('message.pleaseEnterNotifyKeyword'), trigger: 'blur' }
         ],
         host_ids: [
-          {required: true, message: this.t('message.selectTaskNode'), trigger: 'blur'},
-          {validator: (rule, value, callback) => this.validateHostIds(rule, value, callback), trigger: 'change'}
+          { required: true, message: this.t('message.selectTaskNode'), trigger: 'blur' },
+          {
+            validator: (rule, value, callback) => this.validateHostIds(rule, value, callback),
+            trigger: 'change'
+          }
         ]
       }
     },
@@ -462,10 +527,11 @@ export default {
       this.notifyTypes = [
         { value: 0, label: this.t('task.notifyEmail') },
         { value: 1, label: this.t('task.notifySlack') },
-        { value: 2, label: this.t('task.notifyWebhook') }
+        { value: 2, label: this.t('task.notifyWebhook') },
+        { value: 3, label: this.t('task.notifyServerChan3') }
       ]
     },
-    updateNotifyKeywordRule () {
+    updateNotifyKeywordRule() {
       const keywordRules = this.formRules.notify_keyword
       const needKeyword = this.form.notify_status === 3
       if (!keywordRules || !keywordRules.length) {
@@ -480,7 +546,7 @@ export default {
       }
       // 移除主动验证，只在用户交互时才验证
     },
-    updateSpecRule () {
+    updateSpecRule() {
       const specRules = this.formRules.spec
       if (!specRules || !specRules.length) {
         return
@@ -492,14 +558,14 @@ export default {
       }
       // 移除主动验证，只在用户交互时才验证
     },
-    validateHostIds (rule, value, callback) {
+    validateHostIds(rule, value, callback) {
       if (Number(this.form.protocol) === 2 && (!value || value.length === 0)) {
         callback(new Error(this.t('message.selectTaskNode')))
         return
       }
       callback()
     },
-    handleProtocolChange (value, skipValidation = false) {
+    handleProtocolChange(value, skipValidation = false) {
       const protocolValue = Number(value)
       if (Number.isNaN(protocolValue)) {
         return
@@ -519,7 +585,7 @@ export default {
         this.$refs.form.clearValidate('host_ids')
       }
     },
-    validateCronSpecField (rule, value, callback) {
+    validateCronSpecField(rule, value, callback) {
       if (this.form.level !== 1) {
         callback()
         return
@@ -531,7 +597,7 @@ export default {
       }
       callback()
     },
-    validateCommand () {
+    validateCommand() {
       if (this.form.command && this.form.command.includes('&quot;')) {
         // 自动修复 HTML 实体编码
         this.form.command = this.form.command
@@ -542,7 +608,7 @@ export default {
           .replace(/&amp;/g, '&')
       }
     },
-    resetForm () {
+    resetForm() {
       if (this.$refs.form) {
         this.$refs.form.clearValidate()
       }
@@ -551,11 +617,12 @@ export default {
       this.selectedMailNotifyIds = []
       this.selectedSlackNotifyIds = []
       this.selectedWebhookNotifyIds = []
+      this.selectedServerChan3NotifyIds = []
       this.handleProtocolChange(this.form.protocol, true)
       this.updateNotifyKeywordRule()
       this.updateSpecRule()
     },
-    initializeForm () {
+    initializeForm() {
       this.resetForm()
       const id = this.$route.params.id
       if (id) {
@@ -577,7 +644,7 @@ export default {
         this.updateSpecRule()
       })
     },
-    populateForm (taskData) {
+    populateForm(taskData) {
       Object.assign(this.form, {
         id: taskData.id,
         name: taskData.name,
@@ -605,10 +672,10 @@ export default {
       this.updateNotifyKeywordRule()
       this.updateSpecRule()
 
-
       this.selectedMailNotifyIds = []
       this.selectedSlackNotifyIds = []
       this.selectedWebhookNotifyIds = []
+      this.selectedServerChan3NotifyIds = []
       if (this.form.notify_status > 0 && this.form.notify_receiver_id) {
         const notifyReceiverIds = this.form.notify_receiver_id.split(',').filter(Boolean)
         if (this.form.notify_type === 0) {
@@ -617,22 +684,27 @@ export default {
           this.selectedSlackNotifyIds = notifyReceiverIds.map(v => parseInt(v))
         } else if (this.form.notify_type === 2) {
           this.selectedWebhookNotifyIds = notifyReceiverIds.map(v => parseInt(v))
+        } else if (this.form.notify_type === 3) {
+          this.selectedServerChan3NotifyIds = notifyReceiverIds.map(v => parseInt(v))
         }
       }
     },
-    loadNotificationOptions () {
-      notificationService.mail((data) => {
+    loadNotificationOptions() {
+      notificationService.mail(data => {
         this.mailUsers = data.mail_users || []
       })
-      notificationService.slack((data) => {
+      notificationService.slack(data => {
         this.slackChannels = data.channels || []
       })
-      notificationService.webhook((data) => {
+      notificationService.webhook(data => {
         this.webhookUrls = data.webhook_urls || []
       })
+      notificationService.serverchan3(data => {
+        this.serverChan3Urls = data.urls || []
+      })
     },
-    submit () {
-      this.$refs.form.validate((valid) => {
+    submit() {
+      this.$refs.form.validate(valid => {
         if (!valid) {
           return false
         }
@@ -649,12 +721,16 @@ export default {
             this.$message.error(this.t('message.selectWebhookUrl'))
             return false
           }
+          if (this.form.notify_type === 3 && this.selectedServerChan3NotifyIds.length === 0) {
+            this.$message.error(this.t('message.selectServerChan3Url'))
+            return false
+          }
         }
 
         this.save()
       })
     },
-    save () {
+    save() {
       // 清理命令中的 HTML 实体编码
       if (this.form.command) {
         this.form.command = this.form.command
@@ -678,6 +754,8 @@ export default {
           this.form.notify_receiver_id = this.selectedSlackNotifyIds.join(',')
         } else if (this.form.notify_type === 2) {
           this.form.notify_receiver_id = this.selectedWebhookNotifyIds.join(',')
+        } else if (this.form.notify_type === 3) {
+          this.form.notify_receiver_id = this.selectedServerChan3NotifyIds.join(',')
         }
       } else {
         this.form.notify_receiver_id = ''
@@ -686,7 +764,7 @@ export default {
         this.$router.push('/task')
       })
     },
-    cancel () {
+    cancel() {
       this.$router.push('/task')
     }
   }
