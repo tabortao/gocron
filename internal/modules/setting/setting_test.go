@@ -3,6 +3,7 @@ package setting
 import (
 	"os"
 	"path/filepath"
+	"runtime"
 	"testing"
 
 	"gopkg.in/ini.v1"
@@ -169,6 +170,9 @@ func TestWritePersistsKeyValuePairs(t *testing.T) {
 }
 
 func TestWriteSetsSecureFilePermissions(t *testing.T) {
+	if runtime.GOOS == "windows" {
+		t.Skip("windows does not enforce POSIX file permissions")
+	}
 	dir := t.TempDir()
 	configPath := filepath.Join(dir, "app.ini")
 	data := []string{

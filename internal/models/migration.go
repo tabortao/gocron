@@ -46,7 +46,7 @@ func (migration *Migration) Upgrade(oldVersionId int) {
 		return
 	}
 
-	versionIds := []int{110, 122, 130, 140, 150, 151, 152, 153, 154, 155, 156, 157}
+	versionIds := []int{110, 122, 130, 140, 150, 151, 152, 153, 154, 155, 156, 157, 158}
 	upgradeFuncs := []func(*gorm.DB) error{
 		migration.upgradeFor110,
 		migration.upgradeFor122,
@@ -60,6 +60,7 @@ func (migration *Migration) Upgrade(oldVersionId int) {
 		migration.upgradeFor155,
 		migration.upgradeFor156,
 		migration.upgradeFor157,
+		migration.upgradeFor158,
 	}
 
 	startIndex := -1
@@ -543,6 +544,26 @@ func (m *Migration) upgradeFor157(tx *gorm.DB) error {
 
 	logger.Info("已升级到v1.5.7\n")
 
+	return nil
+}
+
+func (m *Migration) upgradeFor158(tx *gorm.DB) error {
+	logger.Info("开始升级到v1.5.8 - 任务通知类型支持多选")
+	result := tx.Exec(`
+		UPDATE ` + TablePrefix + `task
+		SET notify_type = CASE notify_type
+			WHEN 0 THEN 1
+			WHEN 1 THEN 2
+			WHEN 2 THEN 4
+			WHEN 3 THEN 8
+			ELSE notify_type
+		END
+		WHERE notify_type IN (0, 1, 2, 3)
+	`)
+	if result.Error != nil {
+		return result.Error
+	}
+	logger.Info("已升级到v1.5.8\n")
 	return nil
 }
 

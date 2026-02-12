@@ -15,6 +15,8 @@ import (
 
 type ServerChan3 struct{}
 
+const serverChan3AllReceiverId = "-3"
+
 func (serverChan3 *ServerChan3) Send(msg Message) {
 	model := new(models.Setting)
 	setting, err := model.ServerChan3()
@@ -58,6 +60,9 @@ func (serverChan3 *ServerChan3) getActiveUrls(setting models.ServerChan3, msg Me
 			continue
 		}
 		taskReceiverIds = append(taskReceiverIds, id)
+	}
+	if utils.InStringSlice(taskReceiverIds, serverChan3AllReceiverId) {
+		return setting.Urls
 	}
 
 	urls := make([]models.ServerChan3Url, 0, len(setting.Urls))

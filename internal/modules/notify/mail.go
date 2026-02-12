@@ -43,6 +43,9 @@ func (mail *Mail) Send(msg Message) {
 	}
 	msg["content"] = parseNotifyTemplate(mailSetting.Template, msg)
 	toUsers := mail.getActiveMailUsers(mailSetting, msg)
+	if len(toUsers) == 0 {
+		return
+	}
 	mail.send(mailSetting, toUsers, msg)
 }
 

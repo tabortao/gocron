@@ -534,27 +534,31 @@ func SendNotification(taskModel models.Task, taskResult TaskResult) {
 			return
 		}
 	}
-	// NotifyType: 0=邮件, 1=Slack, 2=WebHook, 3=Server 酱³
-	// WebHook/Server 酱³ 不需要 receiver_id（为空时默认发给全部地址），其他类型需要
-	if taskModel.NotifyType != 2 && taskModel.NotifyType != 3 && taskModel.NotifyReceiverId == "" {
-		return
-	}
 	if taskResult.Err != nil {
 		statusName = "Failed"
 	} else {
 		statusName = "Success"
 	}
-	// 发送通知
-	msg := notify.Message{
-		"task_type":        taskModel.NotifyType,
-		"task_receiver_id": taskModel.NotifyReceiverId,
-		"name":             taskModel.Name,
-		"output":           taskResult.Result,
-		"status":           statusName,
-		"task_id":          taskModel.Id,
-		"remark":           taskModel.Remark,
+	notifyTypeMask, err := models.NormalizeNotifyTypeMask(taskModel.NotifyType)
+	if err != nil {
+		return
 	}
-	notifyPushFunc(msg)
+	notifyReceiverId := strings.TrimSpace(taskModel.NotifyReceiverId)
+	for _, taskType := range models.NotifyTypeMaskToTypes(notifyTypeMask) {
+		if taskType != 2 && taskType != 3 && notifyReceiverId == "" {
+			continue
+		}
+		msg := notify.Message{
+			"task_type":        taskType,
+			"task_receiver_id": taskModel.NotifyReceiverId,
+			"name":             taskModel.Name,
+			"output":           taskResult.Result,
+			"status":           statusName,
+			"task_id":          taskModel.Id,
+			"remark":           taskModel.Remark,
+		}
+		notifyPushFunc(msg)
+	}
 }
 
 // 执行具体任务

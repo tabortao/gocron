@@ -5,11 +5,31 @@ package utils
 
 import (
 	"context"
+	"fmt"
+	"os"
+	"path/filepath"
 	"testing"
 	"time"
 )
 
 func TestExecShellWithQuotes(t *testing.T) {
+	tempDir := t.TempDir()
+	srcDir := filepath.Join(tempDir, "My Documents")
+	dstDir := filepath.Join(tempDir, "Backup Folder")
+	if err := os.MkdirAll(srcDir, 0o755); err != nil {
+		t.Fatalf("mkdir srcDir failed: %v", err)
+	}
+	if err := os.MkdirAll(dstDir, 0o755); err != nil {
+		t.Fatalf("mkdir dstDir failed: %v", err)
+	}
+	srcFile := filepath.Join(srcDir, "report.txt")
+	if err := os.WriteFile(srcFile, []byte("hello"), 0o644); err != nil {
+		t.Fatalf("write srcFile failed: %v", err)
+	}
+	dstFile := filepath.Join(dstDir, "report.txt")
+	dstFile2 := filepath.Join(dstDir, "report2.txt")
+	newDir := filepath.Join(tempDir, "John Doe", "Projects")
+
 	tests := []struct {
 		name    string
 		command string
@@ -27,17 +47,17 @@ func TestExecShellWithQuotes(t *testing.T) {
 		},
 		{
 			name:    "Copy command with quoted paths",
-			command: `copy "C:\My Documents\report.docx" "D:\Backup"`,
+			command: fmt.Sprintf(`copy "%s" "%s"`, srcFile, dstFile),
 			wantErr: false,
 		},
 		{
 			name:    "Mkdir with quoted path",
-			command: `mkdir "C:\Users\John Doe\Projects"`,
+			command: fmt.Sprintf(`mkdir "%s"`, newDir),
 			wantErr: false,
 		},
 		{
 			name:    "Command with HTML entity quotes",
-			command: `copy &quot;C:\My Documents\report.docx&quot; &quot;D:\Backup&quot;`,
+			command: fmt.Sprintf(`copy &quot;%s&quot; &quot;%s&quot;`, srcFile, dstFile2),
 			wantErr: false, // HTML实体会被CleanHTMLEntities清理，所以应该成功
 		},
 	}

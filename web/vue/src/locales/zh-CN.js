@@ -107,6 +107,8 @@ export default {
     notifySlack: 'Slack',
     notifyWebhook: 'WebHook',
     notifyServerChan3: 'Server 酱³',
+    notifyAllWebhook: '全部Webhook地址',
+    notifyAllServerChan3: '全部Server 酱³地址',
     createNew: '新增任务'
   },
   host: {
@@ -339,6 +341,7 @@ export default {
     confirmRunTask: '确定要手动执行任务 "{name}" 吗？',
     taskStarted: '任务已开始执行',
     selectTaskNode: '请选择任务节点',
+    selectNotifyType: '请选择通知类型',
     selectMailReceiver: '请选择邮件接收用户',
     selectSlackChannel: '请选择Slack Channel',
     selectWebhookUrl: '请选择Webhook地址',

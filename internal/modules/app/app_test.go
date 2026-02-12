@@ -3,6 +3,7 @@ package app
 import (
 	"os"
 	"path/filepath"
+	"runtime"
 	"testing"
 )
 
@@ -72,6 +73,9 @@ func TestCreateInstallLockAndIsInstalled(t *testing.T) {
 }
 
 func TestCreateInstallLockSetsSecurePermissions(t *testing.T) {
+	if runtime.GOOS == "windows" {
+		t.Skip("windows does not enforce POSIX file permissions")
+	}
 	initTempEnv(t, "1.0.0")
 	lockPath := filepath.Join(ConfDir, "install.lock")
 	if err := CreateInstallLock(); err != nil {
@@ -100,6 +104,9 @@ func TestUpdateVersionFileAndGetCurrentVersionId(t *testing.T) {
 }
 
 func TestUpdateVersionFileSetsSecurePermissions(t *testing.T) {
+	if runtime.GOOS == "windows" {
+		t.Skip("windows does not enforce POSIX file permissions")
+	}
 	initTempEnv(t, "1.0.0")
 	VersionId = 123
 	UpdateVersionFile()

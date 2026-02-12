@@ -108,6 +108,8 @@ export default {
     notifySlack: 'Slack',
     notifyWebhook: 'WebHook',
     notifyServerChan3: 'Server Chan',
+    notifyAllWebhook: 'All Webhook URLs',
+    notifyAllServerChan3: 'All Server Chan URLs',
     createNew: 'Create Task'
   },
   host: {
@@ -344,6 +346,7 @@ export default {
     confirmRunTask: 'Are you sure you want to manually run task "{name}"?',
     taskStarted: 'Task has started executing',
     selectTaskNode: 'Please select task node',
+    selectNotifyType: 'Please select notify type',
     selectMailReceiver: 'Please select email receiver',
     selectSlackChannel: 'Please select Slack channel',
     selectWebhookUrl: 'Please select Webhook URL',

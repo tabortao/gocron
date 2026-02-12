@@ -15,6 +15,8 @@ import (
 
 type WebHook struct{}
 
+const webHookAllReceiverId = "-2"
+
 func (webHook *WebHook) Send(msg Message) {
 	model := new(models.Setting)
 	webHookSetting, err := model.Webhook()
@@ -71,6 +73,9 @@ func (webHook *WebHook) getActiveWebhookUrls(webHookSetting models.WebHook, msg 
 			continue
 		}
 		taskReceiverIds = append(taskReceiverIds, id)
+	}
+	if utils.InStringSlice(taskReceiverIds, webHookAllReceiverId) {
+		return webHookSetting.WebhookUrls
 	}
 	urls := []models.WebhookUrl{}
 	for _, v := range webHookSetting.WebhookUrls {

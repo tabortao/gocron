@@ -33,7 +33,7 @@ type TaskForm struct {
 	Tag              string                      `form:"tag" json:"tag"`
 	Remark           string                      `form:"remark" json:"remark"`
 	NotifyStatus     int8                        `form:"notify_status" json:"notify_status" binding:"oneof=0 1 2 3"`
-	NotifyType       int8                        `form:"notify_type" json:"notify_type" binding:"oneof=0 1 2 3"`
+	NotifyType       int8                        `form:"notify_type" json:"notify_type"`
 	NotifyReceiverId string                      `form:"notify_receiver_id" json:"notify_receiver_id"`
 	NotifyKeyword    string                      `form:"notify_keyword" json:"notify_keyword"`
 }
@@ -118,16 +118,24 @@ func Store(c *gin.Context) {
 	taskModel.RetryTimes = form.RetryTimes
 	taskModel.RetryInterval = form.RetryInterval
 	taskModel.NotifyStatus = form.NotifyStatus
-	taskModel.NotifyType = form.NotifyType
+	notifyTypeMask, err := models.NormalizeNotifyTypeMask(form.NotifyType)
+	if err != nil {
+		base.RespondError(c, i18n.T(c, "param_error"))
+		return
+	}
+	taskModel.NotifyType = notifyTypeMask
 	taskModel.NotifyReceiverId = form.NotifyReceiverId
 	taskModel.NotifyKeyword = form.NotifyKeyword
 	taskModel.Spec = form.Spec
 	taskModel.Level = form.Level
 	taskModel.DependencyStatus = form.DependencyStatus
 	taskModel.DependencyTaskId = strings.TrimSpace(form.DependencyTaskId)
-	if taskModel.NotifyStatus > 0 && taskModel.NotifyType != 2 && taskModel.NotifyType != 3 && taskModel.NotifyReceiverId == "" {
-		base.RespondError(c, i18n.T(c, "select_at_least_one_receiver"))
-		return
+	if taskModel.NotifyStatus > 0 {
+		receiverId := strings.TrimSpace(taskModel.NotifyReceiverId)
+		if taskModel.NotifyType&(models.NotifyTypeMailMask|models.NotifyTypeSlackMask) != 0 && receiverId == "" {
+			base.RespondError(c, i18n.T(c, "select_at_least_one_receiver"))
+			return
+		}
 	}
 	taskModel.HttpMethod = form.HttpMethod
 	if taskModel.Protocol == models.TaskHTTP {
