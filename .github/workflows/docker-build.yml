@@ -2,8 +2,6 @@ name: Build and Push Gocron Docker Image
 
 on:
   push:
-    branches:
-      - 'release/**'
     tags:
       - 'v*.*.*'
   workflow_dispatch:
