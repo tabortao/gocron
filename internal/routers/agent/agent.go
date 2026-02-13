@@ -92,12 +92,19 @@ func InstallScript(c *gin.Context) {
 	script := `#!/bin/bash
 set -e
 
-# 安全检查：禁止使用 root 用户运行
+# 安装用户与提权工具
+SUDO="sudo"
+NODE_ARGS=""
 if [ "$(id -u)" = "0" ]; then
-    echo "Error: This script should NOT be run as root for security reasons."
-    echo "Please run as a regular user with sudo privileges."
-    echo "Example: su - youruser -c 'curl -fsSL ... | bash'"
-    exit 1
+    SUDO=""
+    NODE_ARGS="-allow-root"
+    echo "Warning: Installing and running gocron-node as root (NODE_ARGS=$NODE_ARGS)."
+    echo "This is NOT recommended unless you understand the security implications."
+else
+    if ! command -v sudo >/dev/null 2>&1; then
+        echo "Error: sudo is required to install as a non-root user."
+        exit 1
+    fi
 fi
 
 # Token is embedded in the script URL, extract it here
@@ -191,9 +198,9 @@ else
     tar -xzf gocron-node.tar.gz
 fi
 
-sudo mkdir -p "$INSTALL_DIR"
-sudo cp -r gocron-node*/* "$INSTALL_DIR/"
-sudo chmod +x "$INSTALL_DIR/gocron-node"
+$SUDO mkdir -p "$INSTALL_DIR"
+$SUDO cp -r gocron-node*/* "$INSTALL_DIR/"
+$SUDO chmod +x "$INSTALL_DIR/gocron-node"
 
 echo "Registering agent..."
 # 获取本机IP地址，如果失败则使用hostname
@@ -218,7 +225,7 @@ else
 fi
 
 if [ "$OS" = "linux" ]; then
-    sudo tee /etc/systemd/system/${SERVICE_NAME}.service > /dev/null <<EOF
+    $SUDO tee /etc/systemd/system/${SERVICE_NAME}.service > /dev/null <<EOF
 [Unit]
 Description=Gocron Node Agent
 After=network.target
@@ -227,24 +234,24 @@ After=network.target
 Type=simple
 User=$(whoami)
 WorkingDirectory=$INSTALL_DIR
-ExecStart=$INSTALL_DIR/gocron-node
+ExecStart=$INSTALL_DIR/gocron-node $NODE_ARGS
 Restart=on-failure
 RestartSec=5s
 
 [Install]
 WantedBy=multi-user.target
 EOF
-    sudo systemctl daemon-reload
-    sudo systemctl enable ${SERVICE_NAME}
-    sudo systemctl start ${SERVICE_NAME}
+    $SUDO systemctl daemon-reload
+    $SUDO systemctl enable ${SERVICE_NAME}
+    $SUDO systemctl start ${SERVICE_NAME}
     echo "Service status:"
-    sudo systemctl status ${SERVICE_NAME} --no-pager
+    $SUDO systemctl status ${SERVICE_NAME} --no-pager
 elif [ "$OS" = "darwin" ]; then
     echo "macOS detected. Starting gocron-node..."
     # 先停止已存在的进程
     pkill -f gocron-node 2>/dev/null || true
     sleep 1
-    nohup $INSTALL_DIR/gocron-node > /tmp/gocron-node.log 2>&1 &
+    nohup $INSTALL_DIR/gocron-node $NODE_ARGS > /tmp/gocron-node.log 2>&1 &
     echo "gocron-node started in background (PID: $!)"
     echo "Log file: /tmp/gocron-node.log"
 fi

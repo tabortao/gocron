@@ -136,14 +136,20 @@ export default {
     autoRegister: 'Auto Register',
     agentInstall: 'Agent Installation',
     installCommand: 'Install Command',
+    installModeNormal: 'Mode 1: Non-root Install (Recommended)',
+    installModeNormalTip:
+      'Run as a regular user; the script uses sudo to write /opt and systemd service.',
+    installModeAllowRoot: 'Mode 2: allow-root Install (Use with caution)',
+    installModeAllowRootTip:
+      'Install and run node as root; the script will add -allow-root automatically.',
     installTipTitle: 'Node Installation & Permissions',
     installTipLine1:
       'Docker deployment usually includes only the Web (Master). Install gocron-node separately on each execution host.',
     installTipLine2: 'Tasks run on the gocron-node host (log shows Host: x.x.x.x:5921).',
     installTipLine3:
-      'To run docker / docker compose in tasks, grant the node user access to Docker (example): sudo usermod -aG docker taozi',
+      'To run docker / docker compose in tasks, grant the node user access to Docker (example): sudo usermod -aG docker tabor',
     installTipLine4:
-      'After changing permissions, restart Docker and restart the node service: sudo service docker stop/start, sudo systemctl restart gocron-node.',
+      'After changing permissions, restart Docker and restart the node service: sudo service docker stop/start, sudo systemctl restart gocron-node; to run as root, enable -allow-root.',
     tokenExpires: 'Token Expires',
     tokenUsage: 'Usage',
     tokenReusable: 'This token can be reused within the validity period for batch installation',

@@ -134,14 +134,19 @@ export default {
     autoRegister: '自动注册',
     agentInstall: 'Agent安装',
     installCommand: '安装命令',
+    installModeNormal: '方式一：普通权限安装（推荐）',
+    installModeNormalTip: '以普通用户执行脚本，安装过程使用 sudo 写入 /opt 与 systemd 服务。',
+    installModeAllowRoot: '方式二：allow-root 安装（谨慎使用）',
+    installModeAllowRootTip:
+      '以 root 安装并运行节点，安装脚本会自动为 gocron-node 添加 -allow-root 参数。',
     installTipTitle: '节点安装与权限提示',
     installTipLine1:
       'Docker 部署通常只包含 Web（Master）。需要在每台执行机器上单独安装 gocron-node。',
     installTipLine2: '任务执行发生在 gocron-node 所在机器（日志 Host: x.x.x.x:5921）。',
     installTipLine3:
-      '如需在任务中执行 docker / docker compose，请确保节点运行用户具备 docker 权限：sudo usermod -aG docker taozi（示例）',
+      '如需在任务中执行 docker / docker compose，请确保节点运行用户具备 docker 权限：sudo usermod -aG docker tabor（示例）',
     installTipLine4:
-      '修改权限后可执行 sudo service docker stop/start，并重启 sudo systemctl restart gocron-node 使权限生效。',
+      '修改权限后可执行 sudo service docker stop/start，并重启 sudo systemctl restart gocron-node 使权限生效；如必须以 root 运行节点，需启用 -allow-root。',
     tokenExpires: 'Token有效期',
     tokenUsage: '使用说明',
     tokenReusable: '此Token可在有效期内重复使用，适用于批量安装',

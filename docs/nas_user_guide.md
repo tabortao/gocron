@@ -19,10 +19,14 @@
 2. 进入 **任务节点** 页面，点击 **自动注册**。
 3. 在弹窗里复制 Linux/macOS 的安装命令，在 NAS 上执行。
 
-示例（命令形态，token 以实际为准）：
+示例（两种方式二选一，token 以实际为准）：
 
 ```bash
+# 方式一：普通权限安装（推荐）
 curl -fsSL 'http://192.168.3.4:5920/api/agent/install.sh?token=xxxx' | bash
+
+# 方式二：allow-root 安装（谨慎）
+curl -fsSL 'http://192.168.3.4:5920/api/agent/install.sh?token=xxxx' | sudo bash
 ```
 
 执行成功后：
@@ -30,6 +34,11 @@ curl -fsSL 'http://192.168.3.4:5920/api/agent/install.sh?token=xxxx' | bash
 - NAS 上会安装 `gocron-node` 到 `/opt/gocron-node`
 - Linux NAS 会创建并启动 systemd 服务 `gocron-node`
 - 主控会自动注册该节点到 **任务节点** 列表
+
+说明：
+
+- 推荐优先使用“普通权限安装”，并通过 `sudo usermod -aG docker <user>` 的方式授权节点用户访问 Docker。
+- 仅当你明确需要以 root 运行节点时才使用 allow-root 安装（安装脚本会自动为 `gocron-node` 追加 `-allow-root` 参数）。
 
 ## 3. 创建任务节点（手动方式）
 

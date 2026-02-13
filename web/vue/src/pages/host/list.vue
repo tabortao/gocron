@@ -86,7 +86,10 @@
             <div style="padding: 15px; background: #f5f7fa; border-radius: 4px">
               <div style="margin-bottom: 10px; color: #606266; font-size: 14px">
                 <el-icon style="vertical-align: middle"><Monitor /></el-icon>
-                {{ t('host.bashCommand') }}
+                {{ t('host.installModeNormal') }}
+              </div>
+              <div style="margin-bottom: 10px; color: #909399; font-size: 13px">
+                {{ t('host.installModeNormalTip') }}
               </div>
               <el-input
                 v-model="installCommand"
@@ -97,6 +100,29 @@
               />
               <div style="margin-top: 10px; text-align: right">
                 <el-button type="primary" @click="copyCommand('linux')" icon="DocumentCopy"
+                  >Copy</el-button
+                >
+              </div>
+              <el-divider style="margin: 18px 0" />
+              <div style="margin-bottom: 10px; color: #606266; font-size: 14px">
+                <el-icon style="vertical-align: middle"><Monitor /></el-icon>
+                {{ t('host.installModeAllowRoot') }}
+              </div>
+              <div style="margin-bottom: 10px; color: #909399; font-size: 13px">
+                {{ t('host.installModeAllowRootTip') }}
+              </div>
+              <el-input
+                v-model="installCommandAllowRoot"
+                type="textarea"
+                :rows="3"
+                readonly
+                style="font-family: monospace; font-size: 13px"
+              />
+              <div style="margin-top: 10px; text-align: right">
+                <el-button
+                  type="primary"
+                  @click="copyCommand('linux-allow-root')"
+                  icon="DocumentCopy"
                   >Copy</el-button
                 >
               </div>
@@ -203,6 +229,12 @@ export default {
       }
     }
   },
+  computed: {
+    installCommandAllowRoot() {
+      if (!this.installCommand) return ''
+      return this.installCommand.replace(/\|\s*bash\s*$/, '| sudo bash')
+    }
+  },
   methods: {
     changePage(page) {
       this.searchParams.page = page
@@ -290,7 +322,12 @@ export default {
       })
     },
     copyCommand(type) {
-      const cmd = type === 'windows' ? this.installCommandWindows : this.installCommand
+      const cmd =
+        type === 'windows'
+          ? this.installCommandWindows
+          : type === 'linux-allow-root'
+            ? this.installCommandAllowRoot
+            : this.installCommand
       copyText(cmd)
         .then(() => {
           this.$message.success(this.t('message.copySuccess'))

@@ -29,10 +29,10 @@ docker --version
 docker ps
 ```
 
-2. 将运行 gocron-node 的用户加入 docker 组（示例用户：taozi）：
+2. 将运行 gocron-node 的用户加入 docker 组（示例用户：tabor）：
 
 ```bash
-sudo usermod -aG docker taozi
+sudo usermod -aG docker tabor
 ```
 
 3. 重启 Docker（不同系统可能命令不同，以下为常见写法）：
@@ -54,6 +54,24 @@ sudo systemctl restart gocron-node
 docker ps
 docker compose version || true
 docker-compose version || true
+```
+
+## 可选：允许 gocron-node 以 root 运行
+
+- 不推荐长期以 root 运行节点；如确有需要，可为 gocron-node 启用 `-allow-root` 参数。
+- 自动注册提供两种安装方式：
+  - 普通权限安装（推荐）：`curl ... | bash`
+  - allow-root 安装（谨慎）：`curl ... | sudo bash`
+- 使用 allow-root 安装时，安装脚本会自动为节点追加 `-allow-root`（Linux systemd 的 ExecStart 会包含该参数）。
+
+示例（token 以实际为准）：
+
+```bash
+# 方式一：普通权限安装（推荐）
+curl -fsSL 'http://<gocron-host>:5920/api/agent/install.sh?token=xxxx' | bash
+
+# 方式二：allow-root 安装（谨慎）
+curl -fsSL 'http://<gocron-host>:5920/api/agent/install.sh?token=xxxx' | sudo bash
 ```
 
 ## 任务配置案例：在 NAS 上控制 docker compose 项目
