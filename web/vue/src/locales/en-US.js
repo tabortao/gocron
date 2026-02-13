@@ -136,12 +136,19 @@ export default {
     autoRegister: 'Auto Register',
     agentInstall: 'Agent Installation',
     installCommand: 'Install Command',
-    installTip:
-      'Run the corresponding command on the target server to automatically install and register the Agent node. Note: Must be executed by a non-root user',
+    installTipTitle: 'Node Installation & Permissions',
+    installTipLine1:
+      'Docker deployment usually includes only the Web (Master). Install gocron-node separately on each execution host.',
+    installTipLine2: 'Tasks run on the gocron-node host (log shows Host: x.x.x.x:5921).',
+    installTipLine3:
+      'To run docker / docker compose in tasks, grant the node user access to Docker (example): sudo usermod -aG docker taozi',
+    installTipLine4:
+      'After changing permissions, restart Docker and restart the node service: sudo service docker stop/start, sudo systemctl restart gocron-node.',
     tokenExpires: 'Token Expires',
     tokenUsage: 'Usage',
     tokenReusable: 'This token can be reused within the validity period for batch installation',
-    bashCommand: 'Run the following command in terminal (non-root user):',
+    bashCommand:
+      'Run the following command in terminal (recommended non-root, use sudo if needed):',
     powershellCommand: 'Run in PowerShell (Administrator):',
     windowsManualInstall: 'Windows Manual Installation',
     windowsManualInstallTip:

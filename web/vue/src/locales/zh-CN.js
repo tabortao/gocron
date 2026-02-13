@@ -134,12 +134,18 @@ export default {
     autoRegister: '自动注册',
     agentInstall: 'Agent安装',
     installCommand: '安装命令',
-    installTip:
-      '在目标服务器上执行对应的命令，将自动安装并注册Agent节点。注意：必须使用非root用户执行安装脚本',
+    installTipTitle: '节点安装与权限提示',
+    installTipLine1:
+      'Docker 部署通常只包含 Web（Master）。需要在每台执行机器上单独安装 gocron-node。',
+    installTipLine2: '任务执行发生在 gocron-node 所在机器（日志 Host: x.x.x.x:5921）。',
+    installTipLine3:
+      '如需在任务中执行 docker / docker compose，请确保节点运行用户具备 docker 权限：sudo usermod -aG docker taozi（示例）',
+    installTipLine4:
+      '修改权限后可执行 sudo service docker stop/start，并重启 sudo systemctl restart gocron-node 使权限生效。',
     tokenExpires: 'Token有效期',
     tokenUsage: '使用说明',
     tokenReusable: '此Token可在有效期内重复使用，适用于批量安装',
-    bashCommand: '在终端（非root用户）执行以下命令：',
+    bashCommand: '在终端执行以下命令（建议普通用户执行，必要时加 sudo）：',
     powershellCommand: '在PowerShell（管理员权限）中执行：',
     windowsManualInstall: 'Windows 手动安装',
     windowsManualInstallTip: '出于安全考虑，Windows 系统建议手动安装 gocron-node',

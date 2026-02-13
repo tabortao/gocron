@@ -71,13 +71,15 @@
 
     <el-dialog v-model="agentDialogVisible" :title="t('host.agentInstall')" width="750px">
       <div v-if="installCommand">
-        <el-alert
-          :title="t('host.installTip')"
-          type="info"
-          :closable="false"
-          style="margin-bottom: 20px"
-          show-icon
-        />
+        <el-alert type="info" :closable="false" style="margin-bottom: 20px" show-icon>
+          <template #title>{{ t('host.installTipTitle') }}</template>
+          <div style="line-height: 1.6">
+            <div>{{ t('host.installTipLine1') }}</div>
+            <div>{{ t('host.installTipLine2') }}</div>
+            <div style="margin-top: 6px">{{ t('host.installTipLine3') }}</div>
+            <div>{{ t('host.installTipLine4') }}</div>
+          </div>
+        </el-alert>
 
         <el-tabs v-model="activeTab" type="card">
           <el-tab-pane label="Linux / macOS" name="linux">

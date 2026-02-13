@@ -231,7 +231,9 @@ export default {
           label: 'shell'
         }
       ],
-      statusList: []
+      statusList: [],
+      autoRefreshTimer: null,
+      autoRefreshInFlight: false
     }
   },
   computed: {
@@ -268,6 +270,12 @@ export default {
     this.updateTaskIdFromRoute()
     this.search()
   },
+  deactivated() {
+    this.stopAutoRefresh()
+  },
+  beforeUnmount() {
+    this.stopAutoRefresh()
+  },
   methods: {
     formatProtocol(row, col) {
       if (row[col.property] === 1) {
@@ -287,6 +295,7 @@ export default {
       taskLogService.list(this.searchParams, data => {
         this.logs = data.data
         this.logTotal = data.total
+        this.ensureAutoRefresh()
 
         if (callback) {
           callback()
@@ -340,6 +349,30 @@ export default {
         this.searchParams.task_id = this.$route.query.task_id
         this.searchParams.page = 1
       }
+    },
+    ensureAutoRefresh() {
+      const hasRunning = Array.isArray(this.logs) && this.logs.some(item => item.status === 1)
+      if (hasRunning) {
+        this.startAutoRefresh()
+      } else {
+        this.stopAutoRefresh()
+      }
+    },
+    startAutoRefresh() {
+      if (this.autoRefreshTimer) return
+      this.autoRefreshTimer = setInterval(() => {
+        if (this.autoRefreshInFlight) return
+        this.autoRefreshInFlight = true
+        this.search(() => {
+          this.autoRefreshInFlight = false
+        })
+      }, 3000)
+    },
+    stopAutoRefresh() {
+      if (!this.autoRefreshTimer) return
+      clearInterval(this.autoRefreshTimer)
+      this.autoRefreshTimer = null
+      this.autoRefreshInFlight = false
     }
   }
 }
