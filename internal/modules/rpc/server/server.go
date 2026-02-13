@@ -3,6 +3,7 @@ package server
 import (
 	"bytes"
 	"context"
+	"io"
 	"net"
 	"os"
 	"os/signal"
@@ -26,6 +27,21 @@ type Server struct {
 	stopChans    sync.Map // 存储停止通道
 }
 
+type taskOutput struct {
+	mu  sync.Mutex
+	buf bytes.Buffer
+}
+
+type taskOutputWriter struct {
+	out *taskOutput
+}
+
+func (w *taskOutputWriter) Write(p []byte) (int, error) {
+	w.out.mu.Lock()
+	defer w.out.mu.Unlock()
+	return w.out.buf.Write(p)
+}
+
 var keepAlivePolicy = keepalive.EnforcementPolicy{
 	MinTime:             10 * time.Second,
 	PermitWithoutStream: true,
@@ -47,6 +63,23 @@ func (s *Server) Run(ctx context.Context, req *pb.TaskRequest) (*pb.TaskResponse
 	// 清理 HTML 实体
 	cleanedCmd := utils.CleanHTMLEntities(req.Command)
 
+	// 获取运行中任务输出
+	if cleanedCmd == "__TAIL__" {
+		if v, ok := s.taskOutputs.Load(req.Id); ok {
+			out := v.(*taskOutput)
+			out.mu.Lock()
+			defer out.mu.Unlock()
+			return &pb.TaskResponse{
+				Output: out.buf.String(),
+				Error:  "",
+			}, nil
+		}
+		return &pb.TaskResponse{
+			Output: "",
+			Error:  "",
+		}, nil
+	}
+
 	// 检测是否是停止信号
 	if cleanedCmd == "__STOP__" {
 		if ch, ok := s.stopChans.Load(req.Id); ok {
@@ -64,7 +97,7 @@ func (s *Server) Run(ctx context.Context, req *pb.TaskRequest) (*pb.TaskResponse
 	defer cancel()
 
 	// 存储任务上下文和输出 buffer
-	outputBuf := &bytes.Buffer{}
+	outputBuf := &taskOutput{}
 	stopChan := make(chan struct{})
 	s.taskContexts.Store(req.Id, cancel)
 	s.taskOutputs.Store(req.Id, outputBuf)
@@ -92,8 +125,8 @@ func (s *Server) Run(ctx context.Context, req *pb.TaskRequest) (*pb.TaskResponse
 	}()
 
 	// 执行命令
-	output, execErr := utils.ExecShell(taskCtx, cleanedCmd)
-	outputBuf.WriteString(output)
+	var writer io.Writer = &taskOutputWriter{out: outputBuf}
+	output, execErr := utils.ExecShellWithWriter(taskCtx, cleanedCmd, writer)
 
 	resp := new(pb.TaskResponse)
 	resp.Output = output

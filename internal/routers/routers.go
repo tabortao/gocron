@@ -82,6 +82,7 @@ func Register(r *gin.Engine) {
 		taskGroup.GET("/:id", task.Detail)
 		taskGroup.GET("", task.Index)
 		taskGroup.GET("/log", tasklog.Index)
+		taskGroup.GET("/log/output", tasklog.Output)
 		taskGroup.POST("/log/clear", tasklog.Clear)
 		taskGroup.POST("/log/stop", tasklog.Stop)
 		taskGroup.POST("/remove/:id", task.Remove)

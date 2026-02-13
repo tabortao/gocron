@@ -112,6 +112,13 @@
         >
           <template #default="scope">
             <el-button
+              type="primary"
+              size="small"
+              v-if="scope.row.status === 1"
+              @click="showTaskResult(scope.row)"
+              >{{ t('taskLog.viewOutput') }}</el-button
+            >
+            <el-button
               type="success"
               size="small"
               v-if="scope.row.status === 2"
@@ -148,6 +155,13 @@
         >
           <template #default="scope">
             <el-button
+              type="primary"
+              size="small"
+              v-if="scope.row.status === 1"
+              @click="showTaskResult(scope.row)"
+              >{{ t('taskLog.viewOutput') }}</el-button
+            >
+            <el-button
               type="success"
               size="small"
               v-if="scope.row.status === 2"
@@ -183,7 +197,9 @@
       </div>
       <div>
         <strong>{{ t('taskLog.output') }}:</strong>
-        <pre>{{ currentTaskResult.result }}</pre>
+        <pre ref="resultPre" style="max-height: 50vh; overflow: auto">{{
+          currentTaskResult.result
+        }}</pre>
       </div>
     </el-dialog>
   </el-main>
@@ -221,6 +237,10 @@ export default {
         command: '',
         result: ''
       },
+      currentLogId: 0,
+      currentLogStatus: 0,
+      outputRefreshTimer: null,
+      outputRefreshInFlight: false,
       protocolList: [
         {
           value: '1',
@@ -260,6 +280,13 @@ export default {
           this.search()
         }
       }
+    },
+    dialogVisible: {
+      handler(visible) {
+        if (!visible) {
+          this.stopOutputRefresh()
+        }
+      }
     }
   },
   created() {
@@ -272,9 +299,11 @@ export default {
   },
   deactivated() {
     this.stopAutoRefresh()
+    this.stopOutputRefresh()
   },
   beforeUnmount() {
     this.stopAutoRefresh()
+    this.stopOutputRefresh()
   },
   methods: {
     formatProtocol(row, col) {
@@ -324,6 +353,8 @@ export default {
     },
     showTaskResult(item) {
       this.dialogVisible = true
+      this.currentLogId = item.id || 0
+      this.currentLogStatus = item.status
       // 清理命令中的 HTML 实体编码
       let cleanedCommand = item.command
       if (cleanedCommand) {
@@ -338,6 +369,15 @@ export default {
       this.currentTaskResult.hostname = item.hostname || ''
       this.currentTaskResult.command = cleanedCommand
       this.currentTaskResult.result = item.result
+      if (item.status === 1) {
+        this.fetchLiveOutput()
+        this.startOutputRefresh()
+      } else {
+        this.stopOutputRefresh()
+      }
+      this.$nextTick(() => {
+        this.scrollOutputToBottom()
+      })
     },
     refresh() {
       this.search(() => {
@@ -349,6 +389,43 @@ export default {
         this.searchParams.task_id = this.$route.query.task_id
         this.searchParams.page = 1
       }
+    },
+    fetchLiveOutput() {
+      if (!this.currentLogId || this.outputRefreshInFlight) return
+      this.outputRefreshInFlight = true
+      taskLogService.output(this.currentLogId, data => {
+        this.outputRefreshInFlight = false
+        if (data && data.status !== undefined) {
+          this.currentLogStatus = data.status
+          if (this.currentLogStatus !== 1) {
+            this.stopOutputRefresh()
+          }
+        }
+        if (data && data.output !== undefined) {
+          this.currentTaskResult.result = data.output
+          this.$nextTick(() => {
+            this.scrollOutputToBottom()
+          })
+        }
+      })
+    },
+    startOutputRefresh() {
+      if (this.outputRefreshTimer || this.currentLogStatus !== 1) return
+      this.outputRefreshTimer = setInterval(() => {
+        if (!this.dialogVisible || this.currentLogStatus !== 1) return
+        this.fetchLiveOutput()
+      }, 2000)
+    },
+    stopOutputRefresh() {
+      if (!this.outputRefreshTimer) return
+      clearInterval(this.outputRefreshTimer)
+      this.outputRefreshTimer = null
+      this.outputRefreshInFlight = false
+    },
+    scrollOutputToBottom() {
+      const el = this.$refs.resultPre
+      if (!el) return
+      el.scrollTop = el.scrollHeight
     },
     ensureAutoRefresh() {
       const hasRunning = Array.isArray(this.logs) && this.logs.some(item => item.status === 1)

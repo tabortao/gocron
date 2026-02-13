@@ -29,6 +29,10 @@ type Result struct {
 // 执行shell命令，可设置执行超时时间
 // 改进：将命令写入临时批处理文件执行，即使超时或被取消，也会返回已产生的输出
 func ExecShell(ctx context.Context, command string) (string, error) {
+	return ExecShellWithWriter(ctx, command, nil)
+}
+
+func ExecShellWithWriter(ctx context.Context, command string, writer io.Writer) (string, error) {
 	// 清理可能存在的 HTML 实体编码,防止 &quot; 等导致命令执行失败
 	// 例如: del &quot;C:\file.txt&quot; -> del "C:\file.txt"
 	command = CleanHTMLEntities(command)
@@ -99,6 +103,14 @@ func ExecShell(ctx context.Context, command string) (string, error) {
 
 	// 实时读取 stdout 和 stderr
 	var mu sync.Mutex
+	writeChunk := func(p []byte) {
+		mu.Lock()
+		outputBuffer.Write(p)
+		if writer != nil {
+			_, _ = writer.Write(p)
+		}
+		mu.Unlock()
+	}
 	wg.Add(2)
 	go func() {
 		defer wg.Done()
@@ -106,9 +118,7 @@ func ExecShell(ctx context.Context, command string) (string, error) {
 		for {
 			n, err := stdout.Read(buf)
 			if n > 0 {
-				mu.Lock()
-				outputBuffer.Write(buf[:n])
-				mu.Unlock()
+				writeChunk(buf[:n])
 			}
 			if err != nil {
 				break
@@ -121,9 +131,7 @@ func ExecShell(ctx context.Context, command string) (string, error) {
 		for {
 			n, err := stderr.Read(buf)
 			if n > 0 {
-				mu.Lock()
-				outputBuffer.Write(buf[:n])
-				mu.Unlock()
+				writeChunk(buf[:n])
 			}
 			if err != nil {
 				break

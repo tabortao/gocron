@@ -2,6 +2,7 @@ package models
 
 import (
 	"database/sql/driver"
+	"errors"
 	"fmt"
 	"time"
 
@@ -69,6 +70,18 @@ func (taskLog *TaskLog) Create() (insertId int64, err error) {
 	}
 
 	return insertId, result.Error
+}
+
+func (taskLog *TaskLog) Detail(id int64) (TaskLog, error) {
+	t := TaskLog{}
+	err := Db.Where("id = ?", id).First(&t).Error
+	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return t, nil
+		}
+		return t, err
+	}
+	return t, nil
 }
 
 // 更新

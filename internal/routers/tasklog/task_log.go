@@ -3,12 +3,15 @@ package tasklog
 // 任务日志
 
 import (
+	"fmt"
 	"strconv"
+	"strings"
 
 	"github.com/gin-gonic/gin"
 	"github.com/tabortao/gocron/internal/models"
 	"github.com/tabortao/gocron/internal/modules/i18n"
 	"github.com/tabortao/gocron/internal/modules/logger"
+	rpcClient "github.com/tabortao/gocron/internal/modules/rpc/client"
 	"github.com/tabortao/gocron/internal/modules/utils"
 	"github.com/tabortao/gocron/internal/routers/base"
 	"github.com/tabortao/gocron/internal/service"
@@ -40,6 +43,61 @@ func Clear(c *gin.Context) {
 	} else {
 		base.RespondSuccessWithDefaultMsg(c, nil)
 	}
+}
+
+func Output(c *gin.Context) {
+	logId, err := strconv.ParseInt(c.Query("id"), 10, 64)
+	if err != nil || logId <= 0 {
+		base.RespondError(c, i18n.T(c, "invalid_log_id"))
+		return
+	}
+
+	taskLogModel := new(models.TaskLog)
+	taskLog, err := taskLogModel.Detail(logId)
+	if err != nil {
+		base.RespondErrorWithDefaultMsg(c, err)
+		return
+	}
+	if taskLog.Id <= 0 {
+		base.RespondError(c, i18n.T(c, "invalid_log_id"))
+		return
+	}
+
+	if taskLog.Protocol != models.TaskRPC || taskLog.Status != models.Running {
+		base.RespondSuccess(c, utils.SuccessContent, map[string]interface{}{
+			"output": taskLog.Result,
+			"status": taskLog.Status,
+		})
+		return
+	}
+
+	taskModel := new(models.Task)
+	task, err := taskModel.Detail(taskLog.TaskId)
+	if err != nil {
+		base.RespondError(c, i18n.T(c, "get_task_info_failed")+"#"+err.Error(), err)
+		return
+	}
+	if len(task.Hosts) == 0 {
+		base.RespondError(c, i18n.T(c, "task_node_list_empty"))
+		return
+	}
+
+	aggregationResult := ""
+	for _, host := range task.Hosts {
+		output, tailErr := rpcClient.Tail(host.Name, host.Port, logId)
+		errorMessage := ""
+		if tailErr != nil {
+			errorMessage = strings.TrimSpace(tailErr.Error()) + "\n"
+		}
+		output = strings.TrimSpace(output)
+		outputMessage := fmt.Sprintf("Host: [%s-%s:%d]\n%s%s\n", host.Alias, host.Name, host.Port, errorMessage, output)
+		aggregationResult += outputMessage
+	}
+
+	base.RespondSuccess(c, utils.SuccessContent, map[string]interface{}{
+		"output": aggregationResult,
+		"status": taskLog.Status,
+	})
 }
 
 // 停止运行中的任务

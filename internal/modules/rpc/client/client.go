@@ -52,6 +52,14 @@ func Stop(ip string, port int, id int64) {
 	}()
 }
 
+func Tail(ip string, port int, id int64) (string, error) {
+	return Exec(ip, port, &pb.TaskRequest{
+		Command: "__TAIL__",
+		Timeout: 5,
+		Id:      id,
+	})
+}
+
 func Exec(ip string, port int, taskReq *pb.TaskRequest) (string, error) {
 	defer func() {
 		if err := recover(); err != nil {

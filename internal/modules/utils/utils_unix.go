@@ -8,6 +8,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"io"
 	"os"
 	"os/exec"
 	"strings"
@@ -24,6 +25,10 @@ type Result struct {
 // 执行shell命令，可设置执行超时时间
 // 改进：将命令写入临时脚本执行，即使超时或被取消，也会返回已产生的输出
 func ExecShell(ctx context.Context, command string) (string, error) {
+	return ExecShellWithWriter(ctx, command, nil)
+}
+
+func ExecShellWithWriter(ctx context.Context, command string, writer io.Writer) (string, error) {
 	// 清理可能存在的 HTML 实体编码
 	command = CleanHTMLEntities(command)
 	// 将换行符统一替换为Unix风格的\n
@@ -87,6 +92,15 @@ func ExecShell(ctx context.Context, command string) (string, error) {
 	var mu sync.Mutex
 	var wg sync.WaitGroup
 
+	writeChunk := func(p []byte) {
+		mu.Lock()
+		outputBuffer.Write(p)
+		if writer != nil {
+			_, _ = writer.Write(p)
+		}
+		mu.Unlock()
+	}
+
 	// 启动命令
 	if err := cmd.Start(); err != nil {
 		return "", err
@@ -100,9 +114,7 @@ func ExecShell(ctx context.Context, command string) (string, error) {
 		for {
 			n, err := stdout.Read(buf)
 			if n > 0 {
-				mu.Lock()
-				outputBuffer.Write(buf[:n])
-				mu.Unlock()
+				writeChunk(buf[:n])
 			}
 			if err != nil {
 				break
@@ -115,9 +127,7 @@ func ExecShell(ctx context.Context, command string) (string, error) {
 		for {
 			n, err := stderr.Read(buf)
 			if n > 0 {
-				mu.Lock()
-				outputBuffer.Write(buf[:n])
-				mu.Unlock()
+				writeChunk(buf[:n])
 			}
 			if err != nil {
 				break
