@@ -5,6 +5,9 @@ import (
 	"path/filepath"
 	"runtime"
 	"testing"
+	"time"
+
+	"github.com/tabortao/gocron/internal/modules/setting"
 )
 
 func initTempEnv(t *testing.T, version string) string {
@@ -13,15 +16,14 @@ func initTempEnv(t *testing.T, version string) string {
 	t.Setenv("HOME", home)
 	t.Setenv("USERPROFILE", home)
 
-	// 保存原始值
 	oldAppDir := AppDir
 	oldConfDir := ConfDir
 	oldLogDir := LogDir
 	oldVersionFile := VersionFile
 	oldVersionId := VersionId
 	oldInstalled := Installed
+	oldSetting := Setting
 
-	// 清理函数
 	t.Cleanup(func() {
 		AppDir = oldAppDir
 		ConfDir = oldConfDir
@@ -29,6 +31,7 @@ func initTempEnv(t *testing.T, version string) string {
 		VersionFile = oldVersionFile
 		VersionId = oldVersionId
 		Installed = oldInstalled
+		Setting = oldSetting
 	})
 
 	InitEnv(version)
@@ -158,5 +161,23 @@ func TestCreateDirIfNotExists(t *testing.T) {
 	createDirIfNotExists(dir)
 	if fi, err := os.Stat(dir); err != nil || !fi.IsDir() {
 		t.Fatalf("expected directory %s to exist", dir)
+	}
+}
+
+func TestInitTimeZone(t *testing.T) {
+	oldLocal := time.Local
+	oldSetting := Setting
+	t.Cleanup(func() {
+		time.Local = oldLocal
+		Setting = oldSetting
+	})
+
+	t.Setenv("TZ", "Europe/London")
+	t.Setenv("GOCRON_TIMEZONE", "Asia/Shanghai")
+	Setting = &setting.Setting{Timezone: "America/New_York"}
+
+	InitTimeZone()
+	if time.Local.String() != "Asia/Shanghai" {
+		t.Fatalf("expected time.Local to be Asia/Shanghai, got %s", time.Local.String())
 	}
 }

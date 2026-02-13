@@ -116,6 +116,7 @@ func initModule() {
 		logger.Fatal("读取应用配置失败", err)
 	}
 	app.Setting = config
+	app.InitTimeZone()
 
 	// 初始化DB
 	models.Db = models.CreateDb()

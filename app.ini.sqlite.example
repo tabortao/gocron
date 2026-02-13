@@ -20,6 +20,10 @@ db.max.open.conns=100
 
 # 应用配置
 app.name=定时任务管理系统
+#
+# 应用时区（IANA 时区名），例如：Asia/Shanghai、Europe/London
+# 留空表示跟随系统/容器的本地时区（Docker 场景建议同时设置环境变量 TZ）
+app.timezone=
 
 # API配置
 api.key=

@@ -3,6 +3,8 @@ package app
 import (
 	"os"
 	"path/filepath"
+	"time"
+	_ "time/tzdata"
 
 	"fmt"
 	"strconv"
@@ -58,6 +60,26 @@ func InitEnv(versionString string) {
 	createDirIfNotExists(AppDir, ConfDir, LogDir)
 	Installed = IsInstalled()
 	VersionId = ToNumberVersion(versionString)
+}
+
+func InitTimeZone() {
+	timezone := strings.TrimSpace(os.Getenv("GOCRON_TIMEZONE"))
+	if timezone == "" {
+		timezone = strings.TrimSpace(os.Getenv("TZ"))
+	}
+	if timezone == "" && Setting != nil {
+		timezone = strings.TrimSpace(Setting.Timezone)
+	}
+	if timezone == "" {
+		return
+	}
+	loc, err := time.LoadLocation(timezone)
+	if err != nil {
+		logger.Warnf("Failed to load timezone %q, using %q: %v", timezone, time.Local.String(), err)
+		return
+	}
+	time.Local = loc
+	logger.Infof("Timezone initialized: %s, now=%s", time.Local.String(), time.Now().Format(time.RFC3339))
 }
 
 // IsInstalled 判断应用是否已安装

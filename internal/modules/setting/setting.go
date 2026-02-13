@@ -27,6 +27,7 @@ type Setting struct {
 	}
 	AllowIps      string
 	AppName       string
+	Timezone      string
 	ApiKey        string
 	ApiSecret     string
 	ApiSignEnable bool
@@ -92,6 +93,7 @@ func Read(filename string) (*Setting, error) {
 
 	s.AllowIps = section.Key("allow_ips").MustString("")
 	s.AppName = section.Key("app.name").MustString("定时任务管理系统")
+	s.Timezone = section.Key("app.timezone").MustString("")
 	s.ApiKey = section.Key("api.key").MustString("")
 	s.ApiSecret = section.Key("api.secret").MustString("")
 	s.ApiSignEnable = section.Key("api.sign.enable").MustBool(true)
@@ -102,6 +104,10 @@ func Read(filename string) (*Setting, error) {
 	}
 	if s.AuthSecret == "" {
 		s.AuthSecret = utils.RandAuthToken()
+	}
+
+	if envTimezone := os.Getenv("GOCRON_TIMEZONE"); envTimezone != "" {
+		s.Timezone = envTimezone
 	}
 
 	s.EnableTLS = section.Key("enable_tls").MustBool(false)
