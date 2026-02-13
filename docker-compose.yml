@@ -6,6 +6,8 @@ services:
       - '5920:5920'
     volumes:
       - ./data:/.gocron
+      - /var/run/docker.sock:/var/run/docker.sock
+      - /vol1/1000:/vol1/1000
     environment:
       - TZ=Asia/Shanghai
       # Database configuration (sqlite by default)
