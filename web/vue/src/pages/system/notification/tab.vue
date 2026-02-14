@@ -5,6 +5,7 @@
       <el-tab-pane label="Slack" name="slack"></el-tab-pane>
       <el-tab-pane label="Webhook" name="webhook"></el-tab-pane>
       <el-tab-pane label="Server 酱³" name="serverchan3"></el-tab-pane>
+      <el-tab-pane label="Bark" name="bark"></el-tab-pane>
     </el-tabs>
     <el-alert type="info" :closable="false" style="margin-bottom: 15px">
       <template #title>

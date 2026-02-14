@@ -145,6 +145,13 @@ func Register(r *gin.Engine) {
 			serverChan3Group.POST("/url", manage.CreateServerChan3Url)
 			serverChan3Group.POST("/url/remove/:id", manage.RemoveServerChan3Url)
 		}
+		barkGroup := systemGroup.Group("/bark")
+		{
+			barkGroup.GET("", manage.Bark)
+			barkGroup.POST("/update", manage.UpdateBark)
+			barkGroup.POST("/url", manage.CreateBarkUrl)
+			barkGroup.POST("/url/remove/:id", manage.RemoveBarkUrl)
+		}
 		systemGroup.GET("/login-log", loginlog.Index)
 		systemGroup.GET("/log-retention", manage.GetLogRetentionDays)
 		systemGroup.POST("/log-retention", manage.UpdateLogRetentionDays)

@@ -1,5 +1,9 @@
 # ChangeLogs
 
+## v1.6.3 / 20260214
+
+- feat: 支持Bark通知
+
 ## v1.6.2 / 20260213
 
 - feat: 支持应用时区配置以修复Docker环境cron触发时间问题

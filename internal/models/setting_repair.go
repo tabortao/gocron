@@ -30,6 +30,11 @@ func RepairSettings() error {
 		{ServerChan3Code, ServerChan3TitleTemplateKey, serverChan3TitleTemplate},
 		{ServerChan3Code, ServerChan3DespTemplateKey, serverChan3DespTemplate},
 
+		// Bark 配置
+		{BarkCode, BarkUrlKey, ""},
+		{BarkCode, BarkTitleTemplateKey, barkTitleTemplate},
+		{BarkCode, BarkBodyTemplateKey, barkBodyTemplate},
+
 		// 系统配置
 		{SystemCode, LogRetentionDaysKey, "0"},
 		{SystemCode, LogCleanupTimeKey, "03:00"},

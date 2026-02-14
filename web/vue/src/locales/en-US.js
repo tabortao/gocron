@@ -80,6 +80,7 @@ export default {
     notifyReceiver: 'Receiver',
     notifyWebhookReceiver: 'Webhook URL',
     notifyServerChan3Receiver: 'Server Chan URL',
+    notifyBarkReceiver: 'Bark URL',
     notifyReceiverPlaceholder: 'Please select',
     notifyChannel: 'Channel',
     notifyKeyword: 'Task Output Keyword',
@@ -110,8 +111,10 @@ export default {
     notifySlack: 'Slack',
     notifyWebhook: 'WebHook',
     notifyServerChan3: 'Server Chan',
+    notifyBark: 'Bark',
     notifyAllWebhook: 'All Webhook URLs',
     notifyAllServerChan3: 'All Server Chan URLs',
+    notifyAllBark: 'All Bark URLs',
     createNew: 'Create Task'
   },
   host: {
@@ -366,6 +369,7 @@ export default {
     selectSlackChannel: 'Please select Slack channel',
     selectWebhookUrl: 'Please select Webhook URL',
     selectServerChan3Url: 'Please select Server Chan URL',
+    selectBarkUrl: 'Please select Bark URL',
     passwordMismatch: 'Passwords do not match',
     oldPasswordError: 'Old password is incorrect',
     passwordSameAsOld: 'New password cannot be the same as old password',

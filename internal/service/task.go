@@ -545,7 +545,7 @@ func SendNotification(taskModel models.Task, taskResult TaskResult) {
 	}
 	notifyReceiverId := strings.TrimSpace(taskModel.NotifyReceiverId)
 	for _, taskType := range models.NotifyTypeMaskToTypes(notifyTypeMask) {
-		if taskType != 2 && taskType != 3 && notifyReceiverId == "" {
+		if taskType != 2 && taskType != 3 && taskType != 4 && notifyReceiverId == "" {
 			continue
 		}
 		msg := notify.Message{

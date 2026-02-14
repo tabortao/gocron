@@ -118,6 +118,11 @@ const routes = [
     component: () => import('../pages/system/notification/serverchan3.vue')
   },
   {
+    path: '/system/notification/bark',
+    name: 'system-notification-bark',
+    component: () => import('../pages/system/notification/bark.vue')
+  },
+  {
     path: '/system/login-log',
     name: 'login-log',
     component: () => import('../pages/system/loginLog.vue')

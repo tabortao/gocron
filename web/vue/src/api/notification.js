@@ -48,5 +48,17 @@ export default {
   },
   removeServerchan3Url(urlId, callback) {
     httpClient.post(`/system/serverchan3/url/remove/${urlId}`, {}, callback)
+  },
+  bark(callback) {
+    httpClient.get('/system/bark', {}, callback)
+  },
+  updateBark(data, callback) {
+    httpClient.post('/system/bark/update', data, callback)
+  },
+  createBarkUrl(data, callback) {
+    httpClient.post('/system/bark/url', data, callback)
+  },
+  removeBarkUrl(urlId, callback) {
+    httpClient.post(`/system/bark/url/remove/${urlId}`, {}, callback)
   }
 }

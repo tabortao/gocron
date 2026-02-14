@@ -45,6 +45,14 @@ const serverChan3DespTemplate = `**任务**：{{.TaskName}}（ID: {{.TaskId}}）
 
 {{ if .Remark }}**备注**：{{.Remark}}{{ end }}`
 
+const barkTitleTemplate = `{{.TaskName}} - {{.StatusZh}}`
+
+const barkBodyTemplate = `任务：{{.TaskName}}（ID: {{.TaskId}}）
+状态：{{.StatusZh}}
+{{ if .Host }}节点：{{.Host}}
+{{ end }}摘要：{{.ResultSummary}}
+{{ if .Remark }}备注：{{.Remark}}{{ end }}`
+
 const (
 	SlackCode        = "slack"
 	SlackUrlKey      = "url"
@@ -70,6 +78,13 @@ const (
 	ServerChan3TitleTemplateKey = "title_template"
 	ServerChan3DespTemplateKey  = "desp_template"
 	ServerChan3UrlKey           = "url"
+)
+
+const (
+	BarkCode             = "bark"
+	BarkTitleTemplateKey = "title_template"
+	BarkBodyTemplateKey  = "body_template"
+	BarkUrlKey           = "url"
 )
 
 const (
@@ -370,6 +385,80 @@ func (setting *Setting) CreateServerChan3Url(name, url string) (int64, error) {
 
 func (setting *Setting) RemoveServerChan3Url(id int) (int64, error) {
 	result := Db.Where("code = ? AND `key` = ? AND id = ?", ServerChan3Code, ServerChan3UrlKey, id).Delete(&Setting{})
+	return result.RowsAffected, result.Error
+}
+
+type Bark struct {
+	Urls          []BarkUrl `json:"urls"`
+	TitleTemplate string    `json:"title_template"`
+	BodyTemplate  string    `json:"body_template"`
+}
+
+type BarkUrl struct {
+	Id   int    `json:"id"`
+	Name string `json:"name"`
+	Url  string `json:"url"`
+}
+
+func (setting *Setting) Bark() (Bark, error) {
+	list := make([]Setting, 0)
+	err := Db.Where("code = ?", BarkCode).Find(&list).Error
+	bark := Bark{Urls: make([]BarkUrl, 0)}
+	if err != nil {
+		return bark, err
+	}
+
+	setting.formatBark(list, &bark)
+	return bark, nil
+}
+
+func (setting *Setting) formatBark(list []Setting, bark *Bark) {
+	urlItem := BarkUrl{}
+	for _, v := range list {
+		switch v.Key {
+		case BarkUrlKey:
+			if v.Value != "" {
+				_ = json.Unmarshal([]byte(v.Value), &urlItem)
+				urlItem.Id = v.Id
+				bark.Urls = append(bark.Urls, urlItem)
+			}
+		case BarkTitleTemplateKey:
+			bark.TitleTemplate = v.Value
+		case BarkBodyTemplateKey:
+			bark.BodyTemplate = v.Value
+		}
+	}
+}
+
+func (setting *Setting) UpdateBark(titleTemplate, bodyTemplate string) error {
+	Db.Model(&Setting{}).
+		Where("code = ? AND `key` = ?", BarkCode, BarkTitleTemplateKey).
+		Update("value", titleTemplate)
+	Db.Model(&Setting{}).
+		Where("code = ? AND `key` = ?", BarkCode, BarkBodyTemplateKey).
+		Update("value", bodyTemplate)
+	return nil
+}
+
+func (setting *Setting) CreateBarkUrl(name, url string) (int64, error) {
+	urlItem := BarkUrl{0, name, url}
+	jsonByte, err := json.Marshal(urlItem)
+	if err != nil {
+		return 0, err
+	}
+
+	newSetting := Setting{
+		Code:  BarkCode,
+		Key:   BarkUrlKey,
+		Value: string(jsonByte),
+	}
+
+	result := Db.Create(&newSetting)
+	return result.RowsAffected, result.Error
+}
+
+func (setting *Setting) RemoveBarkUrl(id int) (int64, error) {
+	result := Db.Where("code = ? AND `key` = ? AND id = ?", BarkCode, BarkUrlKey, id).Delete(&Setting{})
 	return result.RowsAffected, result.Error
 }
 

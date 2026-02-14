@@ -60,6 +60,10 @@ func run() {
 			// Server 酱³
 			serverChan3 := ServerChan3{}
 			go serverChan3.Send(msg)
+		case 4:
+			// Bark
+			bark := Bark{}
+			go bark.Send(msg)
 		}
 		time.Sleep(1 * time.Second)
 	}

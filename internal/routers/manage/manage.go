@@ -128,6 +128,16 @@ type CreateServerChan3UrlForm struct {
 	Url  string `form:"url" json:"url" binding:"required,url,max=200"`
 }
 
+type UpdateBarkForm struct {
+	TitleTemplate string `form:"title_template" json:"title_template" binding:"required"`
+	BodyTemplate  string `form:"body_template" json:"body_template" binding:"required"`
+}
+
+type CreateBarkUrlForm struct {
+	Name string `form:"name" json:"name" binding:"required,max=50"`
+	Url  string `form:"url" json:"url" binding:"required,url,max=200"`
+}
+
 // CreateSlackChannelForm 创建Slack频道表单
 type CreateSlackChannelForm struct {
 	Channel string `form:"channel" json:"channel" binding:"required,max=50"`
@@ -313,6 +323,62 @@ func RemoveServerChan3Url(c *gin.Context) {
 	id, _ := strconv.Atoi(c.Param("id"))
 	settingModel := new(models.Setting)
 	_, err := settingModel.RemoveServerChan3Url(id)
+	if err != nil {
+		base.RespondErrorWithDefaultMsg(c, err)
+	} else {
+		base.RespondSuccessWithDefaultMsg(c, nil)
+	}
+}
+
+func Bark(c *gin.Context) {
+	settingModel := new(models.Setting)
+	bark, err := settingModel.Bark()
+	if err != nil {
+		logger.Error(err)
+		base.RespondSuccess(c, utils.SuccessContent, nil)
+		return
+	}
+	base.RespondSuccess(c, "", bark)
+}
+
+func UpdateBark(c *gin.Context) {
+	var form UpdateBarkForm
+	if err := c.ShouldBind(&form); err != nil {
+		logger.Errorf("Bark配置表单验证失败: %v", err)
+		base.RespondError(c, "表单验证失败, 请检测输入")
+		return
+	}
+
+	settingModel := new(models.Setting)
+	err := settingModel.UpdateBark(form.TitleTemplate, form.BodyTemplate)
+	if err != nil {
+		base.RespondErrorWithDefaultMsg(c, err)
+	} else {
+		base.RespondSuccessWithDefaultMsg(c, nil)
+	}
+}
+
+func CreateBarkUrl(c *gin.Context) {
+	var form CreateBarkUrlForm
+	if err := c.ShouldBind(&form); err != nil {
+		logger.Errorf("创建Bark地址表单验证失败: %v", err)
+		base.RespondError(c, "表单验证失败, 请检测输入")
+		return
+	}
+
+	settingModel := new(models.Setting)
+	_, err := settingModel.CreateBarkUrl(form.Name, form.Url)
+	if err != nil {
+		base.RespondErrorWithDefaultMsg(c, err)
+	} else {
+		base.RespondSuccessWithDefaultMsg(c, nil)
+	}
+}
+
+func RemoveBarkUrl(c *gin.Context) {
+	id, _ := strconv.Atoi(c.Param("id"))
+	settingModel := new(models.Setting)
+	_, err := settingModel.RemoveBarkUrl(id)
 	if err != nil {
 		base.RespondErrorWithDefaultMsg(c, err)
 	} else {

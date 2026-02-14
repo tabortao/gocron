@@ -314,6 +314,27 @@
             </el-select>
           </el-form-item>
         </el-col>
+
+        <el-col :span="8" v-if="form.notify_status !== 0 && form.notify_type.includes(4)">
+          <el-form-item :label="t('task.notifyBarkReceiver')">
+            <el-select
+              key="notify-bark"
+              v-model="selectedBarkNotifyIds"
+              filterable
+              multiple
+              :placeholder="t('task.notifyReceiverPlaceholder')"
+            >
+              <el-option :label="t('task.notifyAllBark')" :value="-4"></el-option>
+              <el-option
+                v-for="item in barkUrls"
+                :key="item.id"
+                :label="item.name"
+                :value="item.id"
+              >
+              </el-option>
+            </el-select>
+          </el-form-item>
+        </el-col>
       </el-row>
       <el-row v-if="form.notify_status === 3">
         <el-col :span="12">
@@ -410,10 +431,12 @@ export default {
       slackChannels: [],
       webhookUrls: [],
       serverChan3Urls: [],
+      barkUrls: [],
       selectedMailNotifyIds: [],
       selectedSlackNotifyIds: [],
       selectedWebhookNotifyIds: [],
       selectedServerChan3NotifyIds: [],
+      selectedBarkNotifyIds: [],
       notifyReceiverInitialized: false
     }
   },
@@ -447,6 +470,7 @@ export default {
         this.selectedSlackNotifyIds = []
         this.selectedWebhookNotifyIds = []
         this.selectedServerChan3NotifyIds = []
+        this.selectedBarkNotifyIds = []
         this.notifyReceiverInitialized = false
       }
     },
@@ -537,7 +561,8 @@ export default {
         { value: 0, label: this.t('task.notifyEmail') },
         { value: 1, label: this.t('task.notifySlack') },
         { value: 2, label: this.t('task.notifyWebhook') },
-        { value: 3, label: this.t('task.notifyServerChan3') }
+        { value: 3, label: this.t('task.notifyServerChan3') },
+        { value: 4, label: this.t('task.notifyBark') }
       ]
     },
     updateNotifyKeywordRule() {
@@ -627,6 +652,7 @@ export default {
       this.selectedSlackNotifyIds = []
       this.selectedWebhookNotifyIds = []
       this.selectedServerChan3NotifyIds = []
+      this.selectedBarkNotifyIds = []
       this.notifyReceiverInitialized = false
       this.handleProtocolChange(this.form.protocol, true)
       this.updateNotifyKeywordRule()
@@ -641,7 +667,7 @@ export default {
         return [0]
       }
       const isPowerOfTwo = n > 0 && (n & (n - 1)) === 0
-      if (n > 0 && n <= 3 && !isPowerOfTwo) {
+      if (n > 0 && n <= 4 && !isPowerOfTwo) {
         return [n]
       }
       const types = []
@@ -649,6 +675,7 @@ export default {
       if (n & 2) types.push(1)
       if (n & 4) types.push(2)
       if (n & 8) types.push(3)
+      if (n & 16) types.push(4)
       return types
     },
     notifyTypeArrayToMask(types) {
@@ -658,7 +685,7 @@ export default {
       let mask = 0
       types.forEach(v => {
         const n = Number(v)
-        if (Number.isInteger(n) && n >= 0 && n <= 3) {
+        if (Number.isInteger(n) && n >= 0 && n <= 4) {
           mask |= 1 << n
         }
       })
@@ -670,6 +697,9 @@ export default {
       }
       if (this.selectedServerChan3NotifyIds.includes(-3)) {
         this.selectedServerChan3NotifyIds = [-3]
+      }
+      if (this.selectedBarkNotifyIds.includes(-4)) {
+        this.selectedBarkNotifyIds = [-4]
       }
     },
     buildNotifyReceiverId(types) {
@@ -706,6 +736,16 @@ export default {
           })
         }
       }
+      if (types.includes(4)) {
+        if (this.selectedBarkNotifyIds.includes(-4)) {
+          tokens.add('b:*')
+        } else {
+          this.selectedBarkNotifyIds.forEach(v => {
+            const id = Number(v)
+            if (Number.isFinite(id)) tokens.add(`b:${id}`)
+          })
+        }
+      }
       return Array.from(tokens).join(',')
     },
     tryInitNotifyReceiverSelections() {
@@ -723,15 +763,17 @@ export default {
         return
       }
 
+      const mailSet = new Set((this.mailUsers || []).map(v => v.id))
+      const slackSet = new Set((this.slackChannels || []).map(v => v.id))
       const webhookSet = new Set((this.webhookUrls || []).map(v => v.id))
       const serverChan3Set = new Set((this.serverChan3Urls || []).map(v => v.id))
-
-      this.selectedMailNotifyIds = []
+      const barkSet = new Set((this.barkUrls || []).map(v => v.id))
 
       this.selectedMailNotifyIds = []
       this.selectedSlackNotifyIds = []
       this.selectedWebhookNotifyIds = []
       this.selectedServerChan3NotifyIds = []
+      this.selectedBarkNotifyIds = []
 
       let hasTyped = false
       const legacyIds = []
@@ -762,6 +804,13 @@ export default {
             }
             const id = Number(val)
             if (Number.isFinite(id)) this.selectedServerChan3NotifyIds.push(id)
+          } else if (key === 'b') {
+            if (val === '*' || val === 'all') {
+              this.selectedBarkNotifyIds = [-4]
+              return
+            }
+            const id = Number(val)
+            if (Number.isFinite(id)) this.selectedBarkNotifyIds.push(id)
           }
           return
         }
@@ -777,6 +826,7 @@ export default {
           if (t === 1) this.selectedSlackNotifyIds = legacyIds
           if (t === 2) this.selectedWebhookNotifyIds = legacyIds.includes(-2) ? [-2] : legacyIds
           if (t === 3) this.selectedServerChan3NotifyIds = legacyIds.includes(-3) ? [-3] : legacyIds
+          if (t === 4) this.selectedBarkNotifyIds = legacyIds.includes(-4) ? [-4] : legacyIds
         } else {
           legacyIds.forEach(id => {
             if (id === -2) {
@@ -785,6 +835,10 @@ export default {
             }
             if (id === -3) {
               this.selectedServerChan3NotifyIds = [-3]
+              return
+            }
+            if (id === -4) {
+              this.selectedBarkNotifyIds = [-4]
               return
             }
             if (mailSet.has(id)) {
@@ -801,6 +855,10 @@ export default {
             }
             if (serverChan3Set.has(id)) {
               this.selectedServerChan3NotifyIds.push(id)
+              return
+            }
+            if (barkSet.has(id)) {
+              this.selectedBarkNotifyIds.push(id)
             }
           })
         }
@@ -863,6 +921,7 @@ export default {
       this.selectedSlackNotifyIds = []
       this.selectedWebhookNotifyIds = []
       this.selectedServerChan3NotifyIds = []
+      this.selectedBarkNotifyIds = []
       this.notifyReceiverInitialized = false
       this.tryInitNotifyReceiverSelections()
     },
@@ -881,6 +940,10 @@ export default {
       })
       notificationService.serverchan3(data => {
         this.serverChan3Urls = data.urls || []
+        this.tryInitNotifyReceiverSelections()
+      })
+      notificationService.bark(data => {
+        this.barkUrls = data.urls || []
         this.tryInitNotifyReceiverSelections()
       })
     },
@@ -909,6 +972,10 @@ export default {
           }
           if (notifyTypes.includes(3) && this.selectedServerChan3NotifyIds.length === 0) {
             this.$message.error(this.t('message.selectServerChan3Url'))
+            return false
+          }
+          if (notifyTypes.includes(4) && this.selectedBarkNotifyIds.length === 0) {
+            this.$message.error(this.t('message.selectBarkUrl'))
             return false
           }
         }

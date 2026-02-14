@@ -80,6 +80,7 @@ export default {
     notifyReceiver: '接收用户',
     notifyWebhookReceiver: 'Webhook 地址',
     notifyServerChan3Receiver: 'Server 酱³地址',
+    notifyBarkReceiver: 'Bark 地址',
     notifyReceiverPlaceholder: '请选择',
     notifyChannel: '发送Channel',
     notifyKeyword: '任务执行输出关键字',
@@ -109,8 +110,10 @@ export default {
     notifySlack: 'Slack',
     notifyWebhook: 'WebHook',
     notifyServerChan3: 'Server 酱³',
+    notifyBark: 'Bark',
     notifyAllWebhook: '全部Webhook地址',
     notifyAllServerChan3: '全部Server 酱³地址',
+    notifyAllBark: '全部Bark地址',
     createNew: '新增任务'
   },
   host: {
@@ -359,6 +362,7 @@ export default {
     selectSlackChannel: '请选择Slack Channel',
     selectWebhookUrl: '请选择Webhook地址',
     selectServerChan3Url: '请选择Server 酱³地址',
+    selectBarkUrl: '请选择Bark地址',
     passwordMismatch: '两次密码输入不一致',
     oldPasswordError: '原密码输入错误',
     passwordSameAsOld: '原密码与新密码不能相同',
