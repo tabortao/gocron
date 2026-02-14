@@ -1,5 +1,9 @@
 # ChangeLogs
 
+## v1.6.4 / 20260214
+
+- feat(notification): 为Bark和Server酱³新增URL格式提示和教程文档
+
 ## v1.6.3 / 20260214
 
 - feat: 支持Bark通知
