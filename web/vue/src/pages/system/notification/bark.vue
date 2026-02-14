@@ -49,6 +49,13 @@
         </el-form-item>
         <el-form-item label="URL">
           <el-input v-model.trim="url" />
+          <div class="url-tip">
+            {{
+              isZh
+                ? '提示：URL 需要为地址+Key，例如 https://api.day.app/你设备的key'
+                : 'Tip: URL should be base + key, e.g. https://api.day.app/your_device_key'
+            }}
+          </div>
         </el-form-item>
         <el-form-item>
           <el-button type="primary" @click="saveUrl">{{ t('common.confirm') }}</el-button>
@@ -182,5 +189,11 @@ export default {
 <style scoped>
 .el-tag + .el-tag {
   margin-left: 10px;
+}
+.url-tip {
+  margin-top: 6px;
+  font-size: 12px;
+  line-height: 1.4;
+  color: var(--el-text-color-secondary);
 }
 </style>

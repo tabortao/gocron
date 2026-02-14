@@ -53,6 +53,13 @@
         </el-form-item>
         <el-form-item label="URL">
           <el-input v-model.trim="url" />
+          <div class="url-tip">
+            {{
+              isZh
+                ? '提示：URL 需要为 uid + sendkey 形式，例如 https://{uid}.push.ft07.com/send/{sendkey}.send'
+                : 'Tip: URL should be uid + sendkey, e.g. https://{uid}.push.ft07.com/send/{sendkey}.send'
+            }}
+          </div>
         </el-form-item>
         <el-form-item>
           <el-button type="primary" @click="saveUrl">{{ t('common.confirm') }}</el-button>
@@ -190,5 +197,11 @@ export default {
 <style scoped>
 .el-tag + .el-tag {
   margin-left: 10px;
+}
+.url-tip {
+  margin-top: 6px;
+  font-size: 12px;
+  line-height: 1.4;
+  color: var(--el-text-color-secondary);
 }
 </style>
