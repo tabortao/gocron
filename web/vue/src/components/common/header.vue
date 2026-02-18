@@ -1,6 +1,8 @@
 <template>
   <div class="app-header">
     <div class="header-left">
+      <!-- 移动端汉堡菜单按钮 -->
+      <el-button v-if="isMobile" class="menu-toggle" :icon="Menu" @click="toggleSidebar" text />
       <span class="page-title">{{ pageTitle }}</span>
     </div>
 
@@ -21,8 +23,8 @@
       <el-dropdown v-if="userStore.isLogin" trigger="click" class="user-dropdown">
         <span class="user-info">
           <el-icon><User /></el-icon>
-          <span>{{ userStore.username }}</span>
-          <el-icon><ArrowDown /></el-icon>
+          <span class="username">{{ userStore.username }}</span>
+          <el-icon class="hidden-mobile"><ArrowDown /></el-icon>
         </span>
         <template #dropdown>
           <el-dropdown-menu>
@@ -46,16 +48,19 @@
 </template>
 
 <script setup>
-import { computed } from 'vue'
+import { computed, inject } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import { useUserStore } from '../../stores/user'
-import { ArrowDown, User, Lock, Key, SwitchButton } from '@element-plus/icons-vue'
+import { ArrowDown, User, Lock, Key, SwitchButton, Menu } from '@element-plus/icons-vue'
+
+const emit = defineEmits(['toggle-sidebar'])
 
 const { t } = useI18n()
 const route = useRoute()
 const router = useRouter()
 const userStore = useUserStore()
+const isMobile = inject('isMobile', { value: false })
 
 const pageTitle = computed(() => {
   const path = route.path
@@ -67,6 +72,10 @@ const pageTitle = computed(() => {
   if (path.startsWith('/system')) return t('nav.systemManage')
   return 'gocron'
 })
+
+const toggleSidebar = () => {
+  emit('toggle-sidebar')
+}
 
 const logout = () => {
   userStore.logout()
@@ -90,18 +99,38 @@ const logout = () => {
 
 .header-left {
   flex: 1;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+}
+
+.menu-toggle {
+  padding: 8px;
+  font-size: 20px;
+  color: #606266;
+  flex-shrink: 0;
+}
+
+.menu-toggle:hover {
+  color: #409eff;
+  background-color: #f5f7fa;
 }
 
 .page-title {
   font-size: 18px;
   font-weight: 600;
   color: #303133;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .header-right {
   display: flex;
   align-items: center;
   gap: 20px;
+  flex-shrink: 0;
 }
 
 .github-link {
@@ -139,9 +168,62 @@ const logout = () => {
   color: #409eff;
 }
 
+.username {
+  max-width: 120px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
 :deep(.el-dropdown-menu__item) {
   display: flex;
   align-items: center;
   gap: 8px;
+}
+
+@media screen and (max-width: 768px) {
+  .app-header {
+    height: 56px;
+    padding: 0 12px;
+  }
+
+  .page-title {
+    font-size: 16px;
+  }
+
+  .header-right {
+    gap: 12px;
+  }
+
+  .github-link {
+    padding: 6px;
+  }
+
+  .user-info {
+    padding: 6px 8px;
+  }
+
+  .username {
+    max-width: 80px;
+    font-size: 14px;
+  }
+}
+
+@media screen and (max-width: 480px) {
+  .app-header {
+    padding: 0 8px;
+  }
+
+  .page-title {
+    font-size: 15px;
+  }
+
+  .header-right {
+    gap: 8px;
+  }
+
+  .username {
+    max-width: 60px;
+  }
 }
 </style>

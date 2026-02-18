@@ -1,11 +1,27 @@
 <template>
-  <el-container style="height: 100vh">
-    <app-sidebar v-if="userStore.isLogin"></app-sidebar>
-    <el-container style="flex-direction: column">
-      <el-header v-if="userStore.isLogin" height="60px">
-        <app-header></app-header>
+  <el-container style="height: 100vh" class="app-container">
+    <!-- 桌面端侧边栏 -->
+    <app-sidebar v-if="userStore.isLogin && !isMobile" class="desktop-sidebar"></app-sidebar>
+
+    <!-- 移动端抽屉式侧边栏 -->
+    <el-drawer
+      v-if="userStore.isLogin && isMobile"
+      v-model="sidebarVisible"
+      direction="ltr"
+      :with-header="false"
+      :size="280"
+      :z-index="2000"
+      class="mobile-sidebar-drawer"
+      @close="handleSidebarClose"
+    >
+      <app-sidebar @menu-select="handleMenuSelect"></app-sidebar>
+    </el-drawer>
+
+    <el-container style="flex-direction: column" class="main-container">
+      <el-header v-if="userStore.isLogin" :height="isMobile ? '56px' : '60px'" class="app-header">
+        <app-header @toggle-sidebar="toggleSidebar"></app-header>
       </el-header>
-      <el-main style="padding: 0; overflow-y: auto">
+      <el-main style="padding: 0; overflow-y: auto" class="app-main">
         <div id="main-container" v-cloak>
           <el-config-provider :locale="activeLang">
             <router-view v-slot="{ Component }">
@@ -21,7 +37,7 @@
 </template>
 
 <script setup>
-import { computed, onMounted } from 'vue'
+import { computed, onMounted, onUnmounted, ref, provide } from 'vue'
 import { useRouter } from 'vue-router'
 import { useUserStore } from './stores/user'
 import installService from './api/install'
@@ -37,6 +53,13 @@ const { locale } = useI18n()
 const router = useRouter()
 const userStore = useUserStore()
 
+const isMobile = ref(false)
+const sidebarVisible = ref(false)
+
+const checkMobile = () => {
+  isMobile.value = window.innerWidth <= 768
+}
+
 const activeLang = computed(() => {
   switch (locale.value) {
     case availableLanguages.enUS.value:
@@ -48,12 +71,36 @@ const activeLang = computed(() => {
   }
 })
 
+const toggleSidebar = () => {
+  sidebarVisible.value = !sidebarVisible.value
+}
+
+const handleSidebarClose = () => {
+  sidebarVisible.value = false
+}
+
+const handleMenuSelect = () => {
+  if (isMobile.value) {
+    sidebarVisible.value = false
+  }
+}
+
+provide('isMobile', isMobile)
+provide('toggleSidebar', toggleSidebar)
+
 onMounted(() => {
+  checkMobile()
+  window.addEventListener('resize', checkMobile)
+
   installService.status(data => {
     if (!data) {
       router.push('/install')
     }
   })
+})
+
+onUnmounted(() => {
+  window.removeEventListener('resize', checkMobile)
 })
 </script>
 
@@ -61,27 +108,34 @@ onMounted(() => {
 [v-cloak] {
   display: none !important;
 }
-html,
-body {
-  margin: 0;
-  padding: 0;
-  height: 100%;
+
+.app-container {
   overflow: hidden;
 }
-.el-header {
+
+.desktop-sidebar {
+  flex-shrink: 0;
+}
+
+.main-container {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+}
+
+.app-header {
   padding: 0;
-  margin: 0;
+  background-color: #fff;
+  border-bottom: 1px solid var(--border-color, #e4e7ed);
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
+  position: relative;
+  z-index: 100;
 }
-.el-container {
-  padding: 0;
-  margin: 0;
-  width: 100%;
+
+.app-main {
+  background-color: var(--bg-color, #f6f7fb);
 }
-.el-main {
-  padding: 20px;
-  margin: 0;
-  background-color: #f6f7fb;
-}
+
 #main-container {
   height: 100%;
 }
@@ -96,61 +150,29 @@ body {
   overflow-y: auto;
 }
 
-.custom-message-box {
-  min-width: 420px;
-}
-.custom-message-box .el-message-box__message {
-  font-size: 15px;
-  line-height: 1.6;
-}
-.el-message-box__title {
-  font-size: 18px;
-  font-weight: 600;
+.mobile-sidebar-drawer {
+  background-color: #304156;
 }
 
-.page-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-  margin-bottom: 16px;
+.mobile-sidebar-drawer :deep(.el-drawer__body) {
+  padding: 0;
+  background-color: #304156;
 }
 
-.page-title {
-  font-size: 18px;
-  font-weight: 600;
-  line-height: 1.2;
-  color: #111827;
+.mobile-sidebar-drawer :deep(.el-overlay) {
+  background-color: rgba(0, 0, 0, 0.5);
 }
 
-.page-subtitle {
-  margin-top: 4px;
-  font-size: 12px;
-  color: #6b7280;
+@media screen and (max-width: 768px) {
+  .app-header {
+    height: 56px !important;
+  }
 }
 
-.toolbar {
-  display: flex;
-  align-items: center;
-  justify-content: flex-end;
-  gap: 8px;
-  flex-wrap: wrap;
-}
-
-.card-section {
-  border-radius: 12px;
-  margin-bottom: 16px;
-}
-
-.filter-card :deep(.el-card__body) {
-  padding-bottom: 6px;
-}
-
-.table-card :deep(.el-card__body) {
-  padding-top: 10px;
-}
-
-.el-card {
-  border-radius: 12px;
+@media (prefers-color-scheme: dark) {
+  .app-header {
+    background-color: #1f1f1f;
+    border-bottom-color: #333;
+  }
 }
 </style>

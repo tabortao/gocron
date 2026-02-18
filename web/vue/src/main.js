@@ -9,9 +9,38 @@ import timezone from 'dayjs/plugin/timezone'
 import App from './App.vue'
 import router from './router'
 import i18n from './locales'
+import './styles/global.css'
+import { registerSW } from 'virtual:pwa-register'
 
 dayjs.extend(utc)
 dayjs.extend(timezone)
+
+const updateSW = registerSW({
+  onNeedRefresh() {
+    ElMessageBox.confirm('发现新版本，是否立即更新？', '系统更新', {
+      confirmButtonText: '更新',
+      cancelButtonText: '稍后',
+      type: 'info'
+    })
+      .then(() => {
+        updateSW(true)
+      })
+      .catch(() => {})
+  },
+  onOfflineReady() {
+    ElMessage.success('应用已准备好离线使用')
+  },
+  onRegistered() {
+    if (import.meta.env.DEV) {
+      console.log('Service Worker registered')
+    }
+  },
+  onRegisterError(error) {
+    if (import.meta.env.DEV) {
+      console.error('Service Worker registration error:', error)
+    }
+  }
+})
 
 const app = createApp(App)
 const pinia = createPinia()
@@ -28,19 +57,17 @@ app.directive('focus', {
 })
 
 app.config.globalProperties.$appConfirm = function (callback) {
-  ElMessageBox.confirm(
-    i18n.global.t('common.confirmOperation'),
-    i18n.global.t('common.tip'),
-    {
-      confirmButtonText: i18n.global.t('common.confirm'),
-      cancelButtonText: i18n.global.t('common.cancel'),
-      type: 'warning',
-      center: true,
-      customClass: 'custom-message-box'
-    }
-  ).then(() => {
-    callback()
-  }).catch(() => {})
+  ElMessageBox.confirm(i18n.global.t('common.confirmOperation'), i18n.global.t('common.tip'), {
+    confirmButtonText: i18n.global.t('common.confirm'),
+    cancelButtonText: i18n.global.t('common.cancel'),
+    type: 'warning',
+    center: true,
+    customClass: 'custom-message-box'
+  })
+    .then(() => {
+      callback()
+    })
+    .catch(() => {})
 }
 
 app.config.globalProperties.$message = ElMessage
@@ -52,7 +79,18 @@ app.config.globalProperties.$filters = {
   }
 }
 
-// 全局错误处理
+app.config.globalProperties.$isMobile = function () {
+  return window.innerWidth <= 768
+}
+
+app.config.globalProperties.$isTablet = function () {
+  return window.innerWidth > 768 && window.innerWidth <= 1024
+}
+
+app.config.globalProperties.$isDesktop = function () {
+  return window.innerWidth > 1024
+}
+
 app.config.errorHandler = (err, instance, info) => {
   if (import.meta.env.DEV) {
     console.error('[Global Error]', err, info)
@@ -66,12 +104,10 @@ app.config.warnHandler = (msg, instance, trace) => {
   }
 }
 
-// 开发环境性能监控
 if (import.meta.env.DEV) {
   app.config.performance = true
 }
 
-// 生产环境禁用 devtools
 if (import.meta.env.PROD) {
   app.config.devtools = false
 }

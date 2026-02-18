@@ -1,5 +1,5 @@
 <template>
-  <el-aside width="200px" class="global-sidebar">
+  <el-aside :width="isMobile ? '100%' : '200px'" class="global-sidebar">
     <div class="sidebar-header">
       <h2 class="app-title">gocron</h2>
     </div>
@@ -12,6 +12,7 @@
       active-text-color="#409EFF"
       :unique-opened="true"
       router
+      @select="handleMenuSelect"
     >
       <!-- 任务管理 -->
       <el-sub-menu index="task">
@@ -78,7 +79,7 @@
 </template>
 
 <script setup>
-import { computed } from 'vue'
+import { computed, inject } from 'vue'
 import { useRoute } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import { useUserStore } from '../../stores/user'
@@ -96,13 +97,15 @@ import {
   QuestionFilled
 } from '@element-plus/icons-vue'
 
+const emit = defineEmits(['menu-select'])
+
 const { t } = useI18n()
 const route = useRoute()
 const userStore = useUserStore()
+const isMobile = inject('isMobile', { value: false })
 
 const currentRoute = computed(() => {
   const path = route.path
-  // 精确匹配路由
   if (path === '/task/log') return '/task/log'
   if (path === '/statistics') return '/statistics'
   if (path.startsWith('/task')) return '/task'
@@ -116,6 +119,10 @@ const currentRoute = computed(() => {
   }
   return '/task'
 })
+
+const handleMenuSelect = () => {
+  emit('menu-select')
+}
 </script>
 
 <style scoped>
@@ -123,7 +130,7 @@ const currentRoute = computed(() => {
   background-color: #304156;
   display: flex;
   flex-direction: column;
-  height: 100vh;
+  height: 100%;
   overflow: hidden;
 }
 
@@ -176,7 +183,6 @@ const currentRoute = computed(() => {
   color: #409eff;
 }
 
-/* 子菜单样式 */
 :deep(.el-sub-menu__title) {
   color: #bfcbd9 !important;
   display: flex;
@@ -204,7 +210,6 @@ const currentRoute = computed(() => {
   background-color: rgba(64, 158, 255, 0.2) !important;
 }
 
-/* 确保图标和文字垂直居中 */
 :deep(.el-icon) {
   display: inline-flex;
   align-items: center;
@@ -223,14 +228,42 @@ const currentRoute = computed(() => {
   white-space: nowrap;
 }
 
-/* 子菜单的子项增加缩进 */
 :deep(.el-menu--inline .el-menu-item) {
   padding-left: 48px !important;
 }
 
-/* 确保展开箭头不被遮挡 */
 :deep(.el-sub-menu__icon-arrow) {
   margin-left: auto !important;
   flex-shrink: 0;
+}
+
+@media screen and (max-width: 768px) {
+  .sidebar-header {
+    padding: 16px 20px 16px 24px;
+  }
+
+  .app-title {
+    font-size: 20px;
+  }
+
+  .sidebar-footer {
+    padding: 12px;
+  }
+
+  :deep(.el-sub-menu__title) {
+    padding-left: 16px !important;
+    height: 48px;
+    line-height: 48px;
+  }
+
+  :deep(.el-menu-item) {
+    padding-left: 16px !important;
+    height: 48px;
+    line-height: 48px;
+  }
+
+  :deep(.el-menu--inline .el-menu-item) {
+    padding-left: 40px !important;
+  }
 }
 </style>

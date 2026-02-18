@@ -12,7 +12,13 @@
         :closable="false"
         style="margin-bottom: 20px"
       />
-      <el-form ref="formRef" :model="form" label-width="100px" :rules="formRules">
+      <el-form
+        ref="formRef"
+        :model="form"
+        label-width="100px"
+        :rules="formRules"
+        class="login-form"
+      >
         <el-form-item :label="t('login.username')" prop="username">
           <el-input
             v-model.trim="form.username"
@@ -45,10 +51,10 @@
             size="large"
           />
         </el-form-item>
-        <el-form-item>
+        <el-form-item class="remember-item">
           <el-checkbox v-model="form.rememberMe">{{ t('login.rememberMe') }}</el-checkbox>
         </el-form-item>
-        <el-form-item>
+        <el-form-item class="submit-item">
           <el-button
             type="primary"
             @click="submit"
@@ -60,6 +66,11 @@
         </el-form-item>
       </el-form>
     </div>
+
+    <!-- 装饰元素 -->
+    <div class="decoration-circle circle-1"></div>
+    <div class="decoration-circle circle-2"></div>
+    <div class="decoration-circle circle-3"></div>
   </div>
 </template>
 
@@ -230,46 +241,79 @@ const submit = async () => {
   justify-content: center;
   align-items: center;
   min-height: 100vh;
-  background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   position: relative;
   overflow: hidden;
+  padding: 20px;
 }
 
-.login-container::before {
-  content: '';
+.decoration-circle {
   position: absolute;
-  top: -50%;
-  right: -10%;
+  border-radius: 50%;
+  opacity: 0.1;
+  pointer-events: none;
+}
+
+.circle-1 {
   width: 600px;
   height: 600px;
-  background: rgba(99, 102, 241, 0.1);
-  border-radius: 50%;
-  filter: blur(80px);
+  background: rgba(255, 255, 255, 0.3);
+  top: -200px;
+  right: -200px;
+  animation: float 20s ease-in-out infinite;
 }
 
-.login-container::after {
-  content: '';
-  position: absolute;
-  bottom: -30%;
-  left: -10%;
-  width: 500px;
-  height: 500px;
-  background: rgba(168, 85, 247, 0.08);
-  border-radius: 50%;
-  filter: blur(80px);
+.circle-2 {
+  width: 400px;
+  height: 400px;
+  background: rgba(255, 255, 255, 0.2);
+  bottom: -100px;
+  left: -100px;
+  animation: float 15s ease-in-out infinite reverse;
+}
+
+.circle-3 {
+  width: 200px;
+  height: 200px;
+  background: rgba(255, 255, 255, 0.15);
+  top: 50%;
+  left: 10%;
+  animation: float 10s ease-in-out infinite;
+}
+
+@keyframes float {
+  0%,
+  100% {
+    transform: translateY(0) rotate(0deg);
+  }
+  50% {
+    transform: translateY(-30px) rotate(180deg);
+  }
 }
 
 .login-box {
   background: rgba(255, 255, 255, 0.95);
-  backdrop-filter: blur(10px);
+  backdrop-filter: blur(20px);
   padding: 48px 40px;
-  border-radius: 16px;
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.08);
+  border-radius: 20px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
   width: 100%;
   max-width: 420px;
   position: relative;
   z-index: 1;
   border: 1px solid rgba(255, 255, 255, 0.8);
+  animation: slideUp 0.5s ease-out;
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .language-switcher {
@@ -281,20 +325,162 @@ const submit = async () => {
 .login-title {
   text-align: center;
   margin: 0 0 32px 0;
-  font-size: 26px;
+  font-size: 28px;
   color: #1f2937;
-  font-weight: 600;
+  font-weight: 700;
   letter-spacing: -0.5px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
 }
 
-.el-button--large {
-  height: 40px;
-  line-height: 40px;
-  padding: 0 15px;
+.login-form {
+  width: 100%;
+}
+
+.login-form :deep(.el-form-item) {
+  margin-bottom: 24px;
+}
+
+.login-form :deep(.el-form-item__label) {
+  font-weight: 500;
+  color: #374151;
+}
+
+.remember-item {
+  margin-bottom: 16px;
+}
+
+.remember-item :deep(.el-form-item__content) {
+  justify-content: flex-start;
+  margin-left: 0 !important;
+}
+
+.submit-item {
+  margin-bottom: 0;
+  margin-top: 32px;
 }
 
 .login-button {
-  width: calc(100% + 60px);
-  margin-left: -60px;
+  width: 100%;
+  height: 48px;
+  font-size: 16px;
+  font-weight: 600;
+  border-radius: 12px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border: none;
+  transition: all 0.3s ease;
+}
+
+.login-button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
+}
+
+.login-button:active {
+  transform: translateY(0);
+}
+
+@media screen and (max-width: 768px) {
+  .login-container {
+    padding: 16px;
+    align-items: flex-start;
+    padding-top: 10vh;
+  }
+
+  .login-box {
+    padding: 32px 24px;
+    border-radius: 16px;
+  }
+
+  .login-title {
+    font-size: 24px;
+    margin-bottom: 24px;
+  }
+
+  .login-form :deep(.el-form-item) {
+    margin-bottom: 20px;
+  }
+
+  .login-form :deep(.el-form-item__label) {
+    padding-bottom: 8px;
+  }
+
+  .submit-item {
+    margin-top: 24px;
+  }
+
+  .login-button {
+    height: 44px;
+    font-size: 15px;
+  }
+
+  .circle-1 {
+    width: 400px;
+    height: 400px;
+    top: -150px;
+    right: -150px;
+  }
+
+  .circle-2 {
+    width: 300px;
+    height: 300px;
+  }
+
+  .circle-3 {
+    display: none;
+  }
+}
+
+@media screen and (max-width: 480px) {
+  .login-container {
+    padding: 12px;
+    padding-top: 8vh;
+  }
+
+  .login-box {
+    padding: 24px 20px;
+    border-radius: 12px;
+  }
+
+  .login-title {
+    font-size: 22px;
+    margin-bottom: 20px;
+  }
+
+  .login-form :deep(.el-form-item__label) {
+    font-size: 14px;
+  }
+
+  .login-button {
+    height: 42px;
+    font-size: 14px;
+    border-radius: 10px;
+  }
+
+  .language-switcher {
+    top: 12px;
+    left: 12px;
+  }
+}
+
+@media screen and (max-height: 600px) {
+  .login-container {
+    align-items: flex-start;
+    padding-top: 20px;
+  }
+
+  .login-box {
+    padding: 24px 20px;
+  }
+
+  .login-title {
+    margin-bottom: 16px;
+  }
+
+  .login-form :deep(.el-form-item) {
+    margin-bottom: 16px;
+  }
 }
 </style>
