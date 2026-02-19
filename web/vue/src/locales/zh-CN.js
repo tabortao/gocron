@@ -20,7 +20,8 @@ export default {
     no: '否',
     total: '共',
     items: '条',
-    date: '日期'
+    date: '日期',
+    back: '返回'
   },
   nav: {
     taskManage: '任务管理',
@@ -185,6 +186,12 @@ export default {
     confirmNewPassword: '确认新密码',
     createNew: '新增用户',
     changePassword: '修改密码',
+    addUser: '新增用户',
+    editUser: '编辑用户',
+    editingUser: '正在编辑',
+    basicInfo: '基本信息',
+    passwordInfo: '密码设置',
+    permissionInfo: '权限设置',
     usernamePlaceholder: '请输入用户名',
     emailPlaceholder: '请输入邮箱',
     passwordPlaceholder: '至少8位，包含字母和数字',

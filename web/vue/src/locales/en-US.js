@@ -20,7 +20,8 @@ export default {
     no: 'No',
     total: 'Total',
     items: 'items',
-    date: 'Date'
+    date: 'Date',
+    back: 'Back'
   },
   nav: {
     taskManage: 'Tasks',
@@ -190,6 +191,12 @@ export default {
     confirmNewPassword: 'Confirm New Password',
     createNew: 'Add User',
     changePassword: 'Change Password',
+    addUser: 'Add User',
+    editUser: 'Edit User',
+    editingUser: 'Editing',
+    basicInfo: 'Basic Information',
+    passwordInfo: 'Password Settings',
+    permissionInfo: 'Permission Settings',
     usernamePlaceholder: 'Please enter username',
     emailPlaceholder: 'Please enter email',
     passwordPlaceholder: 'At least 8 characters, letters and digits',
