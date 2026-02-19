@@ -68,6 +68,7 @@ export default defineConfig(({ mode }) => {
         },
         workbox: {
           globPatterns: ['**/*.{js,css,html,ico,png,svg,woff2}'],
+          globIgnores: ['**/node_modules/**/*'],
           runtimeCaching: [
             {
               urlPattern: /^https:\/\/fonts\.googleapis\.com\/.*/i,
@@ -116,7 +117,8 @@ export default defineConfig(({ mode }) => {
         },
         devOptions: {
           enabled: true,
-          type: 'module'
+          type: 'module',
+          suppressWarnings: true
         }
       })
     ],
