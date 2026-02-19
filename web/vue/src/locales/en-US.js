@@ -456,7 +456,10 @@ export default {
     daily: 'Run once a day',
     hourly: 'Run once an hour',
     every30s: 'Run every 30 seconds',
-    every1m20s: 'Run every 1 minute and 20 seconds'
+    every1m20s: 'Run every 1 minute and 20 seconds',
+    noData: 'No data',
+    noNodeTip: 'No nodes yet. Click Add to add a task node.',
+    noTaskTip: 'No tasks yet. Click Add to create a scheduled task.'
   },
   statistics: {
     title: 'Statistics',

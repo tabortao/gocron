@@ -448,7 +448,10 @@ export default {
     daily: '每天运行一次',
     hourly: '每小时运行一次',
     every30s: '每隔30秒运行一次',
-    every1m20s: '每隔1分钟20秒运行一次'
+    every1m20s: '每隔1分钟20秒运行一次',
+    noData: '暂无数据',
+    noNodeTip: '暂无节点，点击新增添加任务节点',
+    noTaskTip: '暂无任务，点击新增创建定时任务'
   },
   statistics: {
     title: '数据统计',
