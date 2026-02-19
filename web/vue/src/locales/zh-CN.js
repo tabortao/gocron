@@ -114,7 +114,14 @@ export default {
     notifyAllWebhook: '全部Webhook地址',
     notifyAllServerChan3: '全部Server 酱³地址',
     notifyAllBark: '全部Bark地址',
-    createNew: '新增任务'
+    createNew: '新增任务',
+    basicInfo: '基本信息',
+    executionConfig: '执行配置',
+    notificationConfig: '通知配置',
+    namePlaceholder: '请输入任务名称',
+    remarkPlaceholder: '请输入备注信息',
+    createTaskDesc: '创建一个新的定时任务',
+    editTaskDesc: '编辑定时任务配置'
   },
   host: {
     list: '任务节点',

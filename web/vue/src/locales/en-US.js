@@ -115,7 +115,14 @@ export default {
     notifyAllWebhook: 'All Webhook URLs',
     notifyAllServerChan3: 'All Server Chan URLs',
     notifyAllBark: 'All Bark URLs',
-    createNew: 'Create Task'
+    createNew: 'Create Task',
+    basicInfo: 'Basic Information',
+    executionConfig: 'Execution Configuration',
+    notificationConfig: 'Notification Configuration',
+    namePlaceholder: 'Please enter task name',
+    remarkPlaceholder: 'Please enter remark',
+    createTaskDesc: 'Create a new scheduled task',
+    editTaskDesc: 'Edit scheduled task configuration'
   },
   host: {
     list: 'Task Nodes',
